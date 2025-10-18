@@ -106,7 +106,7 @@ const Navbar: React.FC = () => {
               </div>
             </div>
 
-            {/* Opción de Perfil */}
+            {/* Opción de Perfil 
             <a 
               href="/perfil" 
               className="dropdown-item"
@@ -114,6 +114,8 @@ const Navbar: React.FC = () => {
             >
               Mi Perfil
             </a>
+            */}
+            
 
             {/* Opción de Cerrar Sesión */}
             <a 
