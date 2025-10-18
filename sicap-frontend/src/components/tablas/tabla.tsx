@@ -16,6 +16,7 @@ const filterOptions: FilterOption[] = [
   { id: 'last-week', label: 'Últimos 7 días', value: 'week' },
   { id: 'last-month', label: 'Últimos 30 días', value: 'month' },
   { id: 'last-year', label: 'Último año', value: 'year' },
+  { id: 'all', label: 'Todos los registros', value: 'all' },
 ];
 
 const ContractTable: React.FC = () => {
@@ -23,7 +24,7 @@ const ContractTable: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [selectedFilter, setSelectedFilter] = useState<string>('month');
+  const [selectedFilter, setSelectedFilter] = useState<string>('all');
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [selectedContract, setSelectedContract] = useState<ContractSummary | null>(null);
 
@@ -36,16 +37,18 @@ const ContractTable: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      
       const token = localStorage.getItem("access");
       if (!token) {
         setError("Sesión expirada. Por favor, inicia sesión nuevamente.");
-    
         return;
       }
 
+      console.log("🔍 Iniciando carga de datos...");
       const data = await getContractData();
+      console.log(`📊 Total de contratos cargados: ${data.length}`);
+      console.log("📋 Primeros 3 contratos:", data.slice(0, 3));
       setContracts(data);
+      console.log("✅ Contratos guardados en state");
     } catch (err: any) {
       console.error("Error al cargar contratos:", err);
 
@@ -64,25 +67,63 @@ const ContractTable: React.FC = () => {
         text: message,
       });
 
-  
       if (err.response?.status === 401 || err.response?.status === 403) {
         localStorage.removeItem("access");
         localStorage.removeItem("usuario");
-      
       }
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredContracts = contracts.filter(contract =>
-    String(contract.numero_contrato).toLowerCase().includes(searchTerm.toLowerCase()) ||
-    String(contract.nombre_completo).toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // 🔥 NUEVA FUNCIÓN: Filtrar por rango de fechas
+  const filterByDateRange = (contract: ContractSummary): boolean => {
+    if (selectedFilter === 'all') return true;
+    if (!contract.ultimo_pago) return false;
+
+    const lastPaymentDate = new Date(contract.ultimo_pago);
+    const today = new Date();
+    const diffTime = today.getTime() - lastPaymentDate.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    switch (selectedFilter) {
+      case 'day':
+        return diffDays <= 1;
+      case 'week':
+        return diffDays <= 7;
+      case 'month':
+        return diffDays <= 30;
+      case 'year':
+        return diffDays <= 365;
+      default:
+        return true;
+    }
+  };
+
+  // 🔥 FILTRADO COMPLETO: Por búsqueda Y por fecha
+  const filteredContracts = contracts.filter(contract => {
+    // Filtro de búsqueda por texto
+    const matchesSearch = 
+      String(contract.numero_contrato).toLowerCase().includes(searchTerm.toLowerCase()) ||
+      String(contract.nombre_completo).toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Filtro por rango de fechas
+    const matchesDateRange = filterByDateRange(contract);
+
+    return matchesSearch && matchesDateRange;
+  });
+
+  // 🔍 DEBUG: Log de filtros
+  console.log("🔎 Estado de filtros:", {
+    totalContracts: contracts.length,
+    filteredContracts: filteredContracts.length,
+    selectedFilter,
+    searchTerm,
+  });
 
   const getFilterLabel = () => {
     const option = filterOptions.find(opt => opt.value === selectedFilter);
-    return option ? option.label : 'Últimos 30 días';
+    return option ? option.label : 'Todos los registros';
   };
 
   return (
@@ -144,6 +185,18 @@ const ContractTable: React.FC = () => {
             />
           </div>
         </div>
+
+        {/* 🔥 INDICADOR DE RESULTADOS */}
+        {!loading && !error && (
+          <div style={{ 
+            padding: '0.75rem 1rem', 
+            fontSize: '0.875rem', 
+            color: '#666',
+            borderBottom: '1px solid #eee'
+          }}>
+            Mostrando <strong>{filteredContracts.length}</strong> de <strong>{contracts.length}</strong> contratos
+          </div>
+        )}
 
         {/* TABLA */}
         {loading && <p style={{ textAlign: 'center', padding: '2rem' }}>Cargando datos...</p>}
@@ -312,4 +365,4 @@ const ContractTable: React.FC = () => {
   );
 };
 
-export default ContractTable;
+export default ContractTable;
