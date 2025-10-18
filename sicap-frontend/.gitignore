@@ -1,0 +1,32 @@
+# Archivos de log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Dependencias (¡la más importante!)
+node_modules
+
+# Carpeta de compilación de Vite
+dist
+dist-ssr
+
+# Variables de entorno
+# No subas tus secretos a Git. Crea un archivo .env.example para la estructura.
+.env
+.env.local
+.env.*.local
+
+# Archivos de caché y temporales de editores
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db

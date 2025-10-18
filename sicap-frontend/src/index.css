@@ -1,0 +1,86 @@
+body.dark {
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+}
+body.light {
+  color-scheme: light dark;
+  color: rgba(0, 0, 0, 0.87);
+  background-color: #ffffff;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 71px;
+  height: 35px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: #23272f;
+  border-radius: 36px;
+  transition: background 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  font-size: 1.3rem;
+  color: #fff;
+}
+
+.slider .icon {
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.icon {
+  filter: brightness(0) invert(1);
+}
+
+
+.slider .sun {
+  opacity: 0.8;
+}
+
+.slider .moon {
+  opacity: 0.5;
+  margin-left: 13.5px;
+}
+
+.switch input:checked + .slider {
+  background: #b3b3b3;
+}
+
+.switch input:checked + .slider .sun {
+  opacity: 0.5;
+}
+
+.switch input:checked + .slider .moon {
+  opacity: 0.8;
+}
+
+.slider:before {
+  content: "";
+  position: absolute;
+  left: 6.5px;
+  top: 3px;
+  width: 26px;
+  height: 26px;
+  background: #fa9600;
+  border-radius: 50%;
+  transition: transform 0.3s;
+  opacity: 0.5;
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(34px);
+}
