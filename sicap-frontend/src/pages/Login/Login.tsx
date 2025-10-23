@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Botones } from "../../components/botones/Botones";
 import "../../styles/styles.css";
@@ -14,6 +14,11 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   
+  useEffect(() => {
+    localStorage.removeItem('access');
+    localStorage.removeItem('usuario');
+  }, []);
+
   const navigate = useNavigate();
   const { login } = useAuth(); // Obtener login del contexto
 
