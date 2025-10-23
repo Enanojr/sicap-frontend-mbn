@@ -4,7 +4,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Dependencias (¡la más importante!)
+# Dependencias (¡la más importante!) 
 node_modules
 
 # Carpeta de compilación de Vite
