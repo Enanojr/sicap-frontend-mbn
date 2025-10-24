@@ -6,6 +6,8 @@ import ContractTable from "../components/tablas/tabla";
 import Main_Card from "../pages/Home/Main_Cards";
 import RootLayout from "../components/layout/layout";
 import ProtectedRoute from "../routes/ProtectedRoute";
+import RegisterCobrador from "../pages/Rcobradores/Rcobradores";
+import RegisterAdmin from "../pages/Radmin/Radmin";
 
 const Rutas = [
   // Ruta #1: Login (pública)
@@ -37,6 +39,14 @@ const Rutas = [
             path: "/Main_Card",
             element: <Main_Card />,
           },
+          {
+            path: "/Rcobradores",
+            element: <RegisterCobrador />,
+          },
+          {
+            path: "/Radmin",
+            element: <RegisterAdmin />,
+          }
         ],
       },
     ],

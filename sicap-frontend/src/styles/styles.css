@@ -831,4 +831,184 @@ top: 30%;
   background-color: #f0f0f0;
 }
 
+/*------------------------------------------Registro cobradores------------------------*/
 
+.register-page-container {
+  min-height: 50vh;
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.register-card {
+  background: #1a1d23;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 900px;
+  min-height: 800px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.register-title {
+  padding: 2rem;
+  margin: 0;
+  font-size: 1.75rem;
+  font-family: 'Poppins', Arial;
+  font-weight: 700;
+  text-align: center;
+  color: #58b2ee  ;
+}
+
+.register-divider {
+  height: 4px;
+  background: #58b2ee;
+  margin: 0 2rem;
+}
+
+/* Alertas */
+.alert {
+  padding: 1rem;
+  margin: 1rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.alert-error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Formulario */
+.register-form-container {
+  padding: 1.5rem 2rem 2rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.register-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4.5rem 2rem;
+  margin-bottom: 1.6rem;
+  flex: 1;
+  align-content: center;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.form-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: 'Poppins', Arial;  
+  color: white;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 0.75rem;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  background-color: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+  outline: none;
+  color: #000;
+}
+
+.form-input:focus {
+  border-color: #58b2ee;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-input::placeholder {
+  color: #9ca3af;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.password-toggle:hover {
+  color: #667eea;
+}
+
+.form-error {
+  font-size: 0.75rem;
+  color: #dc2626;
+  margin-top: 0.25rem;
+  font-family: 'Poppins', Arial;
+}
+
+/* Botones */
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  padding-top: 1rem;
+  border-top: 2px solid #f3f4f6;
+}
+
+@media (max-width: 768px) {
+  .register-page-container {
+    padding: 1rem;
+  }
+
+  .register-form-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .register-title {
+    font-size: 1.5rem;
+    padding: 1.5rem;
+  }
+
+  .register-form-container {
+    padding: 1rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+}
