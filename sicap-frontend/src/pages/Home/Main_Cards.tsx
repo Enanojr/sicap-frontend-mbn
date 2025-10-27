@@ -3,17 +3,17 @@ import {WaterServiceCard} from '../../components/cards/card'
 import '../../styles/styles.css';
 
 // Iconos
-const PaymentIcon = ({ className }: { className: string }) => (
-  <svg className={className} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <rect x="2" y="5" width="20" height="14" rx="2" />
-    <line x1="2" y1="10" x2="22" y2="10" />
-  </svg>
-);
-
 const SearchIcon = ({ className }: { className: string }) => (
   <svg className={className} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <circle cx="11" cy="11" r="8" />
     <path d="m21 21-4.35-4.35" />
+  </svg>
+);
+
+const PaymentIcon = ({ className }: { className: string }) => (
+  <svg className={className} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="5" width="20" height="14" rx="2" />
+    <line x1="2" y1="10" x2="22" y2="10" />
   </svg>
 );
 
@@ -49,16 +49,6 @@ function Main_Card() {
   return (
     <div className="waterCardsContainer">
       <div className="waterCardsWrapper">
-        {/* Card de Pagos */}
-        <WaterServiceCard
-          title="Pagos"
-          description="Realiza el pago de tu recibo de agua de forma rápida y segura."
-          icon={PaymentIcon}
-          ctaText="Pagar Ahora"
-          gradientColors={['#ff6b6b', '#d63031']}
-          waterDropColor="rgba(255, 107, 107, 0.6)"
-          onClick={handlePayment}
-        />
 
         {/* Card de Consultas */}
         <WaterServiceCard
@@ -69,6 +59,17 @@ function Main_Card() {
           gradientColors={['#4ecdc4', '#2c9fb9']}
           waterDropColor="rgba(78, 205, 196, 0.6)"
           onClick={handleConsult}
+        />
+
+        {/* Card de Pagos */}
+        <WaterServiceCard
+          title="Pagos"
+          description="Realiza el pago de tu recibo de agua de forma rápida y segura."
+          icon={PaymentIcon}
+          ctaText="Pagar Ahora"
+          gradientColors={['#ff6b6b', '#d63031']}
+          waterDropColor="rgba(255, 107, 107, 0.6)"
+          onClick={handlePayment}
         />
 
         {/* Card de Informes */}
