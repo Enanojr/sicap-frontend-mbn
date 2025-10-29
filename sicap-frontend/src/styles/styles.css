@@ -447,14 +447,26 @@ top: 30%;
   font-weight: 600;
 }
 .status-pending {
-  background-color: rgba(255, 193, 7, 0.1);
-  border: 1px solid #fbbf24;
-  color: #fbbf24;
+  background-color:  rgba(239, 68, 68, 0.1); 
+  border: 1px solid #ef4444;
+  color: #ef4444;
 }
 .status-complete {
-  background-color: rgba(72, 187, 120, 0.1);
-  border: 1px solid #4ade80;
-  color: #4ade80;
+  background-color: rgba(34, 197, 94, 0.1);
+  border: 1px solid #22c55e;
+  color: #22c55e;
+}
+
+.status-warning {
+  background-color: rgba(234, 179, 8, 0.1);
+  border: 1px solid #eab308;
+  color: #eab308;
+}
+
+.status-danger {
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid #ef4444;
+  color: #ef4444;
 }
 
 @media (max-width: 768px) {
@@ -1085,4 +1097,90 @@ input[type="number"]::-webkit-inner-spin-button {
 
 .form-input:invalid:not(:placeholder-shown):not(:focus) {
   border-color: #fbbf24;
+}
+
+/*--------------------------------------------Estandarización de texto a tipo oración--------------------------------------------*/
+
+/* Clase genérica para tipo oración */
+.text-sentence-case {
+    text-transform: lowercase;
+}
+
+.text-sentence-case::first-letter {
+    text-transform: uppercase;
+}
+
+/* Aplicar a inputs y campos de texto */
+.form-input,
+.form-select option,
+.form-textarea,
+.contracts-search-input,
+.Input input {
+    text-transform: lowercase;
+}
+
+.form-input::first-letter,
+.form-textarea::first-letter,
+.Input input::first-letter {
+    text-transform: uppercase;
+}
+
+/* Aplicar a labels y títulos */
+.form-label,
+.detail-label,
+.radio-label {
+    text-transform: lowercase;
+}
+
+.form-label::first-letter,
+.detail-label::first-letter,
+.radio-label::first-letter {
+    text-transform: uppercase;
+}
+
+/* Aplicar a títulos principales */
+.contracts-title,
+.modal-title,
+.waterCardTitle,
+.Titulo_Login,
+.title {
+    text-transform: lowercase;
+}
+
+.contracts-title::first-letter,
+.modal-title::first-letter,
+.waterCardTitle::first-letter,
+.Titulo_Login::first-letter,
+.title::first-letter {
+    text-transform: uppercase;
+}
+
+/* Aplicar a valores de datos y celdas de tabla */
+.detail-value,
+.td,
+.td-name,
+.waterCardDescription {
+    text-transform: lowercase;
+}
+
+.detail-value::first-letter,
+.td::first-letter,
+.td-name::first-letter,
+.waterCardDescription::first-letter {
+    text-transform: uppercase;
+}
+
+/* Excepciones: mantener mayúsculas en botones y headers de tabla */
+.Boton,
+.contracts-filter-button,
+.view-button,
+.waterCardButton,
+.form-button,
+.contracts-thead th {
+    text-transform: uppercase;
+}
+
+/* Excepción: mantener formato original en badges de estado */
+.status-badge {
+    text-transform: capitalize;
 }

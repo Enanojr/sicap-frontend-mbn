@@ -1,35 +1,182 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { FormConfig } from '../forms/form';
 import FormularioReutilizable from '../forms/form';
-import { DollarSign, Calendar, User, Percent, Users } from 'lucide-react';
+import { DollarSign, Calendar, User, Percent, MessageSquare } from 'lucide-react';
 import Swal from "sweetalert2";
-import { createPago, type PagoCreate } from '../../services/pago.service'; // 👈 Importar el servicio
+import { createPago, type PagoCreate } from '../../services/pago.service';
+import api from '../../api_axios';
+
+// Interface para cuentahabiente
+interface Cuentahabiente {
+  id_cuentahabiente: number;
+  numero_contrato: number;
+  nombres: string;
+  ap: string;
+  am: string;
+}
+
+// Interface para la respuesta paginada
+interface PaginatedResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: Cuentahabiente[];
+}
+
+// Interface para descuento
+interface Descuento {
+  id_descuento: number;
+  nombre_descuento: string;
+  porcentaje?: number;
+}
+
+// Interface para la respuesta paginada de descuentos
+interface PaginatedDescuentosResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: Descuento[];
+}
 
 const FormularioPagos: React.FC = () => {
-  
-  const cobradores = [
-    { value: '1', label: 'Juan Pérez' },
-    { value: '2', label: 'María García' },
-    { value: '3', label: 'Carlos Rodríguez' }
-  ];
+  const navigate = useNavigate();
+  const [cuentahabientes, setCuentahabientes] = useState<Array<{ value: string; label: string }>>([]);
+  const [descuentos, setDescuentos] = useState<Array<{ value: string; label: string }>>([]);
+  const [loading, setLoading] = useState(true);
 
-  const cuentahabientes = [
-    { value: '1', label: 'Cliente A - Juan López' },
-    { value: '2', label: 'Cliente B - Ana Martínez' },
-    { value: '3', label: 'Cliente C - Pedro Sánchez' }
-  ];
+  // Cargar cuentahabientes al montar el componente
+  useEffect(() => {
+    const fetchCuentahabientes = async (): Promise<void> => {
+      try {
+        setLoading(true);
+        
+        // Verificar token
+        const token = localStorage.getItem("access");
+        if (!token) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Sesión expirada',
+            text: 'Por favor, inicia sesión nuevamente.',
+            confirmButtonColor: '#ef4444',
+          });
+          return;
+        }
 
-  const descuentos = [
-    { value: '0', label: 'INAPAM' },
-    { value: '1', label: 'Promoción anual' },
-    { value: '2', label: 'Pago puntual' },
-    { value: '3', label: 'Empleado' },
-    { value: '4', label: 'Fuga de agua' },
-    { value: '5', label: 'Convenio con la empresa' },
-    { value: '6', label: 'Buen fin 2024' }, 
-    { value: '7', label: 'Adulto mayor' }, 
-    { value: '8', label: 'Ninguno' }, 
-  ];
+        console.log('Cargando cuentahabientes...');
+        
+        // Cargar TODAS las páginas 
+        const allCuentahabientes: Cuentahabiente[] = [];
+        let nextUrl: string | null = '/cuentahabientes/';
+        let pageCount: number = 0;
+
+        while (nextUrl) {
+          pageCount++;
+          console.log(` Cargando página ${pageCount}...`);
+          
+          const response = await api.get<PaginatedResponse>(nextUrl);
+          const data: PaginatedResponse = response.data;
+          
+         
+          if (data.results && Array.isArray(data.results)) {
+            allCuentahabientes.push(...data.results);
+            nextUrl = data.next ? data.next.replace('https://sicap-backend.onrender.com', '') : null;
+            console.log(` Página ${pageCount}: ${data.results.length} registros (Total: ${allCuentahabientes.length})`);
+          } else {
+            console.warn(' Estructura inesperada:', data);
+            break;
+          }
+        }
+        
+        console.log(` Total de cuentahabientes cargados: ${allCuentahabientes.length}`);
+        
+    
+        const formattedData = allCuentahabientes.map((cuenta) => ({
+          value: cuenta.id_cuentahabiente.toString(), 
+          label: `#${cuenta.numero_contrato} - ${cuenta.nombres} ${cuenta.ap} ${cuenta.am}`.trim() 
+        }));
+
+        setCuentahabientes(formattedData);
+        console.log('Select preparado con', formattedData.length, 'opciones');
+      } catch (error: any) {
+        console.error(' Error al cargar cuentahabientes:', error);
+        
+        const message =
+          error.response?.status === 403
+            ? "Acceso prohibido. Tu sesión puede haber expirado."
+            : error.response?.status === 401
+            ? "No autorizado. Por favor, inicia sesión nuevamente."
+            : "No se pudieron cargar los cuentahabientes";
+
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: message,
+          confirmButtonColor: '#ef4444',
+        });
+
+        
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          localStorage.removeItem("access");
+          localStorage.removeItem("usuario");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchDescuentos = async (): Promise<void> => {
+      try {
+        console.log('Cargando descuentos...');
+        
+        
+        const allDescuentos: Descuento[] = [];
+        let nextUrl: string | null = '/descuentos/';
+        let pageCount: number = 0;
+
+        while (nextUrl) {
+          pageCount++;
+          console.log(`  Cargando página de descuentos ${pageCount}...`);
+          
+          const response = await api.get<PaginatedDescuentosResponse>(nextUrl);
+          const data: PaginatedDescuentosResponse = response.data;
+          
+        
+          if (data.results && Array.isArray(data.results)) {
+            allDescuentos.push(...data.results);
+            nextUrl = data.next ? data.next.replace('https://sicap-backend.onrender.com', '') : null;
+            console.log(`  Página ${pageCount}: ${data.results.length} descuentos (Total: ${allDescuentos.length})`);
+          } else {
+            console.warn('  Estructura inesperada en descuentos:', data);
+            break;
+          }
+        }
+        
+        console.log(`  Total de descuentos cargados: ${allDescuentos.length}`);
+        
+   
+        const formattedData = allDescuentos.map((desc) => ({
+          value: desc.id_descuento.toString(), 
+          label: desc.nombre_descuento 
+        }));
+
+        setDescuentos(formattedData);
+        console.log('Descuentos preparados:', formattedData.length, 'opciones');
+      } catch (error: any) {
+        console.error('  Error al cargar descuentos:', error);
+        
+        Swal.fire({
+          icon: 'warning',
+          title: 'Advertencia',
+          text: 'No se pudieron cargar los descuentos. Podrás continuar sin seleccionar descuento.',
+          confirmButtonColor: '#f59e0b',
+        });
+      }
+    };
+
+    fetchCuentahabientes();
+    fetchDescuentos();
+  }, []);
 
   const meses = [
     { value: 'Enero', label: 'Enero' },
@@ -46,11 +193,19 @@ const FormularioPagos: React.FC = () => {
     { value: 'Diciembre', label: 'Diciembre' }
   ];
 
-  // Validaciones personalizadas
   const validatePositiveNumber = (value: any): string | null => {
     const num = parseFloat(value);
     if (isNaN(num) || num <= 0) {
       return 'Debe ser un número mayor a 0';
+    }
+    return null;
+  };
+
+  const validateNonNegativeNumber = (value: any): string | null => {
+    if (!value || value === '') return null; 
+    const num = parseFloat(value);
+    if (isNaN(num) || num < 0) {
+      return 'Debe ser un número mayor o igual a 0';
     }
     return null;
   };
@@ -64,25 +219,17 @@ const FormularioPagos: React.FC = () => {
     return null;
   };
 
-  // Configuración del formulario
   const formConfig: FormConfig = {
     title: 'Registro de Pagos',
     fields: [
       {
-        name: 'id_cuentahabiente',
+        name: 'cuentahabiente',
         label: 'Cuenta Habiente',
         type: 'select',
         icon: User,
         required: true,
         options: cuentahabientes,
-      },
-      {
-        name: 'id_cobrador',
-        label: 'Cobrador',
-        type: 'select',
-        icon: Users,
-        required: true,
-        options: cobradores,
+        placeholder: loading ? 'Cargando...' : 'Selecciona un cuentahabiente',
       },
       {
         name: 'fecha_pago',
@@ -102,22 +249,13 @@ const FormularioPagos: React.FC = () => {
         validation: validatePositiveNumber,
       },
       {
-        name: 'id_descuento',
-        label: 'Descuento Aplicado',
+        name: 'descuento',
+        label: 'Descuento',
         type: 'select',
         icon: Percent,
         required: false,
         options: descuentos,
-        defaultValue: '8', // "Ninguno" como default
-      },
-      {
-        name: 'monto_descuento',
-        label: 'Monto de Descuento',
-        type: 'number',
-        placeholder: '0.00',
-        icon: Percent,
-        required: false,
-        defaultValue: '0',
+        placeholder: 'Selecciona un descuento (opcional)',
       },
       {
         name: 'mes',
@@ -140,11 +278,31 @@ const FormularioPagos: React.FC = () => {
         defaultValue: new Date().getFullYear().toString(),
         validation: validateYear,
       },
+      {
+        name: 'comentarios',
+        label: 'Comentarios',
+        type: 'textarea',
+        placeholder: 'Observaciones o comentarios adicionales (opcional)',
+        icon: MessageSquare,
+        required: false,
+        defaultValue: '',
+      },
     ],
 
     onSubmit: async (data) => {
       try {
-        // 1. Mostrar loading
+        
+        const token = localStorage.getItem("access");
+        if (!token) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Sesión expirada',
+            text: 'Por favor, inicia sesión nuevamente.',
+            confirmButtonColor: '#ef4444',
+          });
+          return;
+        }
+
         Swal.fire({
           title: 'Enviando...',
           text: 'Registrando el pago, por favor espera.',
@@ -154,45 +312,54 @@ const FormularioPagos: React.FC = () => {
           }
         });
 
-        // 2. Preparar los datos según la interfaz PagoCreate
+        
         const pagoData: PagoCreate = {
-          ID_Descuento: parseInt(data.id_descuento),
-          ID_Cobrador: parseInt(data.id_cobrador),
-          ID_Cuentahabiente: parseInt(data.id_cuentahabiente),
-          Fecha_pago: data.fecha_pago,
-          Monto_recibido: parseFloat(data.monto_recibido),
-          Monto_descuento: parseFloat(data.monto_descuento) || 0,
-          Mes: data.mes,
-          Anio: parseInt(data.anio)
+          cuentahabiente: parseInt(data.cuentahabiente), 
+          fecha_pago: data.fecha_pago,
+          monto_recibido: parseFloat(data.monto_recibido),
+          descuento: data.descuento ? parseInt(data.descuento) : 0, 
+          mes: data.mes,
+          anio: parseInt(data.anio),
+          comentarios: data.comentarios || '' 
         };
 
-        console.log('📤 Datos a enviar:', pagoData);
+        console.log(' Datos a enviar:', pagoData);
 
-        // 3. Llamar al servicio (maneja autenticación y errores automáticamente)
         const result = await createPago(pagoData);
 
-        // 4. Mostrar éxito
         Swal.fire({
           icon: 'success',
           title: '¡Pago registrado exitosamente!',
           text: `ID del Pago: ${result.ID_Pago}`,
           confirmButtonColor: '#58b2ee',
           confirmButtonText: 'Aceptar'
+        }).then(() => {
+          navigate('/Tabla');
         });
 
-        console.log('✅ Pago registrado:', result);
+        console.log('Pago registrado:', result);
 
-        // El FormularioReutilizable resetea automáticamente el formulario
-        
       } catch (error: any) {
-        console.error('❌ Error al registrar el pago:', error);
+        console.error(' Error al registrar el pago:', error);
         
-        // Solo mostrar error si no fue manejado por el servicio
-        // (el servicio ya muestra Swal para errores de autenticación)
-        if (!error.message.includes("Sesión expirada") && 
-            !error.message.includes("autenticación") &&
-            !error.message.includes("autorizado")) {
+        
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          const message = error.response?.status === 403
+            ? "Acceso prohibido. Tu sesión puede haber expirado."
+            : "No autorizado. Por favor, inicia sesión nuevamente.";
           
+          Swal.fire({
+            icon: 'error',
+            title: 'Error de autenticación',
+            text: message,
+            confirmButtonColor: '#ef4444',
+          });
+
+          // Limpiar localStorage
+          localStorage.removeItem("access");
+          localStorage.removeItem("usuario");
+        } else {
+         
           Swal.fire({
             icon: 'error',
             title: 'Error al registrar el pago',
@@ -202,7 +369,6 @@ const FormularioPagos: React.FC = () => {
           });
         }
 
-        // Re-lanzar el error para que FormularioReutilizable lo maneje
         throw error;
       }
     },
@@ -213,6 +379,10 @@ const FormularioPagos: React.FC = () => {
     errorMessage: 'Error al registrar el pago. Intente nuevamente.',
     showResetButton: true,
   };
+
+  if (loading) {
+    return <div className="text-center p-4">Cargando formulario...</div>;
+  }
 
   return <FormularioReutilizable config={formConfig} />;
 };

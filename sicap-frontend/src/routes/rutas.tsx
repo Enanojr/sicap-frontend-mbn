@@ -9,6 +9,8 @@ import ProtectedRoute from "../routes/ProtectedRoute";
 
 // Importaciones de rutas por eliminar
 import FormularioPago from '../components/forms/form_pago'
+import FormularioDescuentos from "../components/forms/form_descuentos";
+import  FormularioServicios from "../components/forms/form_servicios"
 
 const Rutas = [
   // Ruta #1: Login (pública)
@@ -55,6 +57,14 @@ const Rutas = [
     {
     path: "pago",
     element: <FormularioPago />,
+  },
+    {
+    path: "descuento",
+    element: <FormularioDescuentos />,
+  },
+   {
+    path: "servicios",
+    element: < FormularioServicios />,
   },
 
 ];
