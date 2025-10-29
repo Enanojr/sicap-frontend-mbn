@@ -9,6 +9,9 @@ import ProtectedRoute from "../routes/ProtectedRoute";
 import RegisterCobrador from "../pages/Rcobradores/Rcobradores";
 import RegisterAdmin from "../pages/Radmin/Radmin";
 
+// Importaciones de rutas por eliminar
+import FormularioPago from '../components/forms/form_pago'
+
 const Rutas = [
   // Ruta #1: Login (pública)
   {
@@ -57,6 +60,13 @@ const Rutas = [
     path: "*",
     element: <Navigate to="/Login" replace />,
   },
+
+  //Rutas para validar componentes, borrar 
+    {
+    path: "pago",
+    element: <FormularioPago />,
+  },
+
 ];
 
 export const router = createBrowserRouter(Rutas);
