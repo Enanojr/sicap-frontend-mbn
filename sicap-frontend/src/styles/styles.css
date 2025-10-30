@@ -843,7 +843,6 @@ top: 30%;
   background-color: #f0f0f0;
 }
 
-<<<<<<< HEAD
 /*------------------------------------------Registro cobradores------------------------*/
 
 .register-page-container {
@@ -1025,7 +1024,6 @@ top: 30%;
     flex-direction: column;
   }
 }
-=======
 /*------------------------------------------------Formualarios----------------------------------------------*/
 
 
@@ -1281,8 +1279,76 @@ input[type="number"]::-webkit-inner-spin-button {
 .form-input:invalid:not(:placeholder-shown):not(:focus) {
   border-color: #fbbf24;
 }
->>>>>>> origin/dev-kirby
 
+
+/*------------------------------------------Registro sector y colonias------------------------*/
+
+.register-page-container-sector {
+  min-height: 50vh;
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.register-card-sector {
+  background: #1a1d23;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 900px;
+  min-height: 300px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.register-title-sector {
+  padding: 2rem;
+  margin: 0;
+  font-size: 1.75rem;
+  font-family: 'Poppins', Arial;
+  font-weight: 700;
+  text-align: center;
+  color: #58b2ee  ;
+}
+
+.register-divider-sector {
+  height: 4px;
+  background: #58b2ee;
+  margin: 0 2rem;
+}
+
+/* Formulario */
+.register-form-container-sector {
+  padding: 1.5rem 2rem 2rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+
+@media (max-width: 480px) {
+  .register-page-container-sector {
+    padding: 1.5rem;
+  }
+
+  .register-form-container-sector .input-wrapper{
+    padding: 10px;
+  }
+
+  .register-form-grid {
+    grid-template-columns: 2fr;
+    gap: 2.5rem;
+  }
+
+  .register-title {
+    font-size: 1.5rem;
+    padding: 1.5rem;
+  }
+
+}
 /*--------------------------------------------Estandarización de texto a tipo oración--------------------------------------------*/
 
 /* Clase genérica para tipo oración */

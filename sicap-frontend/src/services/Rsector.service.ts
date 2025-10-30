@@ -1,6 +1,6 @@
 import api from '../api_axios'; // Ajusta la ruta según tu estructura
 
-const API_URL = "/auth"; // O la ruta que uses para registro
+const API_URL = "/sector/"; // O la ruta que uses para registro
 
 /**
  * Obtiene el token del administrador desde localStorage
@@ -10,17 +10,13 @@ const getAdminToken = (): string | null => {
 };
 
 /**
- * Registra un nuevo usuario (solo admins)
- * @param userData - Datos del usuario a registrar
+ * Registra un nuevo sector (solo admins)
+ * @param userData - Datos del sector a registrar
  * @returns Promise con el resultado del registro
  */
-export const registerUser = async (userData: {
-  nombre: string;
-  apellidos: string;
-  email: string;
-  usuario: string;
-  password: string;
-  password2: string;
+export const registerSector = async (userData: {
+  nombre_sector: string;
+  descripcion: string;
 }) => {
   try {
     const token = getAdminToken();
@@ -34,13 +30,9 @@ export const registerUser = async (userData: {
       };
     }
 
-    const response = await api.post(`${API_URL}/signup/`, {
-      nombre: userData.nombre,
-      apellidos: userData.apellidos,
-      email: userData.email,
-      usuario: userData.usuario,
-      password: userData.password,
-      password2: userData.password2
+    const response = await api.post(`${API_URL}`, {
+      nombre_sector: userData.nombre_sector,
+      descripcion: userData.descripcion,
     });
 
     return {
@@ -49,7 +41,7 @@ export const registerUser = async (userData: {
     };
 
   } catch (error: any) {
-    console.error('Error en registerUser:', error);
+    console.error('Error en registerSector:', error);
     
     if (error.response && error.response.data) {
       return {
@@ -68,10 +60,10 @@ export const registerUser = async (userData: {
 };
 
 /**
- * Obtiene todos los cobradores
- * @returns Promise con la lista de cobradores
+ * Obtiene todos los sectores
+ * @returns Promise con la lista de sectores
  */
-export const getCobradores = async () => {
+export const getSectores = async () => {
   try {
     const token = getAdminToken();
     
@@ -84,7 +76,7 @@ export const getCobradores = async () => {
       };
     }
 
-    const response = await api.get(`${API_URL}/users/`);
+    const response = await api.get(`${API_URL}`);
 
     return {
       success: true,
@@ -92,7 +84,7 @@ export const getCobradores = async () => {
     };
 
   } catch (error: any) {
-    console.error('Error en getCobradores:', error);
+    console.error('Error en getSectores:', error);
     
     if (error.response && error.response.data) {
       return {
@@ -104,18 +96,18 @@ export const getCobradores = async () => {
     return {
       success: false,
       errors: {
-        general: 'Error al obtener los cobradores. Por favor, intente nuevamente.'
+        general: 'Error al obtener los sectores. Por favor, intente nuevamente.'
       }
     };
   }
 };
 
 /**
- * Obtiene un cobrador por su ID
- * @param id - ID del cobrador
- * @returns Promise con los datos del cobrador
+ * Obtiene un sector por su ID
+ * @param id - ID del sector
+ * @returns Promise con los datos del sector
  */
-export const getCobradorById = async (id: string | number) => {
+export const getSectorById = async (id: string | number) => {
   try {
     const token = getAdminToken();
     
@@ -128,7 +120,7 @@ export const getCobradorById = async (id: string | number) => {
       };
     }
 
-    const response = await api.get(`${API_URL}/users/${id}/`); // Ajusta el endpoint según tu API
+    const response = await api.get(`${API_URL}${id}/`);
 
     return {
       success: true,
@@ -136,7 +128,7 @@ export const getCobradorById = async (id: string | number) => {
     };
 
   } catch (error: any) {
-    console.error('Error en getCobradorById:', error);
+    console.error('Error en getSectorById:', error);
     
     if (error.response && error.response.data) {
       return {
@@ -148,7 +140,7 @@ export const getCobradorById = async (id: string | number) => {
     return {
       success: false,
       errors: {
-        general: 'Error al obtener el cobrador. Por favor, intente nuevamente.'
+        general: 'Error al obtener el sector. Por favor, intente nuevamente.'
       }
     };
   }

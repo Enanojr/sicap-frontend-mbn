@@ -8,6 +8,10 @@ import RootLayout from "../components/layout/layout";
 import ProtectedRoute from "../routes/ProtectedRoute";
 import RegisterCobrador from "../pages/Rcobradores/Rcobradores";
 import RegisterAdmin from "../pages/Radmin/Radmin";
+import RegisterSector from "../pages/Rsector/Rsector";
+import RegisterColonia from "../pages/Rcolonias/Rcolonias";
+import RegisterCuentahabiente from "../pages/Rcuentahabientes/Rcuentahabientes";
+import RegisterAsignacion from "../pages/Asignaciones/Asignaciones";
 
 // Importaciones de rutas por eliminar
 import FormularioPago from '../components/forms/form_pago'
@@ -51,6 +55,22 @@ const Rutas = [
           {
             path: "/Radmin",
             element: <RegisterAdmin />,
+          },
+          {
+            path: "/Rsector",
+            element: <RegisterSector />,
+          },
+          {
+            path: "/Rcolonia",
+            element: <RegisterColonia />,
+          },
+          {
+            path: "/Rcuentahabiente",
+            element: <RegisterCuentahabiente />,
+          },
+          {
+            path: "/Rasignacion",
+            element: <RegisterAsignacion />,
           }
         ],
       },

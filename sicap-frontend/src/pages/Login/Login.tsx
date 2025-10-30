@@ -84,7 +84,7 @@ const LoginPage = () => {
       <div className="rightPanel">
         <div className="infoCard">
           <div className="Cabeza_Login">
-            <img src={Usuario} alt="Logo" className="Estilo_Logo" />
+            <img src={Logo} alt="Logo" className="Estilo_Logo" />
             <div className="Titulo_Login">Iniciar Sesión</div>
             <div className="Linea_Divisora_Login"></div>
           </div>

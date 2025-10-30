@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { User, Mail, Lock, UserPlus, Eye, EyeOff, Shield } from "lucide-react";
 import { registerUser } from "../../services/Radmin.service";
 import { Botones } from "../../components/botones/Botones";
 import Swal from "sweetalert2";
 import "../../styles/styles.css";
+import { Eye, EyeOff } from "lucide-react";
 
 interface FormData {
   nombre: string;
@@ -209,7 +209,6 @@ export default function RegisterAdmin() {
             <div className="form-field">
               <label className="form-label">Nombre *</label>
               <div className="input-wrapper">
-                <User size={18} className="input-icon" />
                 <input
                   type="text"
                   name="nombre"
@@ -228,7 +227,6 @@ export default function RegisterAdmin() {
             <div className="form-field">
               <label className="form-label">Apellidos *</label>
               <div className="input-wrapper">
-                <User size={18} className="input-icon" />
                 <input
                   type="text"
                   name="apellidos"
@@ -247,7 +245,6 @@ export default function RegisterAdmin() {
             <div className="form-field">
               <label className="form-label">Email *</label>
               <div className="input-wrapper">
-                <Mail size={18} className="input-icon" />
                 <input
                   type="email"
                   name="email"
@@ -266,7 +263,6 @@ export default function RegisterAdmin() {
             <div className="form-field">
               <label className="form-label">Usuario *</label>
               <div className="input-wrapper">
-                <UserPlus size={18} className="input-icon" />
                 <input
                   type="text"
                   name="usuario"
@@ -285,7 +281,6 @@ export default function RegisterAdmin() {
             <div className="form-field">
               <label className="form-label">Rol *</label>
               <div className="input-wrapper">
-                <Shield size={18} className="input-icon" />
                 <select
                   name="role"
                   value={formData.role}
@@ -306,7 +301,6 @@ export default function RegisterAdmin() {
             <div className="form-field">
               <label className="form-label">Contraseña *</label>
               <div className="input-wrapper">
-                <Lock size={18} className="input-icon" />
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
@@ -332,7 +326,6 @@ export default function RegisterAdmin() {
             <div className="form-field">
               <label className="form-label">Confirmar Contraseña *</label>
               <div className="input-wrapper">
-                <Lock size={18} className="input-icon" />
                 <input
                   type={showPassword2 ? "text" : "password"}
                   name="password2"
