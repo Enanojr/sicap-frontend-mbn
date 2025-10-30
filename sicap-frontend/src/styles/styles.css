@@ -1,17 +1,17 @@
 /*--------------------------------------Estilos de los componentes------------------------------------------------------------ */
 
-.Boton{
-    background-color: #58b2ee;
-    border: none;
-    color: white;
-    padding: 15px 50px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
-    cursor: pointer;
-    border-radius: 8px;
+.Boton {
+  background-color: #58b2ee;
+  border: none;
+  color: white;
+  padding: 15px 50px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 8px;
 }
 
 /*----------------Sweetalert----------------------------*/
@@ -37,13 +37,14 @@
   display: flex;
   width: 100vw;
   height: 100vh;
-  font-family: Arial, 'Poppins';
+  font-family: Arial, "Poppins";
   gap: 24px;
   justify-content: center;
   align-items: center;
 }
 
-.leftPanel, .rightPanel {
+.leftPanel,
+.rightPanel {
   flex: 0 0 420px;
   max-width: 420px;
   min-width: 320px;
@@ -66,8 +67,8 @@
   min-height: 600px; /* Altura mínima para las tarjetas */
   text-align: center;
   display: flex;
-    flex-direction: column;
-    justify-content: center;
+  flex-direction: column;
+  justify-content: center;
 }
 
 /* --- CONTENIDO DEL PANEL IZQUIERDO --- */
@@ -90,13 +91,11 @@
 }
 
 .welcomeText {
-    padding: 1rem;
+  padding: 1rem;
   font-size: 2rem;
   color: rgb(255, 255, 255);
   font-weight: bold;
 }
-
-
 
 /* --- CONTENIDO DEL PANEL DERECHO (FORMULARIO) --- */
 
@@ -118,7 +117,7 @@
 .Linea_Divisora_Login {
   width: 50px;
   height: 4px;
-  background-color: #2F3B7E;
+  background-color: #2f3b7e;
   margin: 1rem auto;
 }
 
@@ -151,26 +150,23 @@
   align-items: center;
 }
 
-
 .passwordWrapper input {
   width: 100%;
 }
 
 /* El ícono que se posicionará de forma absoluta */
 .passwordIcon {
-  position: absolute; 
-top: 30%;         
-  right: 10px;      
+  position: absolute;
+  top: 30%;
+  right: 10px;
   cursor: pointer;
-  color: #888;       
+  color: #888;
   font-size: 1.2rem;
 }
 
 .passwordIcon:hover {
   color: #333; /* Color más oscuro al pasar el ratón */
 }
-
-
 
 /* --- RESPONSIVE --- */
 @media (max-width: 850px) {
@@ -182,15 +178,15 @@ top: 30%;
   }
 }
 
-/*-------------------------------------------------Estilos de tabla consulta------------------------------------*/ 
+/*-------------------------------------------------Estilos de tabla consulta------------------------------------*/
 .contracts-page-container {
   min-height: 100vh;
-  
+
   display: flex;
   justify-content: center;
   align-items: flex-start;
   padding: 2rem;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   color: white;
 }
 
@@ -211,7 +207,7 @@ top: 30%;
   margin-bottom: 0.5rem;
 }
 .contracts-title-gradient {
-  background: linear-gradient(90deg, #58b2ee, #2F3B7E);
+  background: linear-gradient(90deg, #58b2ee, #2f3b7e);
   -webkit-background-clip: text;
   color: transparent;
 }
@@ -230,8 +226,8 @@ top: 30%;
   gap: 1rem;
   justify-content: space-between;
   margin-bottom: 1.5rem;
-  align-items: center; /* Centra verticalmente todos los elementos */ /*anadido*/ 
-  flex-wrap: wrap;  /*anadido*/ 
+  align-items: center; /* Centra verticalmente todos los elementos */ /*anadido*/
+  flex-wrap: wrap; /*anadido*/
 }
 
 .contracts-filter-button {
@@ -286,7 +282,6 @@ top: 30%;
   flex: 1;
   max-width: 250px;
   max-width: 100%; /*recien anadido8*/
-
 }
 .search-icon {
   position: absolute;
@@ -302,7 +297,7 @@ top: 30%;
   border-radius: 8px;
   background-color: #2b2e35;
   color: white;
-   box-sizing: border-box; /* para que respete el ancho del contenedor */
+  box-sizing: border-box; /* para que respete el ancho del contenedor */
 }
 .contracts-search-input:focus {
   outline: none;
@@ -372,7 +367,7 @@ top: 30%;
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0,0,0,0.8);
+  background-color: rgba(0, 0, 0, 0.8);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -447,7 +442,7 @@ top: 30%;
   font-weight: 600;
 }
 .status-pending {
-  background-color:  rgba(239, 68, 68, 0.1); 
+  background-color: rgba(239, 68, 68, 0.1);
   border: 1px solid #ef4444;
   color: #ef4444;
 }
@@ -479,7 +474,6 @@ top: 30%;
     max-width: 100%;
   }
 }
-
 
 /*-------------------------------------Cards-------------------------------*/
 
@@ -517,7 +511,7 @@ top: 30%;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .waterCardsWrapper {
@@ -547,13 +541,18 @@ top: 30%;
 }
 
 .waterCard::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
   transition: left 0.6s ease;
 }
 
@@ -646,18 +645,18 @@ top: 30%;
   .waterCardsContainer {
     padding: 40px 24px;
   }
-  
+
   .waterCardsWrapper {
     gap: 18px;
     max-width: 550px;
   }
-  
+
   .waterCard {
     padding: 28px 24px;
     flex-direction: row;
     text-align: left;
   }
-  
+
   .waterCardIconContainer {
     width: 90px;
     height: 90px;
@@ -665,20 +664,20 @@ top: 30%;
     margin-right: 20px;
     flex-shrink: 0;
   }
-  
+
   .waterCardContent {
     margin-bottom: 0;
   }
-  
+
   .waterCardTitle {
     font-size: 22px;
   }
-  
+
   .waterCardDescription {
     font-size: 14px;
     padding: 0;
   }
-  
+
   .waterCardButton {
     width: auto;
     margin-left: auto;
@@ -691,36 +690,36 @@ top: 30%;
   .waterCardsContainer {
     padding: 60px 40px;
   }
-  
+
   .waterCardsWrapper {
     gap: 20px;
     max-width: 900px;
   }
-  
+
   .waterCard {
     padding: 32px 40px;
     min-height: 140px;
   }
-  
+
   .waterCardIconContainer {
     width: 100px;
     height: 100px;
     margin-right: 32px;
   }
-  
+
   .waterCardIcon {
     width: 50px;
     height: 50px;
   }
-  
+
   .waterCardTitle {
     font-size: 24px;
   }
-  
+
   .waterCardDescription {
     font-size: 15px;
   }
-  
+
   .waterCardButton {
     padding: 12px 28px;
     font-size: 14px;
@@ -737,7 +736,7 @@ top: 30%;
   padding: 0 40px;
   height: 80px;
   background-color: #ffffff00;
-  
+
   position: relative; /* Necesario para centrar el logo */
 }
 
@@ -781,7 +780,6 @@ top: 30%;
   gap: 25px; /* Espacio entre los links */
   flex: 1; /* Ocupa el espacio disponible */
 }
-
 
 /* Estilos para los links de navegación */
 .nav-link {
@@ -1025,7 +1023,6 @@ top: 30%;
   }
 }
 /*------------------------------------------------Formualarios----------------------------------------------*/
-
 
 /* Grid del formulario */
 .form-grid {
@@ -1280,6 +1277,7 @@ input[type="number"]::-webkit-inner-spin-button {
   border-color: #fbbf24;
 }
 
+<<<<<<< HEAD
 
 /*------------------------------------------Registro sector y colonias------------------------*/
 
@@ -1350,87 +1348,429 @@ input[type="number"]::-webkit-inner-spin-button {
 
 }
 /*--------------------------------------------Estandarización de texto a tipo oración--------------------------------------------*/
+=======
+/*-----------------------------TicketPago-----------------------------------------------------*/
+>>>>>>> origin/dev-kirby
 
-/* Clase genérica para tipo oración */
-.text-sentence-case {
-    text-transform: lowercase;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-.text-sentence-case::first-letter {
-    text-transform: uppercase;
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* Aplicar a inputs y campos de texto */
-.form-input,
-.form-select option,
-.form-textarea,
-.contracts-search-input,
-.Input input {
-    text-transform: lowercase;
+/* ========== OVERLAY DEL MODAL ========== */
+.ticket-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+  padding: 20px;
+  animation: fadeIn 0.3s ease-out;
 }
 
-.form-input::first-letter,
-.form-textarea::first-letter,
-.Input input::first-letter {
-    text-transform: uppercase;
+/* ========== CONTENEDOR PRINCIPAL DEL TICKET ========== */
+.ticket-container {
+  background: linear-gradient(135deg, #1a1d29 0%, #252831 100%);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(88, 178, 238, 0.1);
+  position: relative;
+  overflow: hidden;
+  animation: slideIn 0.3s ease-out;
 }
 
-/* Aplicar a labels y títulos */
-.form-label,
-.detail-label,
-.radio-label {
-    text-transform: lowercase;
+/* ========== BOTÓN DE CERRAR ========== */
+.ticket-close-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+  color: #e0e0e0;
 }
 
-.form-label::first-letter,
-.detail-label::first-letter,
-.radio-label::first-letter {
-    text-transform: uppercase;
+.ticket-close-button:hover {
+  background-color: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.3);
+  transform: rotate(90deg);
 }
 
-/* Aplicar a títulos principales */
-.contracts-title,
-.modal-title,
-.waterCardTitle,
-.Titulo_Login,
-.title {
-    text-transform: lowercase;
+/* ========== HEADER DEL TICKET ========== */
+.ticket-header {
+  background: linear-gradient(135deg, #58b2ee 0%, #2f3b7e 100%);
+  padding: 24px;
+  text-align: center;
+  border-bottom: 2px dashed rgba(255, 255, 255, 0.1);
+  position: relative;
 }
 
-.contracts-title::first-letter,
-.modal-title::first-letter,
-.waterCardTitle::first-letter,
-.Titulo_Login::first-letter,
-.title::first-letter {
-    text-transform: uppercase;
+/* Círculos decorativos en los bordes */
+.ticket-header::before,
+.ticket-header::after {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color: #1a1d29;
+  border-radius: 50%;
+  bottom: -10px;
 }
 
-/* Aplicar a valores de datos y celdas de tabla */
-.detail-value,
-.td,
-.td-name,
-.waterCardDescription {
-    text-transform: lowercase;
+.ticket-header::before {
+  left: -10px;
 }
 
-.detail-value::first-letter,
-.td::first-letter,
-.td-name::first-letter,
-.waterCardDescription::first-letter {
-    text-transform: uppercase;
+.ticket-header::after {
+  right: -10px;
 }
 
-/* Excepciones: mantener mayúsculas en botones y headers de tabla */
-.Boton,
-.contracts-filter-button,
-.view-button,
-.waterCardButton,
-.form-button,
-.contracts-thead th {
-    text-transform: uppercase;
+.ticket-header-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
 }
 
-/* Excepción: mantener formato original en badges de estado */
-.status-badge {
-    text-transform: capitalize;
+.ticket-header-folio {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.5px;
+  text-transform: lowercase;
+}
+
+.ticket-header-folio::first-letter {
+  text-transform: uppercase;
+}
+
+/* ========== CUERPO DEL TICKET ========== */
+.ticket-body {
+  padding: 32px 24px;
+}
+
+/* ========== LOGO ========== */
+.ticket-logo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.ticket-logo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+
+.ticket-logo-placeholder {
+  width: 80px;
+  height: 80px;
+  background-color: #2b2e35;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  color: #58b2ee;
+  border: 2px solid rgba(88, 178, 238, 0.2);
+}
+
+/* ========== MONTO PRINCIPAL ========== */
+.ticket-amount-section {
+  text-align: center;
+  margin-bottom: 32px;
+  padding: 20px;
+  background-color: #2b2e35;
+  border-radius: 12px;
+  border: 2px solid #58b2ee;
+  box-shadow: 0 4px 15px rgba(88, 178, 238, 0.1);
+}
+
+.ticket-amount-label {
+  font-size: 14px;
+  color: #999;
+  margin-bottom: 8px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.ticket-amount-value {
+  font-size: 42px;
+  font-weight: 700;
+  color: #58b2ee;
+  line-height: 1;
+  font-family: "Courier New", monospace;
+}
+
+.ticket-amount-currency {
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+/* ========== INFORMACIÓN DETALLADA ========== */
+.ticket-details {
+  border-top: 2px dashed #3b3f47;
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ticket-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ticket-detail-label {
+  font-size: 11px;
+  color: #999;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.ticket-detail-value {
+  font-size: 15px;
+  color: #e0e0e0;
+  font-weight: 500;
+  text-transform: lowercase;
+}
+
+.ticket-detail-value::first-letter {
+  text-transform: uppercase;
+}
+
+.ticket-detail-value.highlight {
+  color: #4ade80;
+}
+
+.ticket-detail-value.no-discount {
+  color: #999;
+}
+
+/* ========== COMENTARIOS ========== */
+.ticket-comments-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ticket-comments-box {
+  font-size: 14px;
+  color: #ccc;
+  font-style: italic;
+  line-height: 1.5;
+  background-color: #2b2e35;
+  padding: 12px;
+  border-radius: 8px;
+  border-left: 3px solid #58b2ee;
+  text-transform: lowercase;
+}
+
+.ticket-comments-box::first-letter {
+  text-transform: uppercase;
+}
+
+/* ========== PIE DEL TICKET ========== */
+.ticket-footer {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 2px dashed #3b3f47;
+  text-align: center;
+}
+
+.ticket-footer-thanks {
+  font-size: 13px;
+  color: #999;
+  margin-bottom: 4px;
+  font-weight: 500;
+  text-transform: lowercase;
+}
+
+.ticket-footer-thanks::first-letter {
+  text-transform: uppercase;
+}
+
+.ticket-footer-system {
+  font-size: 11px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ticket-footer-timestamp {
+  font-size: 10px;
+  color: #555;
+  margin-top: 8px;
+}
+
+/* ========== SECCIÓN DE BOTÓN DE DESCARGA ========== */
+.ticket-download-section {
+  padding: 20px 24px;
+  border-top: 1px solid #3b3f47;
+  background-color: #1a1d23;
+}
+
+.ticket-download-button {
+  width: 100%;
+  background-color: #58b2ee;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(88, 178, 238, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ticket-download-button:hover {
+  background-color: #2f91d5;
+  box-shadow: 0 4px 12px rgba(88, 178, 238, 0.4);
+  transform: translateY(-2px);
+}
+
+.ticket-download-button:active {
+  transform: translateY(0);
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 480px) {
+  .ticket-container {
+    max-width: 100%;
+    margin: 0 10px;
+  }
+
+  .ticket-body {
+    padding: 24px 16px;
+  }
+
+  .ticket-header {
+    padding: 20px;
+  }
+
+  .ticket-amount-value {
+    font-size: 36px;
+  }
+
+  .ticket-logo,
+  .ticket-logo-placeholder {
+    width: 70px;
+    height: 70px;
+  }
+
+  .ticket-download-section {
+    padding: 16px;
+  }
+
+  .ticket-download-button {
+    padding: 12px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 360px) {
+  .ticket-amount-value {
+    font-size: 32px;
+  }
+
+  .ticket-detail-value {
+    font-size: 14px;
+  }
+
+  .ticket-comments-box {
+    font-size: 13px;
+    padding: 10px;
+  }
+}
+
+/* ========== ESTADOS ADICIONALES ========== */
+.ticket-container:hover {
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(88, 178, 238, 0.2);
+}
+
+/* Efecto de brillo en el header */
+.ticket-header::after {
+  animation: none;
+}
+
+/* Transición suave para todos los elementos interactivos */
+.ticket-close-button,
+.ticket-download-button {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* Accesibilidad - focus visible */
+.ticket-close-button:focus-visible,
+.ticket-download-button:focus-visible {
+  outline: 2px solid #58b2ee;
+  outline-offset: 2px;
+}
+
+/* Print styles (opcional) */
+@media print {
+  .ticket-modal-overlay {
+    background-color: white;
+    position: static;
+    padding: 0;
+  }
+
+  .ticket-container {
+    box-shadow: none;
+    border: 1px solid #ddd;
+    max-width: 100%;
+  }
+
+  .ticket-close-button,
+  .ticket-download-section {
+    display: none;
+  }
+
+  .ticket-body {
+    padding: 20px;
+  }
 }
