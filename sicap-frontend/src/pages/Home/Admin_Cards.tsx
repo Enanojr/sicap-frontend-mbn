@@ -4,7 +4,6 @@ import "../../styles/styles.css";
 import {
   UserCog,
   UserSquare,
-  Users,
   MapPin,
   Home,
   Clipboard,
@@ -13,47 +12,25 @@ import {
 } from "lucide-react";
 
 
-const ROLES = {
-  ADMIN: 'admin',
-  SUPERVISOR: 'supervisor',
-  COBRADOR: 'cobrador'
-};
 
 function Admin_Cards() {
   const navigate = useNavigate();
 
-  const userString = localStorage.getItem('usuario'); 
-  
-  let role = null;
-  
-  if (userString) {
-    const user = JSON.parse(userString); 
-    role = user?.role; 
-  }
-  
-  const canViewAll = role === ROLES.ADMIN || role === ROLES.SUPERVISOR;
 
   const handleAdmin = () => navigate("/Radmin");
   const handleCobradores = () => navigate("/Rcobradores");
   const handleColonias = () => navigate("/Rcolonia");
-  const handleCuentahabientes = () => navigate("/Rcuentahabiente");
   const handleSector = () => navigate("/Rsector");
   const handleAsignacion = () => navigate("/Rasignacion");
   const handleDescuento = () => navigate("/Descuento");
   const handleServicios = () => navigate("/Servicios");
 
-  if (!role) {
-    console.error("No se encontró un rol de usuario en localStorage.");
-    return null; 
-  }
 
   return (
     <div className="waterCardsContainer">
       <div className="waterCardsWrapper">
 
-        {/* --- TARJETAS SÓLO PARA ADMIN/SUPERVISOR --- */}
-        {canViewAll && (
-          <>
+
             {/* Card de Admin */}
             <WaterServiceCard
               title="Registro de Administradores"
@@ -75,25 +52,7 @@ function Admin_Cards() {
               waterDropColor="rgba(76, 175, 80, 0.6)"
               onClick={handleCobradores}
             />
-          </>
-        )}
 
-        {/* --- TARJETA PARA ADMIN/SUPERVISOR Y COBRADOR --- */}
-        {(canViewAll || role === ROLES.COBRADOR) && (
-          <WaterServiceCard
-            title="Registro de Cuentahabientes"
-            description="Registra nuevos cuentahabientes"
-            icon={Users}
-            ctaText="Registrar Cuentahabiente"
-            gradientColors={["#9c27b0", "#7b1fa2"]}
-            waterDropColor="rgba(156, 39, 176, 0.6)"
-            onClick={handleCuentahabientes}
-          />
-        )}
-
-        {/* --- RESTO DE TARJETAS SÓLO PARA ADMIN/SUPERVISOR --- */}
-        {canViewAll && (
-          <>
             {/* Card de Sectores */}
             <WaterServiceCard
               title="Registro de Sectores"
@@ -148,8 +107,7 @@ function Admin_Cards() {
               waterDropColor="rgba(121, 85, 72, 0.6)"
               onClick={handleServicios}
             />
-          </>
-        )}
+  
       </div>
     </div>
   );
