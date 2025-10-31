@@ -25,7 +25,7 @@ const PaymentIcon = ({ className }: { className: string }) => (
   </svg>
 );
 
-const ReportIcon = ({ className }: { className: string }) => (
+{/*const ReportIcon = ({ className }: { className: string }) => (
   <svg
     className={className}
     viewBox="0 0 24 24"
@@ -37,13 +37,13 @@ const ReportIcon = ({ className }: { className: string }) => (
     <line x1="16" y1="17" x2="8" y2="17" />
     <polyline points="10 9 9 9 8 9" />
   </svg>
-);
+);*/}
 
 function Main_Card() {
   const navigate = useNavigate();
   const handlePayment = () => {
     console.log("Navegando a pagos...");
-    navigate("/pago");
+    navigate("/Pago");
   };
 
   const handleConsult = () => {
@@ -51,9 +51,9 @@ function Main_Card() {
     navigate("/Tabla");
   };
 
-  const handleReports = () => {
+  {/*const handleReports = () => {
     console.log("Navegando a informes...");
-  };
+  };*/}
 
   return (
     <div className="waterCardsContainer">
@@ -80,7 +80,7 @@ function Main_Card() {
           onClick={handlePayment}
         />
 
-        {/* Card de Informes */}
+        {/* Card de Informes 
         <WaterServiceCard
           title="Informes"
           description="Descarga tus recibos, reportes de consumo e historial."
@@ -89,7 +89,7 @@ function Main_Card() {
           gradientColors={["#a29bfe", "#6c5ce7"]}
           waterDropColor="rgba(162, 155, 254, 0.6)"
           onClick={handleReports}
-        />
+        />*/}
       </div>
     </div>
   );

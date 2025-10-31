@@ -106,15 +106,14 @@ const Navbar: React.FC = () => {
               </div>
             </div>
 
-            {/* Opción de Perfil 
             <a 
-              href="/perfil" 
+              href="/Admin_Cards" 
               className="dropdown-item"
               onClick={() => setDropdownOpen(false)}
             >
-              Mi Perfil
+              Panel de Administración
             </a>
-            */}
+          
             
 
             {/* Opción de Cerrar Sesión */}

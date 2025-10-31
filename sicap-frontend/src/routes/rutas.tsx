@@ -6,11 +6,16 @@ import ContractTable from "../components/tablas/tabla";
 import Main_Card from "../pages/Home/Main_Cards";
 import RootLayout from "../components/layout/layout";
 import ProtectedRoute from "../routes/ProtectedRoute";
-
-// Importaciones de rutas por eliminar
+import RegisterCobrador from "../pages/Rcobradores/Rcobradores";
+import RegisterAdmin from "../pages/Radmin/Radmin";
+import RegisterSector from "../pages/Rsector/Rsector";
+import RegisterColonia from "../pages/Rcolonias/Rcolonias";
+import RegisterCuentahabiente from "../pages/Rcuentahabientes/Rcuentahabientes";
+import RegisterAsignacion from "../pages/Asignaciones/Asignaciones";
 import FormularioPago from "../components/forms/form_pago";
 import FormularioDescuentos from "../components/forms/form_descuentos";
 import FormularioServicios from "../components/forms/form_servicios";
+import Admin_Cards from "../pages/Home/Admin_Cards";
 
 const Rutas = [
   // Ruta #1: Login (pública)
@@ -43,17 +48,45 @@ const Rutas = [
             element: <Main_Card />,
           },
           {
-            path: "pago",
+            path: "/Rcobradores",
+            element: <RegisterCobrador />,
+          },
+          {
+            path: "/Radmin",
+            element: <RegisterAdmin />,
+          },
+          {
+            path: "/Rsector",
+            element: <RegisterSector />,
+          },
+          {
+            path: "/Rcolonia",
+            element: <RegisterColonia />,
+          },
+          {
+            path: "/Rcuentahabiente",
+            element: <RegisterCuentahabiente />,
+          },
+          {
+            path: "/Rasignacion",
+            element: <RegisterAsignacion />,
+          },
+          {
+            path: "/Pago",
             element: <FormularioPago />,
           },
           {
-            path: "descuento",
+            path: "/Descuento",
             element: <FormularioDescuentos />,
           },
           {
-            path: "servicios",
+            path: "/Servicios",
             element: <FormularioServicios />,
           },
+          {
+            path: "/Admin_Cards",
+            element: <Admin_Cards />,
+          }
         ],
       },
     ],

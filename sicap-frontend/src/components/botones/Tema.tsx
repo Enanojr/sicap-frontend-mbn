@@ -6,7 +6,7 @@ import '../../index.css'
 function ThemeToggleButton() {
   const { theme, toggleTheme } = useTheme();
   return (
-    <div style={{ position: "fixed", top: 96, left: 40, zIndex: 950 }}>
+    <div >
       <label className="switch">
         <input
           type="checkbox"
