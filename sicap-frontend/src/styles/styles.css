@@ -1459,6 +1459,7 @@ input[type="number"]::-webkit-inner-spin-button {
   letter-spacing: 2px;
   margin-bottom: 8px;
   text-transform: uppercase;
+  font-family: Arial, "Poppins";
 }
 
 .ticket-header-folio {
@@ -1466,6 +1467,7 @@ input[type="number"]::-webkit-inner-spin-button {
   color: rgba(255, 255, 255, 0.7);
   letter-spacing: 0.5px;
   text-transform: lowercase;
+  font-family: Arial, "Poppins";
 }
 
 .ticket-header-folio::first-letter {
@@ -1475,6 +1477,7 @@ input[type="number"]::-webkit-inner-spin-button {
 /* ========== CUERPO DEL TICKET ========== */
 .ticket-body {
   padding: 32px 24px;
+  font-family: Arial, "Poppins";
 }
 
 /* ========== LOGO ========== */
@@ -1528,7 +1531,7 @@ input[type="number"]::-webkit-inner-spin-button {
   font-weight: 700;
   color: #58b2ee;
   line-height: 1;
-  font-family: "Courier New", monospace;
+  font-family: Arial, "Poppins";
 }
 
 .ticket-amount-currency {

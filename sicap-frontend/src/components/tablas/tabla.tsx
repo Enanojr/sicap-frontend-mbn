@@ -121,7 +121,7 @@ const ContractTable: React.FC = () => {
       case "week":
         return diffDays <= 7;
       case "month":
-        return diffDays <= 30;
+        return diffDays <= 31;
       case "year":
         return diffDays <= 365;
       default:
