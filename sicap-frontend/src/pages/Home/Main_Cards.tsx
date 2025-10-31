@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { WaterServiceCard } from "../../components/cards/card";
 import "../../styles/styles.css";
+import { Users } from "lucide-react";
 
 // Iconos
 const SearchIcon = ({ className }: { className: string }) => (
@@ -51,6 +52,8 @@ function Main_Card() {
     navigate("/Tabla");
   };
 
+  const handleCuentahabientes = () => navigate("/Rcuentahabiente");
+
   {/*const handleReports = () => {
     console.log("Navegando a informes...");
   };*/}
@@ -80,6 +83,16 @@ function Main_Card() {
           onClick={handlePayment}
         />
 
+                  <WaterServiceCard
+            title="Registro de Cuentahabientes"
+            description="Registra nuevos cuentahabientes"
+            icon={Users}
+            ctaText="Registrar Cuentahabiente"
+            gradientColors={["#9c27b0", "#7b1fa2"]}
+            waterDropColor="rgba(156, 39, 176, 0.6)"
+            onClick={handleCuentahabientes}
+          />
+
         {/* Card de Informes 
         <WaterServiceCard
           title="Informes"
@@ -90,6 +103,8 @@ function Main_Card() {
           waterDropColor="rgba(162, 155, 254, 0.6)"
           onClick={handleReports}
         />*/}
+
+        
       </div>
     </div>
   );
