@@ -1,5 +1,5 @@
 import React from "react";
-import { Download, X } from "lucide-react";
+import { X } from "lucide-react";
 import "../../styles/styles.css";
 
 // Interface para el ticket
@@ -23,56 +23,6 @@ const TicketPago: React.FC<TicketPagoProps> = ({
   onClose,
   logoUrl,
 }) => {
-  const handleDownloadTicket = () => {
-    const ticketContent = `
-
-
-  ${ticketData.numero_contrato}
-  
-${ticketData.nombre_completo}
-  
-
-
-  ${Number(ticketData.monto_recibido).toLocaleString("es-MX", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })} 
-
-  
-   ${new Date(ticketData.fecha_pago).toLocaleDateString("es-MX", {
-     day: "2-digit",
-     month: "long",
-     year: "numeric",
-   })}
-  
-   ${ticketData.nombre_descuento || "Sin descuento"}
-  
-  ${ticketData.comentarios ? `Comentarios:\n  ${ticketData.comentarios}` : ""}
-  
-
-  
-
-  
- 
-  ${new Date().toLocaleString("es-MX")}
-  
-
-    `.trim();
-
-    const blob = new Blob([ticketContent], {
-      type: "text/plain;charset=utf-8",
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `ticket_pago_${
-      ticketData.numero_contrato
-    }_${new Date().getTime()}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
 
   return (
     <div className="ticket-modal-overlay" onClick={onClose}>
@@ -184,17 +134,6 @@ ${ticketData.nombre_completo}
           </div>
         </div>
 
-        {/* Botón de descarga 
-        <div className="ticket-download-section">
-          <button
-            className="ticket-download-button"
-            onClick={handleDownloadTicket}
-            aria-label="Descargar ticket"
-          >
-            <Download size={18} />
-            Descargar Ticket
-          </button>
-        </div> */}
       </div>
     </div>
   );
