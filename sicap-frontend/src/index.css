@@ -10,10 +10,12 @@ body.light {
 }
 
 .switch {
-  position: relative;
-  display: inline-block;
+  position: fixed;
+  top: 70px;
+  left: 30px;
   width: 71px;
   height: 35px;
+  z-index: 10000; /* superior al navbar */
 }
 
 .switch input {
@@ -45,7 +47,6 @@ body.light {
 .icon {
   filter: brightness(0) invert(1);
 }
-
 
 .slider .sun {
   opacity: 0.8;
