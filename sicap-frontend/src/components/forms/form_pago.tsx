@@ -12,6 +12,7 @@ import {
 import Swal from "sweetalert2";
 import { createPago, type PagoCreate } from "../../services/pago.service";
 import api from "../../api_axios";
+// IMPORTANTE: Se actualiza la importación del tipo TicketData
 import TicketPago, { type TicketData } from "../forms/ticket";
 import Logo from "../../assets/Logo.png";
 
@@ -33,7 +34,7 @@ interface PaginatedResponse {
 interface Descuento {
   id_descuento: number;
   nombre_descuento: string;
-  porcentaje?: number;
+  porcentaje?: number; // Asegúrate de que este campo exista en el backend
 }
 
 interface PaginatedDescuentosResponse {
@@ -54,6 +55,7 @@ const FormularioPagos: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   const [showTicket, setShowTicket] = useState(false);
+  // Se usa la nueva estructura de TicketData
   const [ticketData, setTicketData] = useState<TicketData | null>(null);
 
   const [cuentahabientesMap, setCuentahabientesMap] = useState<
@@ -218,17 +220,28 @@ const FormularioPagos: React.FC = () => {
     return null;
   };
 
+  // Función para ajustar la fecha y evitar problemas de zona horaria
+  const adjustDateForTimezone = (dateString: string): string => {
+    const date = new Date(dateString + "T12:00:00");
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   const formConfig: FormConfig = {
     title: "Registro de Pagos",
     fields: [
       {
         name: "cuentahabiente",
         label: "Cuenta Habiente",
-        type: "select",
+        type: "search-select",
         icon: User,
         required: true,
         options: cuentahabientes,
-        placeholder: loading ? "Cargando..." : "Selecciona un cuentahabiente",
+        placeholder: loading
+          ? "Cargando..."
+          : "Escribe para buscar un cuentahabiente...",
       },
       {
         name: "fecha_pago",
@@ -240,7 +253,7 @@ const FormularioPagos: React.FC = () => {
       },
       {
         name: "monto_recibido",
-        label: "Monto Recibido",
+        label: "Monto a Pagar (Base)", // Cambiado el label para mayor claridad
         type: "number",
         placeholder: "0.00",
         icon: DollarSign,
@@ -308,28 +321,46 @@ const FormularioPagos: React.FC = () => {
           },
         });
 
+        // --- LÓGICA DE CÁLCULO DE DESCUENTO ---
+        const cuentahabienteId = parseInt(data.cuentahabiente);
+        const montoRecibidoOriginal = parseFloat(data.monto_recibido);
+        const descuentoId = data.descuento ? parseInt(data.descuento) : null;
+
+        let montoFinalPago = montoRecibidoOriginal;
+        let porcentajeDescuento = 0;
+        let nombreDescuento = "Sin descuento";
+
+        const descuentoAplicado = descuentoId
+          ? descuentosMap.get(descuentoId)
+          : null;
+
+        if (descuentoAplicado && descuentoAplicado.porcentaje) {
+          porcentajeDescuento = descuentoAplicado.porcentaje;
+          nombreDescuento = `${descuentoAplicado.nombre_descuento} (${porcentajeDescuento}%)`;
+
+          // Cálculo del monto final
+          const factorDescuento = porcentajeDescuento / 100;
+          montoFinalPago = montoRecibidoOriginal * (1 - factorDescuento);
+        }
+        // ----------------------------------------
+
         const pagoData: PagoCreate = {
-          cuentahabiente: parseInt(data.cuentahabiente),
-          fecha_pago: data.fecha_pago,
-          monto_recibido: parseFloat(data.monto_recibido),
+          cuentahabiente: cuentahabienteId,
+          // IMPORTANTE: El backend espera el MONTO FINAL después del descuento,
+          // aunque el campo se llame monto_recibido.
+          monto_recibido: montoFinalPago,
+          fecha_pago: adjustDateForTimezone(data.fecha_pago),
           mes: data.mes,
           anio: parseInt(data.anio),
           comentarios: data.comentarios || "",
-          ...(data.descuento &&
-            data.descuento !== "" && { descuento: parseInt(data.descuento) }),
+          ...(descuentoId && { descuento: descuentoId }),
         };
 
         const result = await createPago(pagoData);
 
         Swal.close();
 
-        const cuentahabiente = cuentahabientesMap.get(
-          parseInt(data.cuentahabiente)
-        );
-        const descuento =
-          data.descuento && data.descuento !== ""
-            ? descuentosMap.get(parseInt(data.descuento))
-            : null;
+        const cuentahabiente = cuentahabientesMap.get(cuentahabienteId);
 
         if (cuentahabiente) {
           const ticket: TicketData = {
@@ -337,8 +368,12 @@ const FormularioPagos: React.FC = () => {
               `${cuentahabiente.nombres} ${cuentahabiente.ap} ${cuentahabiente.am}`.trim(),
             numero_contrato: cuentahabiente.numero_contrato,
             fecha_pago: data.fecha_pago,
-            monto_recibido: data.monto_recibido,
-            nombre_descuento: descuento?.nombre_descuento || "Sin descuento",
+
+            monto_original: montoRecibidoOriginal,
+            monto_final: montoFinalPago,
+            porcentaje_descuento: porcentajeDescuento,
+
+            nombre_descuento: nombreDescuento,
             comentarios: data.comentarios || "",
           };
 
@@ -387,7 +422,17 @@ const FormularioPagos: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="text-center p-4">Cargando formulario...</div>;
+    Swal.fire({
+      title: "Preparando el formulario...",
+      text: "Esto puede tardar unos segundos.",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+    return null;
+  } else {
+    Swal.close();
   }
 
   return (

@@ -25,7 +25,6 @@ const filterOptions: FilterOption[] = [
   { id: "last-year", label: "Último año", value: "year" },
   { id: "all", label: "Todos los registros", value: "all" },
 ];
-9;
 
 const ContractTable: React.FC = () => {
   const [contracts, setContracts] = useState<ContractSummary[]>([]);
@@ -105,7 +104,6 @@ const ContractTable: React.FC = () => {
     }
   };
 
-  //  NUEVA FUNCIÓN: Filtrar por rango de fechas
   const filterByDateRange = (contract: ContractSummary): boolean => {
     if (selectedFilter === "all") return true;
     if (!contract.ultimo_pago) return false;
@@ -121,7 +119,7 @@ const ContractTable: React.FC = () => {
       case "week":
         return diffDays <= 7;
       case "month":
-        return diffDays <= 30;
+        return diffDays <= 31;
       case "year":
         return diffDays <= 365;
       default:
@@ -322,15 +320,13 @@ const ContractTable: React.FC = () => {
                         ).toLocaleString()}
                       </td>
                       <td className="td">
-                        <td className="td">
-                          <span
-                            className={`status-badge ${getStatusClass(
-                              contract.estatus_deuda
-                            )}`}
-                          >
-                            {contract.estatus_deuda}
-                          </span>
-                        </td>
+                        <span
+                          className={`status-badge ${getStatusClass(
+                            contract.estatus_deuda
+                          )}`}
+                        >
+                          {contract.estatus_deuda}
+                        </span>
                       </td>
                       <td className="td-actions">
                         <button
@@ -481,17 +477,13 @@ const ContractTable: React.FC = () => {
                   <div className="detail-item">
                     <div className="detail-label">Estatus</div>
                     <div className="detail-value">
-                      <td className="td">
-                        <td className="td">
-                          <span
-                            className={`status-badge ${getStatusClass(
-                              selectedContract.estatus_deuda
-                            )}`}
-                          >
-                            {selectedContract.estatus_deuda}
-                          </span>
-                        </td>
-                      </td>
+                      <span
+                        className={`status-badge ${getStatusClass(
+                          selectedContract.estatus_deuda
+                        )}`}
+                      >
+                        {selectedContract.estatus_deuda}
+                      </span>
                     </div>
                   </div>
                 </div>
