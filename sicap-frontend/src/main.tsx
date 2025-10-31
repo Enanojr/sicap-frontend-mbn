@@ -5,7 +5,6 @@ import { RouterProvider } from 'react-router-dom';
 import { router } from './routes/rutas'; // Tu archivo de rutas
 import { AuthProvider } from './services/authcontext'; // AuthProvider
 import { ThemeProvider } from './components/botones/ThemeContext'; // ThemeProvider
-import ThemeToggleButton from './components/botones/Tema';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
