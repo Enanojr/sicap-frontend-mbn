@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { registerUser } from "../../services/Rcolonias.service";
+import { House, MapPin } from "lucide-react";
 import { Botones } from "../../components/botones/Botones";
 import Swal from "sweetalert2";
 import "../../styles/styles.css";
@@ -154,7 +155,7 @@ export default function RegisterColonia() {
           <div className="register-form-grid">
             {/* sector*/}  
             <div className="form-field">
-              <label className="form-label">Nombre de colonia *</label>
+              <label className="form-label"><House></House> Nombre de colonia *</label>
               <div className="input-wrapper">
                 <input
                   type="text"
@@ -172,7 +173,7 @@ export default function RegisterColonia() {
 
             {/* Descripcion */}
             <div className="form-field">
-              <label className="form-label">Codigo Postal *</label>
+              <label className="form-label"><MapPin></MapPin> Codigo Postal *</label>
               <div className="input-wrapper">
                 <input
                   type="number"

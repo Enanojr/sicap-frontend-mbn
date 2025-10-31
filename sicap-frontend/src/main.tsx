@@ -12,7 +12,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ThemeProvider>
       <AuthProvider> {/* Envuelve el RouterProvider con AuthProvider */}
-        <ThemeToggleButton></ThemeToggleButton>
         <RouterProvider router={router} />
       </AuthProvider>
     </ThemeProvider>

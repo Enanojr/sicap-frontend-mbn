@@ -84,7 +84,7 @@ export const getCobradores = async () => {
       };
     }
 
-    const response = await api.get(`${API_URL}/users/`);
+    const response = await api.get(`${API_URL}/cobradores/`);
 
     return {
       success: true,

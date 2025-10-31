@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { registerSector } from "../../services/Rsector.service";
 import { Botones } from "../../components/botones/Botones";
+import { MapPinHouse, BookOpenText } from "lucide-react";
 import Swal from "sweetalert2";
 import "../../styles/styles.css";
 
@@ -154,7 +155,7 @@ export default function RegisterSector() {
           <div className="register-form-grid">
             {/* sector*/}
             <div className="form-field">
-              <label className="form-label">Nombre de sector *</label>
+              <label className="form-label"><MapPinHouse></MapPinHouse> Nombre de sector *</label>
               <div className="input-wrapper">
                 <input
                   type="text"
@@ -172,7 +173,7 @@ export default function RegisterSector() {
 
             {/* Descripcion */}
             <div className="form-field">
-              <label className="form-label">Descripcion *</label>
+              <label className="form-label"><BookOpenText></BookOpenText> Descripcion *</label>
               <div className="input-wrapper">
                 <input
                   type="text"

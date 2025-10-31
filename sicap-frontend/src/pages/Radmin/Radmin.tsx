@@ -3,7 +3,7 @@ import { registerUser } from "../../services/Radmin.service";
 import { Botones } from "../../components/botones/Botones";
 import Swal from "sweetalert2";
 import "../../styles/styles.css";
-import { Eye, EyeOff } from "lucide-react";
+import {  User, Mail, Lock, UserPlus, Eye, EyeOff } from "lucide-react";
 
 interface FormData {
   nombre: string;
@@ -207,7 +207,7 @@ export default function RegisterAdmin() {
           <div className="register-form-grid">
             {/* Nombre */}
             <div className="form-field">
-              <label className="form-label">Nombre *</label>
+              <label className="form-label"><User></User> Nombre *</label>
               <div className="input-wrapper">
                 <input
                   type="text"
@@ -225,7 +225,7 @@ export default function RegisterAdmin() {
 
             {/* Apellidos */}
             <div className="form-field">
-              <label className="form-label">Apellidos *</label>
+              <label className="form-label"><User></User> Apellidos *</label>
               <div className="input-wrapper">
                 <input
                   type="text"
@@ -243,7 +243,7 @@ export default function RegisterAdmin() {
 
             {/* Email */}
             <div className="form-field">
-              <label className="form-label">Email *</label>
+              <label className="form-label"><Mail></Mail> Email *</label>
               <div className="input-wrapper">
                 <input
                   type="email"
@@ -261,7 +261,7 @@ export default function RegisterAdmin() {
 
             {/* Usuario */}
             <div className="form-field">
-              <label className="form-label">Usuario *</label>
+              <label className="form-label"><UserPlus></UserPlus> Usuario *</label>
               <div className="input-wrapper">
                 <input
                   type="text"
@@ -279,7 +279,7 @@ export default function RegisterAdmin() {
 
             {/* Rol */}
             <div className="form-field">
-              <label className="form-label">Rol *</label>
+              <label className="form-label"><User></User> Rol *</label>
               <div className="input-wrapper">
                 <select
                   name="role"
@@ -299,7 +299,7 @@ export default function RegisterAdmin() {
 
             {/* Contraseña */}
             <div className="form-field">
-              <label className="form-label">Contraseña *</label>
+              <label className="form-label"><Lock></Lock> Contraseña *</label>
               <div className="input-wrapper">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -324,7 +324,7 @@ export default function RegisterAdmin() {
 
             {/* Confirmar Contraseña */}
             <div className="form-field">
-              <label className="form-label">Confirmar Contraseña *</label>
+              <label className="form-label"><Lock></Lock> Confirmar Contraseña *</label>
               <div className="input-wrapper">
                 <input
                   type={showPassword2 ? "text" : "password"}

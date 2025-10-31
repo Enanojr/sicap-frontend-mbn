@@ -12,11 +12,10 @@ import RegisterSector from "../pages/Rsector/Rsector";
 import RegisterColonia from "../pages/Rcolonias/Rcolonias";
 import RegisterCuentahabiente from "../pages/Rcuentahabientes/Rcuentahabientes";
 import RegisterAsignacion from "../pages/Asignaciones/Asignaciones";
-
-// Importaciones de rutas por eliminar
-import FormularioPago from '../components/forms/form_pago'
+import FormularioPago from "../components/forms/form_pago";
 import FormularioDescuentos from "../components/forms/form_descuentos";
-import  FormularioServicios from "../components/forms/form_servicios"
+import FormularioServicios from "../components/forms/form_servicios";
+import Admin_Cards from "../pages/Home/Admin_Cards";
 
 const Rutas = [
   // Ruta #1: Login (pública)
@@ -71,6 +70,22 @@ const Rutas = [
           {
             path: "/Rasignacion",
             element: <RegisterAsignacion />,
+          },
+          {
+            path: "/Pago",
+            element: <FormularioPago />,
+          },
+          {
+            path: "/Descuento",
+            element: <FormularioDescuentos />,
+          },
+          {
+            path: "/Servicios",
+            element: <FormularioServicios />,
+          },
+          {
+            path: "/Admin_Cards",
+            element: <Admin_Cards />,
           }
         ],
       },
@@ -82,21 +97,6 @@ const Rutas = [
     path: "*",
     element: <Navigate to="/Login" replace />,
   },
-
-  //Rutas para validar componentes, borrar 
-    {
-    path: "pago",
-    element: <FormularioPago />,
-  },
-    {
-    path: "descuento",
-    element: <FormularioDescuentos />,
-  },
-   {
-    path: "servicios",
-    element: < FormularioServicios />,
-  },
-
 ];
 
 export const router = createBrowserRouter(Rutas);

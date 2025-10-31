@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { User, Mail, Lock, UserPlus, Eye, EyeOff } from "lucide-react";
 import { registerUser } from "../../services/Rcobradores.service";
 import { Botones } from "../../components/botones/Botones";
 import Swal from "sweetalert2";
@@ -200,7 +200,7 @@ export default function RegisterCobrador() {
           <div className="register-form-grid">
             {/* Nombre */}
             <div className="form-field">
-              <label className="form-label">Nombre *</label>
+              <label className="form-label"><User></User>Nombre *</label>
               <div className="input-wrapper">
                 <input
                   type="text"
@@ -218,7 +218,7 @@ export default function RegisterCobrador() {
 
             {/* Apellidos */}
             <div className="form-field">
-              <label className="form-label">Apellidos *</label>
+              <label className="form-label"><User></User>Apellidos *</label>
               <div className="input-wrapper">
                 <input
                   type="text"
@@ -236,7 +236,7 @@ export default function RegisterCobrador() {
 
             {/* Email */}
             <div className="form-field">
-              <label className="form-label">Email *</label>
+              <label className="form-label"><Mail></Mail>Email *</label>
               <div className="input-wrapper">
                 <input
                   type="email"
@@ -254,7 +254,7 @@ export default function RegisterCobrador() {
 
             {/* Usuario */}
             <div className="form-field">
-              <label className="form-label">Usuario *</label>
+              <label className="form-label"><UserPlus></UserPlus> Usuario *</label>
               <div className="input-wrapper">
                 <input
                   type="text"
@@ -272,7 +272,7 @@ export default function RegisterCobrador() {
 
             {/* Contraseña */}
             <div className="form-field">
-              <label className="form-label">Contraseña *</label>
+              <label className="form-label"><Lock></Lock> Contraseña *</label>
               <div className="input-wrapper">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -297,7 +297,7 @@ export default function RegisterCobrador() {
 
             {/* Confirmar Contraseña */}
             <div className="form-field">
-              <label className="form-label">Confirmar Contraseña *</label>
+              <label className="form-label"><Lock></Lock> Confirmar Contraseña *</label>
               <div className="input-wrapper">
                 <input
                   type={showPassword2 ? "text" : "password"}

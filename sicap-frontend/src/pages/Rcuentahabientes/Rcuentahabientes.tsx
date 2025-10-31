@@ -334,7 +334,7 @@ export default function RegisterCuentahabiente() {
           <div className="register-form-grid">
             {/* Número de Contrato */}
             <div className="form-field">
-              <label className="form-label">Número de Contrato *</label>
+              <label className="form-label"><FileText></FileText> Número de Contrato *</label>
               <div className="input-wrapper">
                 <input
                   type="number"
@@ -352,7 +352,7 @@ export default function RegisterCuentahabiente() {
 
             {/* Nombres */}
             <div className="form-field">
-              <label className="form-label">Nombre(s) *</label>
+              <label className="form-label"><User></User> Nombre(s) *</label>
               <div className="input-wrapper">
                 <input
                   type="text"
@@ -370,7 +370,7 @@ export default function RegisterCuentahabiente() {
 
             {/* Apellido Paterno */}
             <div className="form-field">
-              <label className="form-label">Apellido Paterno *</label>
+              <label className="form-label"><User></User> Apellido Paterno *</label>
               <div className="input-wrapper">
                 <input
                   type="text"
@@ -386,7 +386,7 @@ export default function RegisterCuentahabiente() {
 
             {/* Apellido Materno */}
             <div className="form-field">
-              <label className="form-label">Apellido Materno *</label>
+              <label className="form-label"><User></User> Apellido Materno *</label>
               <div className="input-wrapper">
                 <input
                   type="text"
@@ -402,7 +402,7 @@ export default function RegisterCuentahabiente() {
 
             {/* Calle */}
             <div className="form-field">
-              <label className="form-label">Calle *</label>
+              <label className="form-label"><Home></Home> Calle *</label>
               <div className="input-wrapper">
                 <input
                   type="text"
@@ -420,7 +420,7 @@ export default function RegisterCuentahabiente() {
 
             {/* Número */}
             <div className="form-field">
-              <label className="form-label">Número *</label>
+              <label className="form-label"><Home></Home> Número *</label>
               <div className="input-wrapper">
                 <input
                   type="number"
@@ -438,7 +438,7 @@ export default function RegisterCuentahabiente() {
 
             {/* Teléfono */}
             <div className="form-field">
-              <label className="form-label">Teléfono *</label>
+              <label className="form-label"><Phone></Phone> Teléfono *</label>
               <div className="input-wrapper">
                 <input
                   type="tel"
@@ -457,7 +457,7 @@ export default function RegisterCuentahabiente() {
 
             {/* Colonia - Select */}
             <div className="form-field">
-              <label className="form-label">Colonia *</label>
+              <label className="form-label"><MapPin></MapPin> Colonia *</label>
               <div className="input-wrapper">
                 <select
                   name="colonia"
@@ -485,7 +485,7 @@ export default function RegisterCuentahabiente() {
 
             {/* Campo para Servicio */}
             <div className="form-field">
-              <label className="form-label">Servicio *</label>
+              <label className="form-label"><Briefcase></Briefcase> Servicio *</label>
               <div className="input-wrapper">
                 <select
                   name="servicio"

@@ -21,8 +21,7 @@ interface FormErrors {
 }
 
 interface Cobrador {
-  id?: number;
-  id_usuario?: number;
+  id_cobrador?: number;
   nombre: string;
   apellidos: string;
   usuario?: string;
@@ -275,7 +274,7 @@ export default function RegisterAsignacion() {
           <div className="register-form-grid">
             {/* Cobrador - Select */}
             <div className="form-field">
-              <label className="form-label">Cobrador *</label>
+              <label className="form-label"><User></User> Cobrador *</label>
               <div className="input-wrapper">
                 <select
                   name="cobrador"
@@ -291,11 +290,10 @@ export default function RegisterAsignacion() {
                   </option>
                   {cobradores.map((cobrador) => (
                     <option 
-                      key={cobrador.id || cobrador.id_usuario} 
-                      value={cobrador.id || cobrador.id_usuario}
+                      key={cobrador.id_cobrador} 
+                      value={ cobrador.id_cobrador}
                     >
-                      {cobrador.nombre} {cobrador.apellidos}
-                      {cobrador.usuario && ` (@${cobrador.usuario})`}
+                      {cobrador.nombre} {cobrador.apellidos} 
                     </option>
                   ))}
                 </select>
@@ -307,7 +305,7 @@ export default function RegisterAsignacion() {
 
             {/* Sector - Select */}
             <div className="form-field">
-              <label className="form-label">Sector *</label>
+              <label className="form-label"><MapPin></MapPin> Sector *</label>
               <div className="input-wrapper">
                 <select
                   name="sector"
@@ -339,7 +337,7 @@ export default function RegisterAsignacion() {
 
             {/* Fecha de Asignación */}
             <div className="form-field">
-              <label className="form-label">Fecha de Asignación *</label>
+              <label className="form-label"><Calendar></Calendar> Fecha de Asignación *</label>
               <div className="input-wrapper">
                 <input
                   type="date"
