@@ -224,11 +224,13 @@ const FormularioPagos: React.FC = () => {
       {
         name: "cuentahabiente",
         label: "Cuenta Habiente",
-        type: "select",
+        type: "search-select",
         icon: User,
         required: true,
         options: cuentahabientes,
-        placeholder: loading ? "Cargando..." : "Selecciona un cuentahabiente",
+        placeholder: loading
+          ? "Cargando..."
+          : "Escribe el nombre de un cuentahabiente",
       },
       {
         name: "fecha_pago",
@@ -387,7 +389,17 @@ const FormularioPagos: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="text-center p-4">Cargando formulario...</div>;
+    Swal.fire({
+      title: "Preparando el formulario...",
+      text: "Esto puede tardar unos segundos.",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+    return null;
+  } else {
+    Swal.close();
   }
 
   return (

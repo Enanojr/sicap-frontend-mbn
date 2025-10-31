@@ -184,7 +184,7 @@ ${ticketData.nombre_completo}
           </div>
         </div>
 
-        {/* Botón de descarga */}
+        {/* Botón de descarga 
         <div className="ticket-download-section">
           <button
             className="ticket-download-button"
@@ -194,7 +194,7 @@ ${ticketData.nombre_completo}
             <Download size={18} />
             Descargar Ticket
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );
