@@ -207,10 +207,9 @@
   margin-bottom: 0.5rem;
 }
 .contracts-title-gradient {
-  color: white;
   background: linear-gradient(90deg, #58b2ee, #2f3b7e);
-  color: transparent;
 }
+
 .contracts-divider {
   width: 80px;
   height: 4px;
