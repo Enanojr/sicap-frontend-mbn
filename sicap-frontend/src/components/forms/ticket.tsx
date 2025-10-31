@@ -2,13 +2,12 @@ import React from "react";
 import { Download, X } from "lucide-react";
 import "../../styles/styles.css";
 
+// Interface para el ticket
 export interface TicketData {
   nombre_completo: string;
   numero_contrato: number;
   fecha_pago: string;
-  monto_original: number;
-  monto_final: number;
-  porcentaje_descuento: number;
+  monto_recibido: number | string;
   nombre_descuento: string;
   comentarios: string;
 }
@@ -24,49 +23,40 @@ const TicketPago: React.FC<TicketPagoProps> = ({
   onClose,
   logoUrl,
 }) => {
-  const montoOriginal = Number(ticketData.monto_original);
-  const montoFinal = Number(ticketData.monto_final);
-  const porcentaje = Number(ticketData.porcentaje_descuento);
-
-  const montoDescuento = montoOriginal - montoFinal;
-
-  const formatCurrency = (amount: number): string =>
-    amount.toLocaleString("es-MX", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-
   const handleDownloadTicket = () => {
     const ticketContent = `
-    
-    
- ${ticketData.numero_contrato}
-      ${ticketData.nombre_completo}
-    ${new Date(ticketData.fecha_pago).toLocaleDateString("es-MX", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    })}
-      
-      
-      ${formatCurrency(montoOriginal)}
-    ${porcentaje}${formatCurrency(montoDescuento)}
-      
-      ${formatCurrency(montoFinal)}
-     
-      
-      ${
-        ticketData.nombre_descuento !== "Sin descuento"
-          ? `Detalle Descuento: ${ticketData.nombre_descuento}`
-          : "No se aplicó descuento."
-      }
-      
-      ${
-        ticketData.comentarios ? `COMENTARIOS:\n ${ticketData.comentarios}` : ""
-      }
-      
-   ${new Date().toLocaleString("es-MX")}
-      
+
+
+  ${ticketData.numero_contrato}
+  
+${ticketData.nombre_completo}
+  
+
+
+  ${Number(ticketData.monto_recibido).toLocaleString("es-MX", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })} 
+
+  
+   ${new Date(ticketData.fecha_pago).toLocaleDateString("es-MX", {
+     day: "2-digit",
+     month: "long",
+     year: "numeric",
+   })}
+  
+   ${ticketData.nombre_descuento || "Sin descuento"}
+  
+  ${ticketData.comentarios ? `Comentarios:\n  ${ticketData.comentarios}` : ""}
+  
+
+  
+
+  
+ 
+  ${new Date().toLocaleString("es-MX")}
+  
+
     `.trim();
 
     const blob = new Blob([ticketContent], {
@@ -100,7 +90,7 @@ const TicketPago: React.FC<TicketPagoProps> = ({
         <div className="ticket-header">
           <div className="ticket-header-title">Ticket de Pago</div>
           <div className="ticket-header-folio">
-            Contrato #{ticketData.numero_contrato}
+            Folio #{ticketData.numero_contrato}
           </div>
         </div>
 
@@ -115,11 +105,15 @@ const TicketPago: React.FC<TicketPagoProps> = ({
             )}
           </div>
 
-          {/* Monto principal - destacado (Monto Final) */}
+          {/* Monto principal - destacado */}
           <div className="ticket-amount-section">
-            <div className="ticket-amount-label">Monto Final Pagado</div>
+            <div className="ticket-amount-label">Monto Pagado</div>
             <div className="ticket-amount-value">
-              ${formatCurrency(montoFinal)}
+              $
+              {Number(ticketData.monto_recibido).toLocaleString("es-MX", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </div>
             <div className="ticket-amount-currency">MXN</div>
           </div>
@@ -146,48 +140,14 @@ const TicketPago: React.FC<TicketPagoProps> = ({
               </div>
             </div>
 
-            {/* --- RESUMEN DE CÁLCULO DE PAGO --- */}
-            {/* Si no hay descuento, solo se muestra el monto base */}
-            {montoDescuento > 0 ? (
-              <div className="ticket-summary-table">
-                <div className="ticket-summary-row">
-                  <span className="ticket-summary-label">Monto Base:</span>
-                  <span className="ticket-summary-value">
-                    ${formatCurrency(montoOriginal)}
-                  </span>
-                </div>
-                <div className="ticket-summary-row discount-row">
-                  <span className="ticket-summary-label">
-                    Descuento ({porcentaje}%):
-                  </span>
-                  <span className="ticket-summary-value discount-value">
-                    - $ {formatCurrency(montoDescuento)}
-                  </span>
-                </div>
-                <div className="ticket-summary-row total-row">
-                  <span className="ticket-summary-label">Total Pagado:</span>
-                  <span className="ticket-summary-value total-value">
-                    $ {formatCurrency(montoFinal)}
-                  </span>
-                </div>
-              </div>
-            ) : (
-              <div className="ticket-summary-table total-row">
-                <div className="ticket-summary-row total-row">
-                  <span className="ticket-summary-label">Total Pagado:</span>
-                  <span className="ticket-summary-value total-value">
-                    $ {formatCurrency(montoFinal)}
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {/* Detalle de Descuento (Nombre) */}
+            {/* Descuento aplicado */}
             <div className="ticket-detail-item">
-              <div className="ticket-detail-label">Detalle de Descuento</div>
+              <div className="ticket-detail-label">Descuento Aplicado</div>
               <div
                 className={`ticket-detail-value ${
-                  montoDescuento > 0 ? "highlight" : "no-discount"
+                  ticketData.nombre_descuento !== "Sin descuento"
+                    ? "highlight"
+                    : "no-discount"
                 }`}
               >
                 {ticketData.nombre_descuento}
