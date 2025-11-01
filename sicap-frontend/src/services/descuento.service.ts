@@ -1,24 +1,21 @@
-
 import api from "../api_axios";
 import Swal from "sweetalert2";
 import { getToken, logout } from "./auth.service";
 
-
 export interface DescuentoCreate {
   nombre_descuento: string;
-  porcentaje: number;
+  porcentaje: string;
   activo: boolean;
 }
 
 export interface DescuentoResponse {
   id_descuento: number;
   nombre_descuento: string;
-  porcentaje: number;
+  porcentaje: string;
   activo: boolean;
 }
 
 const DESCUENTOS_URL = "/descuentos/";
-
 
 const authHeaders = () => {
   const token = getToken();
@@ -29,8 +26,9 @@ const authHeaders = () => {
   };
 };
 
-
-export const createDescuento = async (data: DescuentoCreate): Promise<DescuentoResponse> => {
+export const createDescuento = async (
+  data: DescuentoCreate
+): Promise<DescuentoResponse> => {
   try {
     console.log(" Enviando descuento:", data);
 
@@ -38,7 +36,6 @@ export const createDescuento = async (data: DescuentoCreate): Promise<DescuentoR
 
     console.log(" Descuento creado exitosamente:", response.data);
     return response.data;
-
   } catch (error: any) {
     console.error(" Error en createDescuento:", error);
 
@@ -49,7 +46,7 @@ export const createDescuento = async (data: DescuentoCreate): Promise<DescuentoR
         text: "Tu sesión ha caducado. Por favor, inicia sesión nuevamente.",
         confirmButtonColor: "#ef4444",
       });
-      logout(); 
+      logout();
     } else if (error.response) {
       const message =
         error.response.data?.detail ||
@@ -68,7 +65,6 @@ export const createDescuento = async (data: DescuentoCreate): Promise<DescuentoR
   }
 };
 
-
 export const getAllDescuentos = async (): Promise<DescuentoResponse[]> => {
   try {
     const response = await api.get(DESCUENTOS_URL, authHeaders());
@@ -79,8 +75,9 @@ export const getAllDescuentos = async (): Promise<DescuentoResponse[]> => {
   }
 };
 
-
-export const getDescuentoById = async (id: number): Promise<DescuentoResponse> => {
+export const getDescuentoById = async (
+  id: number
+): Promise<DescuentoResponse> => {
   try {
     const response = await api.get(`${DESCUENTOS_URL}${id}/`, authHeaders());
     return response.data;
@@ -90,20 +87,22 @@ export const getDescuentoById = async (id: number): Promise<DescuentoResponse> =
   }
 };
 
-
 export const updateDescuento = async (
   id: number,
   data: Partial<DescuentoCreate>
 ): Promise<DescuentoResponse> => {
   try {
-    const response = await api.put(`${DESCUENTOS_URL}${id}/`, data, authHeaders());
+    const response = await api.put(
+      `${DESCUENTOS_URL}${id}/`,
+      data,
+      authHeaders()
+    );
     return response.data;
   } catch (error: any) {
     console.error(" Error en updateDescuento:", error);
     throw error;
   }
 };
-
 
 export const deleteDescuento = async (id: number): Promise<void> => {
   try {
