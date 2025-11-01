@@ -36,6 +36,16 @@ export interface ContractSummary extends Pago {
 const PAGOS_URL = "/api/vista-pagos/";
 const HISTORIAL_URL = "/api/vista-historial/";
 
+const normalizeFecha = (fechaString: string): string => {
+  if (!fechaString) return "";
+
+  if (fechaString.includes("T")) {
+    return fechaString.split("T")[0];
+  }
+
+  return fechaString;
+};
+
 const fetchAllPages = async <T>(url: string): Promise<T[]> => {
   let allResults: T[] = [];
   let nextUrl: string | null = url;
@@ -115,6 +125,7 @@ export const getHistorialPagos = async (): Promise<HistorialPago[]> => {
   const result = allHistorial.map((h) => ({
     ...h,
     monto_recibido: Number(h.monto_recibido || 0),
+    fecha_pago: normalizeFecha(h.fecha_pago),
   }));
 
   console.log(" getHistorialPagos: Primeros 3 registros:", result.slice(0, 3));
@@ -149,10 +160,10 @@ export const getContractData = async (): Promise<ContractSummary[]> => {
     );
 
     const fecha_inicio = pagosDelContrato.length
-      ? pagosDelContrato[pagosDelContrato.length - 1].fecha_pago
+      ? normalizeFecha(pagosDelContrato[pagosDelContrato.length - 1].fecha_pago)
       : "";
     const ultimo_pago = pagosDelContrato.length
-      ? pagosDelContrato[0].fecha_pago
+      ? normalizeFecha(pagosDelContrato[0].fecha_pago)
       : "";
 
     return {
