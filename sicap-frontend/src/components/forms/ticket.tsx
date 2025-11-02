@@ -8,6 +8,7 @@ export interface TicketData {
   fecha_pago: string;
   monto_recibido: number | string;
   nombre_descuento: string;
+  porcentaje_descuento?: number; // ✅ Monto del descuento en pesos
   comentarios: string;
 }
 
@@ -52,36 +53,64 @@ const TicketPago: React.FC<TicketPagoProps> = ({
   onClose,
   logoUrl,
 }) => {
+  // ✅ Cálculo del monto con descuento
+  const montoOriginal = Number(ticketData.monto_recibido);
+  const montoDescuento = Number(ticketData.porcentaje_descuento) || 0;
+  const montoFinal = montoOriginal - montoDescuento;
+  const tieneDescuento = montoDescuento > 0; // ✅ Esta línea faltaba
+
   const handleDownloadTicket = () => {
     const ticketContent = `
+═══════════════════════════════════════════════
+          TICKET DE PAGO - SICAP
+═══════════════════════════════════════════════
 
-
-  ${ticketData.numero_contrato}
+  Folio: #${ticketData.numero_contrato}
   
-${ticketData.nombre_completo}
+  Cliente: ${ticketData.nombre_completo}
   
+═══════════════════════════════════════════════
 
-
-  ${Number(ticketData.monto_recibido).toLocaleString("es-MX", {
+  ${
+    tieneDescuento
+      ? `Monto Original: $${montoOriginal.toLocaleString("es-MX", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}
+  
+  Descuento: -$${montoDescuento.toLocaleString("es-MX", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  })} 
-
+  })}
   
-   ${formatFechaLarga(ticketData.fecha_pago)}
+  ───────────────────────────────────────────
   
-   ${ticketData.nombre_descuento || "Sin descuento"}
+  MONTO FINAL: $${montoFinal.toLocaleString("es-MX", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`
+      : `MONTO PAGADO: $${montoOriginal.toLocaleString("es-MX", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}`
+  }
+  
+═══════════════════════════════════════════════
+  
+  Fecha de Pago: ${formatFechaLarga(ticketData.fecha_pago)}
+  
+  Descuento: ${ticketData.nombre_descuento || "Sin descuento"}
   
   ${ticketData.comentarios ? `Comentarios:\n  ${ticketData.comentarios}` : ""}
   
+═══════════════════════════════════════════════
 
+  ¡Gracias por su pago!
+  Sistema de Captura de Pagos
   
-
+  Emitido: ${new Date().toLocaleString("es-MX")}
   
- 
-  ${new Date().toLocaleString("es-MX")}
-  
-
+═══════════════════════════════════════════════
     `.trim();
 
     const blob = new Blob([ticketContent], {
@@ -196,7 +225,7 @@ ${ticketData.nombre_completo}
             )}
           </div>
 
-          {/* Monto principal - destacado */}
+          {/* ✅ Monto principal - con desglose de descuento si aplica */}
           <div
             style={{
               textAlign: "center",
@@ -204,27 +233,122 @@ ${ticketData.nombre_completo}
               borderRadius: "12px",
               padding: "1.5rem",
               marginBottom: "1.5rem",
-              border: "2px solid #58b2ee",
+              border: `2px solid ${tieneDescuento ? "#4ade80" : "#58b2ee"}`,
             }}
           >
-            <div
-              style={{
-                fontSize: "0.85rem",
-                color: "#999",
-                marginBottom: "0.5rem",
-              }}
-            >
-              Monto Pagado
-            </div>
-            <div
-              style={{ fontSize: "2.5rem", fontWeight: 700, color: "#58b2ee" }}
-            >
-              $
-              {Number(ticketData.monto_recibido).toLocaleString("es-MX", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
-            </div>
+            {tieneDescuento ? (
+              <>
+                {/* Monto original */}
+                <div
+                  style={{
+                    fontSize: "0.85rem",
+                    color: "#999",
+                    marginBottom: "0.5rem",
+                  }}
+                >
+                  Monto Original
+                </div>
+                <div
+                  style={{
+                    fontSize: "1.5rem",
+                    fontWeight: 600,
+                    color: "#999",
+                    textDecoration: "line-through",
+                  }}
+                >
+                  $
+                  {montoOriginal.toLocaleString("es-MX", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </div>
+
+                {/* Descuento aplicado */}
+                <div
+                  style={{
+                    fontSize: "0.85rem",
+                    color: "#4ade80",
+                    marginTop: "1rem",
+                    marginBottom: "0.25rem",
+                  }}
+                >
+                  Descuento
+                </div>
+                <div
+                  style={{
+                    fontSize: "1.2rem",
+                    fontWeight: 600,
+                    color: "#4ade80",
+                  }}
+                >
+                  -$
+                  {montoDescuento.toLocaleString("es-MX", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </div>
+
+                {/* Línea divisoria */}
+                <div
+                  style={{
+                    width: "100%",
+                    height: "1px",
+                    backgroundColor: "#444",
+                    margin: "1rem 0",
+                  }}
+                />
+
+                {/* Monto final */}
+                <div
+                  style={{
+                    fontSize: "0.85rem",
+                    color: "#999",
+                    marginBottom: "0.5rem",
+                  }}
+                >
+                  Monto Final
+                </div>
+                <div
+                  style={{
+                    fontSize: "2.5rem",
+                    fontWeight: 700,
+                    color: "#4ade80",
+                  }}
+                >
+                  $
+                  {montoFinal.toLocaleString("es-MX", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Sin descuento - mostrar monto simple */}
+                <div
+                  style={{
+                    fontSize: "0.85rem",
+                    color: "#999",
+                    marginBottom: "0.5rem",
+                  }}
+                >
+                  Monto Pagado
+                </div>
+                <div
+                  style={{
+                    fontSize: "2.5rem",
+                    fontWeight: 700,
+                    color: "#58b2ee",
+                  }}
+                >
+                  $
+                  {montoOriginal.toLocaleString("es-MX", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </div>
+              </>
+            )}
             <div
               style={{
                 fontSize: "0.85rem",
@@ -288,12 +412,8 @@ ${ticketData.nombre_completo}
               <div
                 style={{
                   fontSize: "1rem",
-                  color:
-                    ticketData.nombre_descuento !== "Sin descuento"
-                      ? "#58b2ee"
-                      : "#e0e0e0",
-                  fontWeight:
-                    ticketData.nombre_descuento !== "Sin descuento" ? 600 : 400,
+                  color: tieneDescuento ? "#4ade80" : "#e0e0e0",
+                  fontWeight: tieneDescuento ? 600 : 400,
                 }}
               >
                 {ticketData.nombre_descuento}
