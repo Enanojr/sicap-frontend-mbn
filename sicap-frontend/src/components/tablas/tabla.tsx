@@ -25,7 +25,21 @@ const filterOptions: FilterOption[] = [
   { id: "last-year", label: "Último año", value: "year" },
   { id: "all", label: "Todos los registros", value: "all" },
 ];
-9;
+
+// ✅ Formatea YYYY-MM-DD a DD/MM/YYYY sin convertir a UTC
+const formatFechaLocal = (fechaString: string): string => {
+  if (!fechaString) return "—";
+  const fechaLimpia = fechaString.includes("T")
+    ? fechaString.split("T")[0]
+    : fechaString;
+  const [year, month, day] = fechaLimpia.split("-").map(Number);
+  const fecha = new Date(year, month - 1, day);
+  return fecha.toLocaleDateString("es-MX", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
 
 const ContractTable: React.FC = () => {
   const [contracts, setContracts] = useState<ContractSummary[]>([]);
@@ -39,16 +53,14 @@ const ContractTable: React.FC = () => {
 
   const getStatusClass = (estatus_deuda: string) => {
     const value = estatus_deuda.trim().toLowerCase();
-
     if (["completado", "corriente", "pagado"].includes(value))
       return "status-complete";
     if (["rezagado"].includes(value)) return "status-warning";
     if (["vencido", "pendiente"].includes(value)) return "status-danger";
-
     return "status-pending";
   };
 
-  // Estados de paginación
+  // Paginación
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 15;
 
@@ -56,7 +68,7 @@ const ContractTable: React.FC = () => {
     loadData();
   }, []);
 
-  // Resetear a página 1 cuando cambian los filtros
+  // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, selectedFilter]);
@@ -72,10 +84,11 @@ const ContractTable: React.FC = () => {
         return;
       }
 
+      // 🧹 Logs sin backticks para evitar errores de TS
       console.log("Iniciando carga de datos...");
       const data = await getContractData();
-      console.log(`Total de contratos cargados: ${data.length}`);
-      console.log(" Primeros 3 contratos:", data.slice(0, 3));
+      console.log("Total de contratos cargados: " + data.length);
+      console.log("Primeros 3 contratos:", data.slice(0, 3));
       setContracts(data);
       console.log("Contratos guardados en state");
     } catch (err: any) {
@@ -105,13 +118,21 @@ const ContractTable: React.FC = () => {
     }
   };
 
-  //  NUEVA FUNCIÓN: Filtrar por rango de fechas
+  // ✅ Filtro por rango de fecha sin conversión a UTC
   const filterByDateRange = (contract: ContractSummary): boolean => {
     if (selectedFilter === "all") return true;
     if (!contract.ultimo_pago) return false;
 
-    const lastPaymentDate = new Date(contract.ultimo_pago);
+    const fechaLimpia = contract.ultimo_pago.includes("T")
+      ? contract.ultimo_pago.split("T")[0]
+      : contract.ultimo_pago;
+
+    const [year, month, day] = fechaLimpia.split("-").map(Number);
+    const lastPaymentDate = new Date(year, month - 1, day);
+
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     const diffTime = today.getTime() - lastPaymentDate.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
@@ -148,14 +169,22 @@ const ContractTable: React.FC = () => {
   const endIndex = startIndex + itemsPerPage;
   const currentContracts = filteredContracts.slice(startIndex, endIndex);
 
-  console.log("Estado de filtros:", {
-    totalContracts: contracts.length,
-    filteredContracts: filteredContracts.length,
-    selectedFilter,
-    searchTerm,
-    currentPage,
-    totalPages,
-  });
+  // Pequeño log seguro
+  console.log(
+    "Estado de filtros:",
+    JSON.stringify(
+      {
+        totalContracts: contracts.length,
+        filteredContracts: filteredContracts.length,
+        selectedFilter,
+        searchTerm,
+        currentPage,
+        totalPages,
+      },
+      null,
+      2
+    )
+  );
 
   const getFilterLabel = () => {
     const option = filterOptions.find((opt) => opt.value === selectedFilter);
@@ -322,15 +351,13 @@ const ContractTable: React.FC = () => {
                         ).toLocaleString()}
                       </td>
                       <td className="td">
-                        <td className="td">
-                          <span
-                            className={`status-badge ${getStatusClass(
-                              contract.estatus_deuda
-                            )}`}
-                          >
-                            {contract.estatus_deuda}
-                          </span>
-                        </td>
+                        <span
+                          className={`status-badge ${getStatusClass(
+                            contract.estatus_deuda
+                          )}`}
+                        >
+                          {contract.estatus_deuda}
+                        </span>
                       </td>
                       <td className="td-actions">
                         <button
@@ -481,17 +508,13 @@ const ContractTable: React.FC = () => {
                   <div className="detail-item">
                     <div className="detail-label">Estatus</div>
                     <div className="detail-value">
-                      <td className="td">
-                        <td className="td">
-                          <span
-                            className={`status-badge ${getStatusClass(
-                              selectedContract.estatus_deuda
-                            )}`}
-                          >
-                            {selectedContract.estatus_deuda}
-                          </span>
-                        </td>
-                      </td>
+                      <span
+                        className={`status-badge ${getStatusClass(
+                          selectedContract.estatus_deuda
+                        )}`}
+                      >
+                        {selectedContract.estatus_deuda}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -512,21 +535,13 @@ const ContractTable: React.FC = () => {
                   <div className="detail-item">
                     <div className="detail-label">Primer pago</div>
                     <div className="detail-value">
-                      {selectedContract.fecha_inicio
-                        ? new Date(
-                            selectedContract.fecha_inicio
-                          ).toLocaleDateString()
-                        : "—"}
+                      {formatFechaLocal(selectedContract.fecha_inicio)}
                     </div>
                   </div>
                   <div className="detail-item">
                     <div className="detail-label">Último Pago</div>
                     <div className="detail-value">
-                      {selectedContract.ultimo_pago
-                        ? new Date(
-                            selectedContract.ultimo_pago
-                          ).toLocaleDateString()
-                        : "—"}
+                      {formatFechaLocal(selectedContract.ultimo_pago)}
                     </div>
                   </div>
                 </div>
@@ -552,9 +567,7 @@ const ContractTable: React.FC = () => {
                         selectedContract.pagos.map((pago, index) => (
                           <tr key={pago.id}>
                             <td>{index + 1}</td>
-                            <td>
-                              {new Date(pago.fecha_pago).toLocaleDateString()}
-                            </td>
+                            <td>{formatFechaLocal(pago.fecha_pago)}</td>
                             <td className="text-success">
                               $
                               {Number(
@@ -630,8 +643,7 @@ const ContractTable: React.FC = () => {
                                   fontWeight: 600,
                                 }}
                               >
-                                Pago del{" "}
-                                {new Date(pago.fecha_pago).toLocaleDateString()}
+                                Pago del {formatFechaLocal(pago.fecha_pago)}
                               </span>
                               <span
                                 style={{
