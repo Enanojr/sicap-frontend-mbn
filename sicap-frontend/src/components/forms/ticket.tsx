@@ -1,5 +1,6 @@
 import React from "react";
-import { Download, X } from "lucide-react";
+import "../../styles/styles.css";
+import { X } from "lucide-react";
 
 // Interface para el ticket
 export interface TicketData {
@@ -19,19 +20,7 @@ interface TicketPagoProps {
 }
 
 // ✅ Formatea YYYY-MM-DD a DD/MM/YYYY sin convertir a UTC
-const formatFechaLocal = (fechaString: string): string => {
-  if (!fechaString) return "—";
-  const fechaLimpia = fechaString.includes("T")
-    ? fechaString.split("T")[0]
-    : fechaString;
-  const [year, month, day] = fechaLimpia.split("-").map(Number);
-  const fecha = new Date(year, month - 1, day);
-  return fecha.toLocaleDateString("es-MX", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
-};
+
 
 // Formato largo para el ticket (DD de mes de YYYY)
 const formatFechaLarga = (fechaString: string): string => {
@@ -59,74 +48,6 @@ const TicketPago: React.FC<TicketPagoProps> = ({
   const montoFinal = montoOriginal - montoDescuento;
   const tieneDescuento = montoDescuento > 0; // ✅ Esta línea faltaba
 
-  const handleDownloadTicket = () => {
-    const ticketContent = `
-═══════════════════════════════════════════════
-          TICKET DE PAGO - SICAP
-═══════════════════════════════════════════════
-
-  Folio: #${ticketData.numero_contrato}
-  
-  Cliente: ${ticketData.nombre_completo}
-  
-═══════════════════════════════════════════════
-
-  ${
-    tieneDescuento
-      ? `Monto Original: $${montoOriginal.toLocaleString("es-MX", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}
-  
-  Descuento: -$${montoDescuento.toLocaleString("es-MX", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}
-  
-  ───────────────────────────────────────────
-  
-  MONTO FINAL: $${montoFinal.toLocaleString("es-MX", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`
-      : `MONTO PAGADO: $${montoOriginal.toLocaleString("es-MX", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}`
-  }
-  
-═══════════════════════════════════════════════
-  
-  Fecha de Pago: ${formatFechaLarga(ticketData.fecha_pago)}
-  
-  Descuento: ${ticketData.nombre_descuento || "Sin descuento"}
-  
-  ${ticketData.comentarios ? `Comentarios:\n  ${ticketData.comentarios}` : ""}
-  
-═══════════════════════════════════════════════
-
-  ¡Gracias por su pago!
-  Sistema de Captura de Pagos
-  
-  Emitido: ${new Date().toLocaleString("es-MX")}
-  
-═══════════════════════════════════════════════
-    `.trim();
-
-    const blob = new Blob([ticketContent], {
-      type: "text/plain;charset=utf-8",
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `ticket_pago_${
-      ticketData.numero_contrato
-    }_${new Date().getTime()}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
 
   return (
     <div
@@ -489,6 +410,7 @@ const TicketPago: React.FC<TicketPagoProps> = ({
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );

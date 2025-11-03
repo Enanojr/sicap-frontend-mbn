@@ -207,10 +207,9 @@
   margin-bottom: 0.5rem;
 }
 .contracts-title-gradient {
-  background: linear-gradient(90deg, #58b2ee, #2f3b7e);
-  -webkit-background-clip: text;
-  color: transparent;
+  color: #58b2ee;
 }
+
 .contracts-divider {
   width: 80px;
   height: 4px;
@@ -736,7 +735,7 @@
   padding: 0 40px;
   height: 80px;
   background-color: #ffffff00;
-  font-family: Arial, 'Poppins';
+
   position: relative; /* Necesario para centrar el logo */
 }
 
@@ -856,8 +855,8 @@
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   width: 100%;
-  max-width: 800px;
-  min-height: 700px;
+  max-width: 900px;
+  min-height: 800px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -914,7 +913,7 @@
 .register-form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem 2rem;
+  gap: 4.5rem 2rem;
   margin-bottom: 1.6rem;
   flex: 1;
   align-content: center;
@@ -1186,7 +1185,6 @@
 
 /* Estilos específicos para inputs numéricos */
 input[type="number"] {
-  -moz-appearance: textfield;
 }
 
 input[type="number"]::-webkit-outer-spin-button,
@@ -1459,7 +1457,6 @@ input[type="number"]::-webkit-inner-spin-button {
   letter-spacing: 2px;
   margin-bottom: 8px;
   text-transform: uppercase;
-  font-family: Arial, "Poppins";
 }
 
 .ticket-header-folio {
@@ -1467,7 +1464,6 @@ input[type="number"]::-webkit-inner-spin-button {
   color: rgba(255, 255, 255, 0.7);
   letter-spacing: 0.5px;
   text-transform: lowercase;
-  font-family: Arial, "Poppins";
 }
 
 .ticket-header-folio::first-letter {
@@ -1477,7 +1473,6 @@ input[type="number"]::-webkit-inner-spin-button {
 /* ========== CUERPO DEL TICKET ========== */
 .ticket-body {
   padding: 32px 24px;
-  font-family: Arial, "Poppins";
 }
 
 /* ========== LOGO ========== */
@@ -1531,7 +1526,7 @@ input[type="number"]::-webkit-inner-spin-button {
   font-weight: 700;
   color: #58b2ee;
   line-height: 1;
-  font-family: Arial, "Poppins";
+  font-family: "Courier New", monospace;
 }
 
 .ticket-amount-currency {

@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Botones } from "../../components/botones/Botones";
 import "../../styles/styles.css";
 import Logo from "../../assets/Logo.png";
-import Usuario from "../../assets/usuario.png";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { useAuth } from "../../services/authcontext"; // Importar useAuth
