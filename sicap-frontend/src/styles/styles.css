@@ -16,20 +16,24 @@
 
 /*----------------Sweetalert----------------------------*/
 .swal2-popup {
-  font-family: Arial, sans-serif !important;
+  font-family: 'Poppins', Arial, sans-serif !important;
+  /* <-- MODIFICADO */
 }
 
 .swal2-title {
-  font-family: Arial, sans-serif !important;
+  font-family: 'Poppins', Arial, sans-serif !important;
+  /* <-- MODIFICADO */
 }
 
 .swal2-html-container {
-  font-family: Arial, sans-serif !important;
+  font-family: 'Poppins', Arial, sans-serif !important;
+  /* <-- MODIFICADO */
 }
 
 .swal2-confirm,
 .swal2-cancel {
-  font-family: Arial, sans-serif !important;
+  font-family: 'Poppins', Arial, sans-serif !important;
+  /* <-- MODIFICADO */
 }
 
 /*---------------------------------------ESTRUCTURA PRINCIPAL--------------------------------------------------------------*/
@@ -37,7 +41,8 @@
   display: flex;
   width: 100vw;
   height: 100vh;
-  font-family: Arial, "Poppins";
+  font-family: 'Poppins', Arial, sans-serif;
+  /* <-- MODIFICADO */
   gap: 24px;
   justify-content: center;
   align-items: center;
@@ -172,6 +177,7 @@
   .loginPageContainer {
     flex-direction: column;
   }
+
   .leftPanel {
     display: none;
   }
@@ -184,7 +190,8 @@
   justify-content: center;
   align-items: flex-start;
   padding: 2rem;
-  font-family: "Poppins", sans-serif;
+  font-family: 'Poppins', Arial, sans-serif;
+  /* <-- MODIFICADO */
   color: white;
 }
 
@@ -204,6 +211,7 @@
   font-weight: 700;
   margin-bottom: 0.5rem;
 }
+
 .contracts-title-gradient {
   color: #58b2ee;
 }
@@ -239,6 +247,7 @@
   cursor: pointer;
   transition: background 0.3s;
 }
+
 .contracts-filter-button:hover {
   background-color: #2f91d5;
 }
@@ -253,10 +262,12 @@
   margin-top: 0.5rem;
   width: 220px;
 }
+
 .contracts-dropdown-list {
   list-style: none;
   padding: 0.5rem;
 }
+
 .contracts-dropdown-item {
   display: flex;
   align-items: center;
@@ -264,9 +275,11 @@
   border-radius: 8px;
   cursor: pointer;
 }
+
 .contracts-dropdown-item:hover {
   background-color: #3a3f47;
 }
+
 .radio-label {
   margin-left: 8px;
   font-size: 0.9rem;
@@ -278,6 +291,7 @@
   flex: 1;
   max-width: 100%;
 }
+
 .search-icon {
   position: absolute;
   left: 12px;
@@ -285,6 +299,7 @@
   transform: translateY(-50%);
   color: #bbb;
 }
+
 .contracts-search-input {
   width: 100%;
   padding: 0.8rem 0.8rem 0.8rem 2.5rem;
@@ -294,6 +309,7 @@
   color: white;
   box-sizing: border-box;
 }
+
 .contracts-search-input:focus {
   outline: none;
   border-color: #58b2ee;
@@ -306,14 +322,17 @@
   background-color: #1a1d23;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
+
 .contracts-table {
   width: 100%;
   border-collapse: collapse;
   min-width: 800px;
 }
+
 .contracts-thead {
   background-color: #2b2e35;
 }
+
 .contracts-thead th {
   padding: 1rem;
   text-align: left;
@@ -322,12 +341,15 @@
   color: #58b2ee;
   text-transform: uppercase;
 }
+
 .contracts-tbody tr {
   border-bottom: 1px solid #2a2a2a;
 }
+
 .contracts-tbody tr:hover {
   background-color: #2b2e35;
 }
+
 .td,
 .td-name,
 .td-actions {
@@ -335,6 +357,7 @@
   font-size: 0.95rem;
   color: #ccc;
 }
+
 .td-name {
   font-weight: 500;
   color: #fff;
@@ -354,6 +377,7 @@
   gap: 6px;
   transition: background 0.3s;
 }
+
 .view-button:hover {
   background-color: #2f91d5;
 }
@@ -368,6 +392,7 @@
   align-items: center;
   z-index: 50;
 }
+
 .modal-content {
   background-color: #1a1d23;
   border-radius: 12px;
@@ -378,6 +403,7 @@
   max-height: 90vh;
   border: 1px solid #2f3b7e;
 }
+
 .modal-header {
   display: flex;
   justify-content: space-between;
@@ -386,15 +412,18 @@
   padding-bottom: 0.8rem;
   margin-bottom: 1rem;
 }
+
 .modal-title {
   color: #58b2ee;
   font-size: 1.4rem;
 }
+
 .close-button {
   cursor: pointer;
   font-size: 1.6rem;
   color: #aaa;
 }
+
 .close-button:hover {
   color: white;
 }
@@ -405,25 +434,30 @@
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1rem;
 }
+
 .detail-item {
   background-color: #2b2e35;
   padding: 1rem;
   border-radius: 8px;
 }
+
 .detail-label {
   font-size: 0.75rem;
   color: #999;
   text-transform: uppercase;
   margin-bottom: 4px;
 }
+
 .detail-value {
   font-size: 1rem;
   font-weight: 500;
 }
+
 .text-success {
   color: #4ade80;
   font-weight: 600;
 }
+
 .text-warning {
   color: #fbbf24;
 }
@@ -436,21 +470,25 @@
   font-size: 0.8rem;
   font-weight: 600;
 }
+
 .status-pending {
   background-color: rgba(239, 68, 68, 0.1);
   border: 1px solid #ef4444;
   color: #ef4444;
 }
+
 .status-complete {
   background-color: rgba(34, 197, 94, 0.1);
   border: 1px solid #22c55e;
   color: #22c55e;
 }
+
 .status-warning {
   background-color: rgba(234, 179, 8, 0.1);
   border: 1px solid #eab308;
   color: #eab308;
 }
+
 .status-danger {
   background-color: rgba(239, 68, 68, 0.1);
   border: 1px solid #ef4444;
@@ -462,6 +500,7 @@
     flex-direction: column;
     align-items: stretch;
   }
+
   .contracts-search-container {
     max-width: 100%;
   }
@@ -475,6 +514,7 @@
     opacity: 1;
     transform: translateY(-10px);
   }
+
   100% {
     opacity: 0;
     transform: translateY(100vh);
@@ -487,6 +527,7 @@
     height: 0;
     opacity: 1;
   }
+
   100% {
     width: 100px;
     height: 100px;
@@ -499,6 +540,7 @@
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -506,11 +548,14 @@
 }
 
 @keyframes glow {
-  0%, 100% { 
-    opacity: 0.5; 
+
+  0%,
+  100% {
+    opacity: 0.5;
   }
-  50% { 
-    opacity: 0.8; 
+
+  50% {
+    opacity: 0.8;
   }
 }
 
@@ -523,7 +568,8 @@
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: 'Poppins', Arial, sans-serif;
+  /* <-- MODIFICADO */
 }
 
 .waterCardsWrapper {
@@ -592,12 +638,10 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.1),
-    transparent
-  );
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent);
   transition: left 0.6s ease;
   z-index: 1;
 }
@@ -880,6 +924,7 @@
 }
 
 /*--------------------------------------------Navbar--------------------------------------------*/
+/* (El Navbar no tiene 'font-family' propia, heredará la del body, lo cual es correcto) */
 
 .navbar-container {
   display: flex;
@@ -894,9 +939,11 @@
 .navbar-container.light .nav-link {
   color: #333;
 }
+
 .navbar-container.light .profile-icon {
   color: #555;
 }
+
 .navbar-container.light .nav-link:hover,
 .navbar-container.light .profile-icon:hover {
   color: #007bff;
@@ -905,9 +952,11 @@
 .navbar-container.dark .nav-link {
   color: #f0f0f0;
 }
+
 .navbar-container.dark .profile-icon {
   color: #ddd;
 }
+
 .navbar-container.dark .nav-link:hover,
 .navbar-container.dark .profile-icon:hover {
   color: #89cff0;
@@ -986,6 +1035,27 @@
   background-color: #f0f0f0;
 }
 
+.profile-button {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  /* Centra el ícono */
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  /* Hereda el color del texto del navbar */
+}
+
+/* Opcional: añade un 'focus' para accesibilidad con teclado */
+.profile-button:focus {
+  outline: 2px solid #58b2ee;
+  /* Un contorno azul al hacer 'Tab' */
+  outline-offset: 2px;
+  border-radius: 50%;
+}
+
 /*------------------------------------------Registro cobradores------------------------*/
 
 .register-page-container {
@@ -1012,7 +1082,8 @@
   padding: 2rem;
   margin: 0;
   font-size: 1.75rem;
-  font-family: 'Poppins', Arial;
+  font-family: 'Poppins', Arial, sans-serif;
+  /* <-- MODIFICADO */
   font-weight: 700;
   text-align: center;
   color: #58b2ee;
@@ -1072,7 +1143,8 @@
 .form-label {
   font-size: 0.875rem;
   font-weight: 500;
-  font-family: 'Poppins', Arial;  
+  font-family: 'Poppins', Arial, sans-serif;
+  /* <-- MODIFICADO */
   color: white;
 }
 
@@ -1131,7 +1203,8 @@
   font-size: 0.75rem;
   color: #dc2626;
   margin-top: 0.25rem;
-  font-family: 'Poppins', Arial;
+  font-family: 'Poppins', Arial, sans-serif;
+  /* <-- MODIFICADO */
 }
 
 .form-actions {
@@ -1167,6 +1240,7 @@
 }
 
 /*------------------------------------------------Formularios----------------------------------------------*/
+/* (Esta sección no tiene 'font-family', heredará la del body, lo cual es correcto) */
 
 .form-grid {
   display: flex;
@@ -1185,14 +1259,17 @@
   grid-template-columns: 1fr;
 }
 
+.form-input,
 .form-select,
 .form-textarea {
   width: 100%;
   padding: 0.75rem;
   background-color: #2b2e35;
+  /* <-- El fondo oscuro */
   border: 1px solid #3b3f47;
   border-radius: 8px;
   color: white;
+  /* <-- El texto blanco */
   font-size: 0.95rem;
   transition: all 0.3s ease;
   box-sizing: border-box;
@@ -1399,7 +1476,8 @@ input[type="number"]::-webkit-inner-spin-button {
   padding: 2rem;
   margin: 0;
   font-size: 1.75rem;
-  font-family: 'Poppins', Arial;
+  font-family: 'Poppins', Arial, sans-serif;
+  /* <-- MODIFICADO */
   font-weight: 700;
   text-align: center;
   color: #58b2ee;
@@ -1445,6 +1523,7 @@ input[type="number"]::-webkit-inner-spin-button {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -1455,6 +1534,7 @@ input[type="number"]::-webkit-inner-spin-button {
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1613,6 +1693,7 @@ input[type="number"]::-webkit-inner-spin-button {
   color: #58b2ee;
   line-height: 1;
   font-family: "Courier New", monospace;
+  /* <-- EXCEPCIÓN MANTENIDA */
 }
 
 .ticket-amount-currency {
@@ -1844,12 +1925,11 @@ input[type="number"]::-webkit-inner-spin-button {
 
 /*--------------------------------------------Admin Page Container--------------------------------------------*/
 
-/*--------------------------------------------Admin Page Container--------------------------------------------*/
-
 .admin-page-container {
   min-height: 100vh;
   padding: 2rem 1rem;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: 'Poppins', Arial, sans-serif;
+  /* <-- MODIFICADO */
 }
 
 /* Header Section */
@@ -1955,7 +2035,8 @@ input[type="number"]::-webkit-inner-spin-button {
   max-width: 1400px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 3 columnas por defecto */
+  grid-template-columns: repeat(3, 1fr);
+  /* 3 columnas por defecto */
   gap: 1.5rem;
   padding: 0 1rem;
 }

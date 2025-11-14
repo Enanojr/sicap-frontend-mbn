@@ -17,12 +17,10 @@ function Main_Card() {
   const navigate = useNavigate();
 
   const handlePayment = () => {
-    console.log("Navegando a pagos...");
     navigate("/Pago");
   };
 
   const handleConsult = () => {
-    console.log("Navegando a consultas...");
     navigate("/Tabla");
   };
 
