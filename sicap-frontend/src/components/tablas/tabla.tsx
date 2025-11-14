@@ -85,14 +85,14 @@ const ContractTable: React.FC = () => {
       }
 
       // 🧹 Logs sin backticks para evitar errores de TS
-      console.log("Iniciando carga de datos...");
+      // console.log("Iniciando carga de datos..."); // <-- ELIMINADO
       const data = await getContractData();
-      console.log("Total de contratos cargados: " + data.length);
-      console.log("Primeros 3 contratos:", data.slice(0, 3));
+      // console.log("Total de contratos cargados: " + data.length); // <-- ELIMINADO
+      // console.log("Primeros 3 contratos:", data.slice(0, 3)); // <-- ELIMINADO
       setContracts(data);
-      console.log("Contratos guardados en state");
+      // console.log("Contratos guardados en state"); // <-- ELIMINADO
     } catch (err: any) {
-      console.error("Error al cargar contratos:", err);
+      // console.error("Error al cargar contratos:", err); // <-- ELIMINADO (Este era el más importante)
 
       const message =
         err.response?.status === 403
@@ -170,6 +170,7 @@ const ContractTable: React.FC = () => {
   const currentContracts = filteredContracts.slice(startIndex, endIndex);
 
   // Pequeño log seguro
+  /* <-- ELIMINADO
   console.log(
     "Estado de filtros:",
     JSON.stringify(
@@ -185,6 +186,7 @@ const ContractTable: React.FC = () => {
       2
     )
   );
+  */
 
   const getFilterLabel = () => {
     const option = filterOptions.find((opt) => opt.value === selectedFilter);

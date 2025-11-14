@@ -1,110 +1,82 @@
 import { useNavigate } from "react-router-dom";
 import { WaterServiceCard } from "../../components/cards/card";
 import "../../styles/styles.css";
-import { Users } from "lucide-react";
+import { Users, Search, CreditCard } from "lucide-react";
 
-// Iconos
-const SearchIcon = ({ className }: { className: string }) => (
-  <svg
-    className={className}
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <circle cx="11" cy="11" r="8" />
-    <path d="m21 21-4.35-4.35" />
-  </svg>
+// Componente para el header de la página principal
+const MainHeader = () => (
+  <div className="admin-header">
+    <h1 className="admin-title">Panel Principal</h1>
+    <p className="admin-subtitle">
+      Accede rápidamente a las funciones principales del sistema
+    </p>
+  </div>
 );
-
-const PaymentIcon = ({ className }: { className: string }) => (
-  <svg
-    className={className}
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <rect x="2" y="5" width="20" height="14" rx="2" />
-    <line x1="2" y1="10" x2="22" y2="10" />
-  </svg>
-);
-
-{/*const ReportIcon = ({ className }: { className: string }) => (
-  <svg
-    className={className}
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-    <polyline points="14 2 14 8 20 8" />
-    <line x1="16" y1="13" x2="8" y2="13" />
-    <line x1="16" y1="17" x2="8" y2="17" />
-    <polyline points="10 9 9 9 8 9" />
-  </svg>
-);*/}
 
 function Main_Card() {
   const navigate = useNavigate();
+
   const handlePayment = () => {
-    console.log("Navegando a pagos...");
     navigate("/Pago");
   };
 
   const handleConsult = () => {
-    console.log("Navegando a consultas...");
     navigate("/Tabla");
   };
 
   const handleCuentahabientes = () => navigate("/Rcuentahabiente");
 
-  {/*const handleReports = () => {
-    console.log("Navegando a informes...");
-  };*/}
+  // Array de configuración de cards
+  const cards = [
+    {
+      title: "Consultas",
+      description: "Consulta tu consumo, saldo y detalles de tu cuenta.",
+      icon: Search,
+      ctaText: "Consultar",
+      gradientColors: ["#4ecdc4", "#2c9fb9"] as [string, string],
+      waterDropColor: "rgba(78, 205, 196, 0.6)",
+      onClick: handleConsult,
+    },
+    {
+      title: "Pagos",
+      description: "Realiza el cobro de agua de los cuentahabientes.",
+      icon: CreditCard,
+      ctaText: "Pagar Ahora",
+      gradientColors: ["#ff6b6b", "#d63031"] as [string, string],
+      waterDropColor: "rgba(255, 107, 107, 0.6)",
+      onClick: handlePayment,
+    },
+    {
+      title: "Registro de Cuentahabientes",
+      description: "Registra nuevos cuentahabientes",
+      icon: Users,
+      ctaText: "Registrar Cuentahabiente",
+      gradientColors: ["#9c27b0", "#7b1fa2"] as [string, string],
+      waterDropColor: "rgba(156, 39, 176, 0.6)",
+      onClick: handleCuentahabientes,
+    },
+  ];
 
   return (
-    <div className="waterCardsContainer">
-      <div className="waterCardsWrapper">
-        {/* Card de Consultas */}
-        <WaterServiceCard
-          title="Consultas"
-          description="Consulta tu consumo, saldo y detalles de tu cuenta."
-          icon={SearchIcon}
-          ctaText="Consultar"
-          gradientColors={["#4ecdc4", "#2c9fb9"]}
-          waterDropColor="rgba(78, 205, 196, 0.6)"
-          onClick={handleConsult}
-        />
+    <div className="admin-page-container">
+      {/* Header Section */}
+      <MainHeader />
 
-        {/* Card de Pagos */}
-        <WaterServiceCard
-          title="Pagos"
-          description="Realiza el pago de tu recibo de agua de forma rápida y segura."
-          icon={PaymentIcon}
-          ctaText="Pagar Ahora"
-          gradientColors={["#ff6b6b", "#d63031"]}
-          waterDropColor="rgba(255, 107, 107, 0.6)"
-          onClick={handlePayment}
-        />
-
-                  <WaterServiceCard
-            title="Registro de Cuentahabientes"
-            description="Registra nuevos cuentahabientes"
-            icon={Users}
-            ctaText="Registrar Cuentahabiente"
-            gradientColors={["#9c27b0", "#7b1fa2"]}
-            waterDropColor="rgba(156, 39, 176, 0.6)"
-            onClick={handleCuentahabientes}
+      {/* Cards Grid */}
+      <div className="cards-grid">
+        {cards.map((card, index) => (
+          <WaterServiceCard
+            key={index}
+            title={card.title}
+            description={card.description}
+            icon={card.icon}
+            ctaText={card.ctaText}
+            gradientColors={card.gradientColors}
+            waterDropColor={card.waterDropColor}
+            onClick={card.onClick}
+            index={index}
           />
-
-        {/* Card de Informes 
-        <WaterServiceCard
-          title="Informes"
-          description="Descarga tus recibos, reportes de consumo e historial."
-          icon={ReportIcon}
-          ctaText="Ver Informes"
-          gradientColors={["#a29bfe", "#6c5ce7"]}
-          waterDropColor="rgba(162, 155, 254, 0.6)"
-          onClick={handleReports}
-        />*/}
-
-        
+        ))}
       </div>
     </div>
   );
