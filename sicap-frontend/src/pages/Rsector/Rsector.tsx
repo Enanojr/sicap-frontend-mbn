@@ -1,205 +1,108 @@
-import React, { useState } from "react";
+
 import { registerSector } from "../../services/Rsector.service";
-import { Botones } from "../../components/botones/Botones";
+// Importa los íconos
 import { MapPinHouse, BookOpenText } from "lucide-react";
 import Swal from "sweetalert2";
-import "../../styles/styles.css";
 
-interface FormData {
-  nombre_sector: string;
-  descripcion: string;
-}
-
-interface FormErrors {
-  nombre_sector?: string;
-  descripcion?: string;
-}
+// Importa los componentes y tipos del formulario reutilizable
+import FormularioReutilizable from "../../components/forms/form"; // Asegúrate que la ruta sea correcta
+import type { FormConfig } from "../../components/forms/form"; // Asegúrate que la ruta sea correcta
 
 export default function RegisterSector() {
-  const [formData, setFormData] = useState<FormData>({
-    nombre_sector: "",
-    descripcion: "",
-  });
+  // --- Configuración del Formulario ---
 
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [loading, setLoading] = useState<boolean>(false);
+  const formConfig: FormConfig = {
+    title: "REGISTRO DE SECTOR",
+    fields: [
+      {
+        name: "nombre_sector",
+        label: "Nombre de sector",
+        type: "text",
+        icon: MapPinHouse,
+        required: true,
+        placeholder: "Ingrese el sector",
+        validation: (value: string) =>
+          !value.trim() ? "El sector es requerido" : null,
+      },
+      {
+        name: "descripcion",
+        label: "Descripcion",
+        type: "text", // El original usa 'input', no 'textarea'
+        icon: BookOpenText,
+        required: true,
+        placeholder: "Ingrese una descripción del sector",
+        validation: (value: string) =>
+          !value.trim() ? "La descripción es requerida" : null,
+      },
+    ],
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    if (errors[name as keyof FormErrors]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
-    }
-  };
+    // --- Lógica de Envío ---
+    onSubmit: async (data) => {
+      // El componente reutilizable ya hizo la validación
+      try {
+        const result = await registerSector(data as any);
 
-  const validateForm = (): FormErrors => {
-    const newErrors: FormErrors = {};
+        if (result.success) {
+          Swal.fire({
+            icon: "success",
+            title: "¡Registro exitoso!",
+            // Texto actualizado para 'sector'
+            text: "El sector ha sido registrado correctamente",
+            confirmButtonColor: "#667eea",
+            timer: 3000,
+            timerProgressBar: true,
+          });
+          // El formulario se limpiará automáticamente
+        } else {
+          // Manejar errores específicos del servidor
+          let errorMessage = "Error al registrar el sector"; // Texto actualizado
 
-    if (!formData.nombre_sector.trim()) {
-      newErrors.nombre_sector= "El sector es requerido";
-    }
-
-    if (!formData.descripcion.trim()) {
-      newErrors.descripcion = "La descripción es requerida";
-    }
-
-    return newErrors;
-  };
-
-  const handleSubmit = async () => {
-    const newErrors = validateForm();
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-
-      // Mostrar primer error encontrado
-      const firstError = Object.values(newErrors)[0];
-      Swal.fire({
-        icon: "warning",
-        title: "Campos incompletos",
-        text: firstError,
-        confirmButtonColor: "#667eea",
-      });
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const result = await registerSector(formData);
-
-      if (result.success) {
-        // Limpiar formulario
-        setFormData({
-          nombre_sector: "",
-          descripcion: "",
-        });
-        setErrors({});
-
-        // Mostrar éxito con SweetAlert
-        Swal.fire({
-          icon: "success",
-          title: "¡Registro exitoso!",
-          text: "El usuario ha sido registrado correctamente",
-          confirmButtonColor: "#667eea",
-          timer: 3000,
-          timerProgressBar: true,
-        });
-      } else {
-        // Manejar errores del servidor
-        let errorMessage = "Error al registrar usuario";
-
-        if (result.errors) {
-          // Si hay errores específicos de campos
-          if (typeof result.errors === "object") {
-            // Mostrar el primer error
-            const firstErrorKey = Object.keys(result.errors)[0];
-            const firstErrorValue = result.errors[firstErrorKey];
-
-            errorMessage = Array.isArray(firstErrorValue)
-              ? firstErrorValue[0]
-              : firstErrorValue;
-
-            // Actualizar errores en el formulario
-            setErrors(result.errors);
-          } else if (result.errors.general) {
-            errorMessage = result.errors.general;
+          if (result.errors) {
+            if (typeof result.errors === "object") {
+              const firstErrorKey = Object.keys(result.errors)[0];
+              const firstErrorValue = result.errors[firstErrorKey];
+              errorMessage = Array.isArray(firstErrorValue)
+                ? firstErrorValue[0]
+                : firstErrorValue;
+            } else if (result.errors.general) {
+              errorMessage = result.errors.general;
+            }
           }
+
+          Swal.fire({
+            icon: "error",
+            title: "Error de registro",
+            text: errorMessage,
+            confirmButtonColor: "#667eea",
+          });
+
+          // Lanzamos un error para que el formulario reutilizable sepa que falló
+          throw new Error(errorMessage);
         }
-
-        Swal.fire({
-          icon: "error",
-          title: "Error de registro",
-          text: errorMessage,
-          confirmButtonColor: "#667eea",
-        });
+      } catch (error: any) {
+        console.error("Error inesperado:", error);
+        
+        // Evita mostrar dos alertas si el error ya fue manejado
+        if (!error.message.includes("Error al registrar")) {
+          Swal.fire({
+            icon: "error",
+            title: "Error inesperado",
+            text: "Ocurrió un error al registrar el sector. Por favor, intente nuevamente.",
+            confirmButtonColor: "#667eea",
+          });
+        }
+        
+        // Relanzamos el error para el componente
+        throw error;
       }
-    } catch (error) {
-      console.error("Error inesperado:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error inesperado",
-        text: "Ocurrió un error al registrar el usuario. Por favor, intente nuevamente.",
-        confirmButtonColor: "#667eea",
-      });
-    } finally {
-      setLoading(false);
-    }
+    },
+
+    // --- Configuración de Botones ---
+    submitButtonText: "Registrar Sector",
+    resetButtonText: "Limpiar",
+    showResetButton: true,
   };
 
-  const handleClear = () => {
-    setFormData({
-      nombre_sector: "",
-      descripcion: "",
-    });
-    setErrors({});
-  };
-
-  return (
-    <div className="register-page-container-sector">
-      <div className="register-card-sector">
-        <h2 className="register-title-sector">
-          <span className="register-title-gradient">
-            REGISTRO DE SECTOR
-          </span>
-        </h2>
-        <div className="register-divider-sector"></div>
-
-        <div className="register-form-container-sector">
-          <div className="register-form-grid">
-            {/* sector*/}
-            <div className="form-field">
-              <label className="form-label"><MapPinHouse></MapPinHouse> Nombre de sector *</label>
-              <div className="input-wrapper">
-                <input
-                  type="text"
-                  name="nombre_sector"
-                  value={formData.nombre_sector}
-                  onChange={handleChange}
-                  className="form-input"
-                  placeholder="Ingrese el sector"
-                />
-              </div>
-              {errors.nombre_sector && (
-                <span className="form-error">{errors.nombre_sector}</span>
-              )}
-            </div>
-
-            {/* Descripcion */}
-            <div className="form-field">
-              <label className="form-label"><BookOpenText></BookOpenText> Descripcion *</label>
-              <div className="input-wrapper">
-                <input
-                  type="text"
-                  name="descripcion"
-                  value={formData.descripcion}
-                  onChange={handleChange}
-                  className="form-input"
-                  placeholder="Ingrese una descripción del sector"
-                />
-              </div>
-              {errors.descripcion && (
-                <span className="form-error">{errors.descripcion}</span>
-              )}
-            </div>
-          </div>
-
-          <div className="form-actions">
-            <Botones onClick={handleClear} style={{backgroundColor: 'white', color:'black', opacity: 0.7}} disabled={loading}>
-              Limpiar
-            </Botones>
-            <Botones onClick={handleSubmit} disabled={loading}>
-              {loading ? "Registrando..." : "Registrar Sector"}
-            </Botones>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  // Simplemente renderiza el formulario reutilizable con la config
+  return <FormularioReutilizable config={formConfig} />;
 }

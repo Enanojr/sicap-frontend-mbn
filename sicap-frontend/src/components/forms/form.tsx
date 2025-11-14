@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Plus } from "lucide-react";
+// Importa Eye y EyeOff para el toggle de contraseña
+import { Plus, Eye, EyeOff } from "lucide-react"; // <-- MODIFICADO
 import type { LucideIcon } from "lucide-react";
 import Swal from "sweetalert2";
 import "../../styles/styles.css";
@@ -13,13 +14,14 @@ export interface FormField {
     | "tel"
     | "number"
     | "date"
+    | "password" // <-- AÑADIDO: Permitir el tipo password
     | "select"
     | "textarea"
     | "search-select";
   placeholder?: string;
   icon?: LucideIcon;
   required?: boolean;
-  validation?: (value: any) => string | null;
+  validation?: (value: any, allData?: Record<string, any>) => string | null; // <-- MODIFICADO: Pasa allData
   options?: { value: string; label: string }[];
   rows?: number;
   gridColumn?: "1" | "2" | "full";
@@ -62,6 +64,10 @@ const FormularioReutilizable: React.FC<FormularioReutilizableProps> = ({
   const [showDropdowns, setShowDropdowns] = useState<Record<string, boolean>>(
     {}
   );
+  // Estado para manejar la visibilidad de las contraseñas
+  const [passwordVisibility, setPasswordVisibility] = useState<
+    Record<string, boolean>
+  >({}); // <-- AÑADIDO
   const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   // Inicializar searchInputs con las etiquetas de las opciones seleccionadas
@@ -82,7 +88,7 @@ const FormularioReutilizable: React.FC<FormularioReutilizableProps> = ({
       }
     });
     setSearchInputs(initialSearchInputs);
-  }, []);
+  }, []); // Dependencia de 'fields' y 'formData' eliminada intencionalmente
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -142,6 +148,15 @@ const FormularioReutilizable: React.FC<FormularioReutilizableProps> = ({
     }
   };
 
+  // <-- AÑADIDO: Función para cambiar la visibilidad de la contraseña -->
+  const togglePasswordVisibility = (fieldName: string) => {
+    setPasswordVisibility((prev) => ({
+      ...prev,
+      [fieldName]: !prev[fieldName],
+    }));
+  };
+  // <-- FIN AÑADIDO -->
+
   const getFilteredOptions = (field: FormField) => {
     if (!field.options) return [];
     const searchTerm = searchInputs[field.name] || "";
@@ -182,8 +197,9 @@ const FormularioReutilizable: React.FC<FormularioReutilizableProps> = ({
         return;
       }
 
-      if (field.validation && value) {
-        const error = field.validation(value);
+      if (field.validation) {
+        // <-- MODIFICADO: Pasa formData para validaciones cruzadas (ej. password2)
+        const error = field.validation(value, formData);
         if (error) newErrors[field.name] = error;
       }
     });
@@ -196,12 +212,16 @@ const FormularioReutilizable: React.FC<FormularioReutilizableProps> = ({
     e.preventDefault();
 
     if (!validateForm()) {
-      const firstError = Object.values(errors)[0];
+      // <-- MODIFICADO: Busca el primer error en el *orden de los campos*
+      const firstErrorField = fields.find((f) => errors[f.name]);
+      const firstError = firstErrorField ? errors[firstErrorField.name] : null;
+
       Swal.fire({
         icon: "error",
-        title: "Error",
+        title: "Error de validación", // Título más específico
         text:
           firstError || "Por favor, completa todos los campos correctamente",
+        confirmButtonColor: "#ef4444", // Color de botón para error
       });
       return;
     }
@@ -214,18 +234,11 @@ const FormularioReutilizable: React.FC<FormularioReutilizableProps> = ({
         icon: "success",
         title: "¡Éxito!",
         text: config.successMessage || "Formulario enviado correctamente",
+        confirmButtonColor: "#3b82f6", // Color de botón para éxito
       });
 
-      setFormData(
-        fields.reduce(
-          (acc, field) => ({
-            ...acc,
-            [field.name]: field.defaultValue ?? "",
-          }),
-          {}
-        )
-      );
-      setErrors({});
+      // Limpia el formulario reseteando al estado inicial
+      handleReset(); // <-- MODIFICADO: Llama a handleReset para consistencia
     } catch (error: any) {
       Swal.fire({
         icon: "error",
@@ -234,6 +247,7 @@ const FormularioReutilizable: React.FC<FormularioReutilizableProps> = ({
           config.errorMessage ||
           error.message ||
           "Ocurrió un error al enviar el formulario",
+        confirmButtonColor: "#ef4444", // Color de botón para error
       });
     } finally {
       setIsSubmitting(false);
@@ -253,6 +267,7 @@ const FormularioReutilizable: React.FC<FormularioReutilizableProps> = ({
     setErrors({});
     setSearchInputs({});
     setShowDropdowns({});
+    setPasswordVisibility({}); // <-- AÑADIDO: Resetea la visibilidad
   };
 
   const handleAddField = (baseField: FormField) => {
@@ -285,13 +300,14 @@ const FormularioReutilizable: React.FC<FormularioReutilizableProps> = ({
           {field.label} {field.required && "*"}
         </label>
 
+        {/* ----- RENDERIZADO DE CAMPOS (MODIFICADO) ----- */}
         {field.type === "textarea" ? (
           <textarea
             name={field.name}
             value={value}
             onChange={handleChange}
             rows={field.rows || 4}
-            className="form-textarea"
+            className={`form-textarea ${hasError ? "form-input-error" : ""}`} // <-- Añadido error
             placeholder={field.placeholder}
           />
         ) : field.type === "search-select" ? (
@@ -393,16 +409,52 @@ const FormularioReutilizable: React.FC<FormularioReutilizableProps> = ({
               hasError ? "form-input-error" : ""
             }`}
           >
-            <option value="">Seleccione una opción</option>
+            {/* <-- MODIFICADO: Usa placeholder si se proporciona --> */}
+            <option value="">
+              {field.placeholder || "Seleccione una opción"}
+            </option>
             {field.options?.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
             ))}
           </select>
+        ) : field.type === "password" ? ( // <-- AÑADIDO: Bloque para tipo password
+          <div className="input-wrapper" style={{ position: "relative" }}>
+            <input
+              type={passwordVisibility[field.name] ? "text" : "password"}
+              name={field.name}
+              value={value}
+              onChange={handleChange}
+              className={`form-input ${hasError ? "form-input-error" : ""}`}
+              placeholder={field.placeholder}
+            />
+            <button
+              type="button"
+              onClick={() => togglePasswordVisibility(field.name)}
+              className="password-toggle" // Añade esta clase en tu CSS
+              style={{
+                position: "absolute",
+                right: "12px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                color: hasError ? "#ef4444" : "#9ca3af", // Color del icono
+              }}
+            >
+              {passwordVisibility[field.name] ? (
+                <EyeOff size={18} />
+              ) : (
+                <Eye size={18} />
+              )}
+            </button>
+          </div>
         ) : (
+          // <-- FIN AÑADIDO -->
           <input
-            type={field.type}
+            type={field.type} // Esto ahora es seguro, 'password' se maneja arriba
             name={field.name}
             value={value}
             onChange={handleChange}
@@ -412,6 +464,7 @@ const FormularioReutilizable: React.FC<FormularioReutilizableProps> = ({
             placeholder={field.placeholder}
           />
         )}
+        {/* ----- FIN RENDERIZADO DE CAMPOS ----- */}
 
         {hasError && <span className="form-error">{errors[field.name]}</span>}
 

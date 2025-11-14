@@ -1,373 +1,211 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { User, MapPin, Calendar } from "lucide-react";
 import { registerAsignacion } from "../../services/Asignaciones.service";
 import { getCobradores } from "../../services/Rcobradores.service";
 import { getSectores } from "../../services/Rsector.service";
-import { Botones } from "../../components/botones/Botones";
 import Swal from "sweetalert2";
-import "../../styles/styles.css";
 
-interface FormData {
-  cobrador: string;
-  sector: string;
-  fecha_asignacion: string;
+// Importa los componentes y tipos del formulario reutilizable
+import FormularioReutilizable from "../../components/forms/form"; // Asegúrate que la ruta sea correcta
+import type { FormConfig } from "../../components/forms/form"; // Asegúrate que la ruta sea correcta
+
+// Interfaz para las opciones de los 'select'
+interface SelectOption {
+  value: string;
+  label: string;
 }
 
-interface FormErrors {
-  cobrador?: string;
-  sector?: string;
-  fecha_asignacion?: string;
-  general?: string;
-}
-
-interface Cobrador {
-  id_cobrador?: number;
-  nombre: string;
-  apellidos: string;
-  usuario?: string;
-}
-
-interface Sector {
-  id?: number;
-  id_sector?: number;
-  nombre_sector: string;
-  descripcion?: string;
-}
+// Helper para obtener la fecha de hoy en formato YYYY-MM-DD
+const getTodayDate = () => {
+  return new Date().toISOString().split("T")[0];
+};
 
 export default function RegisterAsignacion() {
-  const [formData, setFormData] = useState<FormData>({
-    cobrador: "",
-    sector: "",
-    fecha_asignacion: "",
-  });
-
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [loading, setLoading] = useState<boolean>(false);
-  const [cobradores, setCobradores] = useState<Cobrador[]>([]);
-  const [sectores, setSectores] = useState<Sector[]>([]);
-  const [loadingCobradores, setLoadingCobradores] = useState<boolean>(true);
-  const [loadingSectores, setLoadingSectores] = useState<boolean>(true);
+  const [cobradorOptions, setCobradorOptions] = useState<SelectOption[]>([]);
+  const [sectorOptions, setSectorOptions] = useState<SelectOption[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true); // Un solo estado de carga
 
   // Cargar cobradores y sectores al montar el componente
   useEffect(() => {
-    loadCobradores();
-    loadSectores();
-  }, []);
-
-  const loadCobradores = async () => {
-    setLoadingCobradores(true);
-    try {
-      const result = await getCobradores();
-      if (result.success) {
-        // Manejar respuesta paginada
-        const cobradoresData = result.data.results || result.data;
-        if (Array.isArray(cobradoresData)) {
-          setCobradores(cobradoresData);
-        } else {
-          console.error("Formato de datos inesperado:", result.data);
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "Formato de datos de cobradores incorrecto",
-            confirmButtonColor: "#667eea",
-          });
-        }
-      } else {
+    const loadData = async () => {
+      try {
         Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: result.errors?.general || "No se pudieron cargar los cobradores",
-          confirmButtonColor: "#667eea",
+          title: "Cargando datos...",
+          text: "Por favor, espere...",
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading(),
         });
-      }
-    } catch (error) {
-      console.error("Error al cargar cobradores:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Error al cargar los cobradores",
-        confirmButtonColor: "#667eea",
-      });
-    } finally {
-      setLoadingCobradores(false);
-    }
-  };
 
-  const loadSectores = async () => {
-    setLoadingSectores(true);
-    try {
-      const result = await getSectores();
-      if (result.success) {
-        // Manejar respuesta paginada
-        const sectoresData = result.data.results || result.data;
-        if (Array.isArray(sectoresData)) {
-          setSectores(sectoresData);
-        } else {
-          console.error("Formato de datos inesperado:", result.data);
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "Formato de datos de sectores incorrecto",
-            confirmButtonColor: "#667eea",
-          });
-        }
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: result.errors?.general || "No se pudieron cargar los sectores",
-          confirmButtonColor: "#667eea",
-        });
-      }
-    } catch (error) {
-      console.error("Error al cargar sectores:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Error al cargar los sectores",
-        confirmButtonColor: "#667eea",
-      });
-    } finally {
-      setLoadingSectores(false);
-    }
-  };
+        // Carga ambos recursos en paralelo
+        const [cobradoresResult, sectoresResult] = await Promise.all([
+          getCobradores(),
+          getSectores(),
+        ]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    if (errors[name as keyof FormErrors]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
-    }
-  };
-
-  const validateForm = (): FormErrors => {
-    const newErrors: FormErrors = {};
-
-    if (!formData.cobrador) {
-      newErrors.cobrador = "El cobrador es requerido";
-    }
-
-    if (!formData.sector) {
-      newErrors.sector = "El sector es requerido";
-    }
-
-    if (!formData.fecha_asignacion) {
-      newErrors.fecha_asignacion = "La fecha de asignación es requerida";
-    }
-
-    return newErrors;
-  };
-
-  const handleSubmit = async () => {
-    const newErrors = validateForm();
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-
-      const firstError = Object.values(newErrors)[0];
-      Swal.fire({
-        icon: "warning",
-        title: "Campos incompletos",
-        text: firstError,
-        confirmButtonColor: "#667eea",
-      });
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const result = await registerAsignacion({
-        cobrador: Number(formData.cobrador),
-        sector: Number(formData.sector),
-        fecha_asignacion: formData.fecha_asignacion,
-      });
-
-      if (result.success) {
-        setFormData({
-          cobrador: "",
-          sector: "",
-          fecha_asignacion: "",
-        });
-        setErrors({});
-
-        Swal.fire({
-          icon: "success",
-          title: "¡Registro exitoso!",
-          text: "La asignación ha sido registrada correctamente",
-          confirmButtonColor: "#667eea",
-          timer: 3000,
-          timerProgressBar: true,
-        });
-      } else {
-        let errorMessage = "Error al registrar asignación";
-
-        if (result.errors) {
-          if (typeof result.errors === "object") {
-            const firstErrorKey = Object.keys(result.errors)[0];
-            const firstErrorValue = result.errors[firstErrorKey];
-
-            errorMessage = Array.isArray(firstErrorValue)
-              ? firstErrorValue[0]
-              : firstErrorValue;
-
-            setErrors(result.errors);
-          } else if (result.errors.general) {
-            errorMessage = result.errors.general;
+        // Procesar Cobradores
+        if (cobradoresResult.success) {
+          const data =
+            (cobradoresResult.data as any).results || cobradoresResult.data;
+          if (Array.isArray(data)) {
+            setCobradorOptions(
+              data.map((c: any) => ({
+                value: c.id_cobrador.toString(),
+                label: `${c.nombre} ${c.apellidos}`,
+              }))
+            );
           }
+        } else {
+          throw new Error("No se pudieron cargar los cobradores");
         }
 
+        // Procesar Sectores
+        if (sectoresResult.success) {
+          const data =
+            (sectoresResult.data as any).results || sectoresResult.data;
+          if (Array.isArray(data)) {
+            setSectorOptions(
+              data.map((s: any) => ({
+                value: (s.id || s.id_sector).toString(),
+                label: s.descripcion
+                  ? `${s.nombre_sector} - ${s.descripcion}`
+                  : s.nombre_sector,
+              }))
+            );
+          }
+        } else {
+          throw new Error("No se pudieron cargar los sectores");
+        }
+
+        Swal.close(); // Cierra el loader si todo salió bien
+      } catch (error: any) {
+        console.error("Error al cargar datos:", error);
         Swal.fire({
           icon: "error",
-          title: "Error de registro",
-          text: errorMessage,
-          confirmButtonColor: "#667eea",
+          title: "Error al cargar datos",
+          text:
+            error.message ||
+            "No se pudieron obtener los datos para el formulario.",
+          confirmButtonColor: "#ef4444",
         });
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Error inesperado:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error inesperado",
-        text: "Ocurrió un error al registrar la asignación. Por favor, intente nuevamente.",
-        confirmButtonColor: "#667eea",
-      });
-    } finally {
-      setLoading(false);
-    }
+    };
+
+    loadData();
+  }, []); // El array vacío asegura que se ejecute solo una vez
+
+  // --- Funciones de Validación Específicas ---
+
+  const validateRequired = (value: string): string | null => {
+    return !value.trim() ? "Este campo es requerido" : null;
   };
 
-  const handleClear = () => {
-    setFormData({
-      cobrador: "",
-      sector: "",
-      fecha_asignacion: "",
-    });
-    setErrors({});
+  // --- Configuración del Formulario ---
+
+  const formConfig: FormConfig = {
+    title: "REGISTRO DE ASIGNACIONES",
+    fields: [
+      {
+        name: "cobrador",
+        label: "Cobrador",
+        type: "select",
+        icon: User,
+        required: true,
+        options: cobradorOptions,
+        placeholder: "Seleccione un cobrador",
+        validation: validateRequired,
+      },
+      {
+        name: "sector",
+        label: "Sector",
+        type: "select",
+        icon: MapPin,
+        required: true,
+        options: sectorOptions,
+        placeholder: "Seleccione un sector",
+        validation: validateRequired,
+      },
+      {
+        name: "fecha_asignacion",
+        label: "Fecha de Asignación",
+        type: "date",
+        icon: Calendar,
+        required: true,
+        // Asigna la fecha de hoy como valor por defecto
+        defaultValue: getTodayDate(),
+        validation: validateRequired,
+      },
+    ],
+
+    // --- Lógica de Envío ---
+    onSubmit: async (data) => {
+      try {
+        // Convierte los campos de string a número antes de enviar
+        const payload = {
+          cobrador: Number(data.cobrador),
+          sector: Number(data.sector),
+          fecha_asignacion: data.fecha_asignacion,
+        };
+
+        const result = await registerAsignacion(payload);
+
+        if (result.success) {
+          Swal.fire({
+            icon: "success",
+            title: "¡Registro exitoso!",
+            text: "La asignación ha sido registrada correctamente",
+            confirmButtonColor: "#667eea",
+            timer: 3000,
+            timerProgressBar: true,
+          });
+          // El formulario se limpiará automáticamente
+        } else {
+          let errorMessage = "Error al registrar asignación";
+          if (result.errors) {
+            if (typeof result.errors === "object") {
+              const firstErrorKey = Object.keys(result.errors)[0];
+              const firstErrorValue = result.errors[firstErrorKey];
+              errorMessage = Array.isArray(firstErrorValue)
+                ? firstErrorValue[0]
+                : firstErrorValue;
+            } else if (result.errors.general) {
+              errorMessage = result.errors.general;
+            }
+          }
+          Swal.fire({
+            icon: "error",
+            title: "Error de registro",
+            text: errorMessage,
+            confirmButtonColor: "#ef4444", // Color de error
+          });
+          throw new Error(errorMessage);
+        }
+      } catch (error: any) {
+        console.error("Error inesperado:", error);
+        if (!error.message.includes("Error al registrar")) {
+          Swal.fire({
+            icon: "error",
+            title: "Error inesperado",
+            text: "Ocurrió un error al registrar la asignación. Por favor, intente nuevamente.",
+            confirmButtonColor: "#ef4444",
+          });
+        }
+        throw error;
+      }
+    },
+
+    // --- Configuración de Botones ---
+    submitButtonText: "Registrar Asignación",
+    resetButtonText: "Limpiar Formulario",
+    showResetButton: true,
   };
 
-  // Obtener fecha actual en formato YYYY-MM-DD
-  const getTodayDate = () => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
-  };
+  // No renderiza el formulario hasta que los datos estén cargados
+  if (isLoading) {
+    return null; // El Swal de carga ya se está mostrando
+  }
 
-  return (
-    <div className="register-page-container-sector">
-      <div className="register-card-sector">
-        <h2 className="register-title-sector">
-          <span className="register-title-gradient">
-            REGISTRO DE ASIGNACIONES
-          </span>
-        </h2>
-        <div className="register-divider-sector"></div>
-
-        <div className="register-form-container-sector">
-          <div className="register-form-grid">
-            {/* Cobrador - Select */}
-            <div className="form-field">
-              <label className="form-label"><User></User> Cobrador *</label>
-              <div className="input-wrapper">
-                <select
-                  name="cobrador"
-                  value={formData.cobrador}
-                  onChange={handleChange}
-                  className="form-input"
-                  disabled={loadingCobradores}
-                >
-                  <option value="">
-                    {loadingCobradores
-                      ? "Cargando cobradores..."
-                      : "Seleccione un cobrador"}
-                  </option>
-                  {cobradores.map((cobrador) => (
-                    <option 
-                      key={cobrador.id_cobrador} 
-                      value={ cobrador.id_cobrador}
-                    >
-                      {cobrador.nombre} {cobrador.apellidos} 
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {errors.cobrador && (
-                <span className="form-error">{errors.cobrador}</span>
-              )}
-            </div>
-
-            {/* Sector - Select */}
-            <div className="form-field">
-              <label className="form-label"><MapPin></MapPin> Sector *</label>
-              <div className="input-wrapper">
-                <select
-                  name="sector"
-                  value={formData.sector}
-                  onChange={handleChange}
-                  className="form-input"
-                  disabled={loadingSectores}
-                >
-                  <option value="">
-                    {loadingSectores
-                      ? "Cargando sectores..."
-                      : "Seleccione un sector"}
-                  </option>
-                  {sectores.map((sector) => (
-                    <option 
-                      key={sector.id || sector.id_sector} 
-                      value={sector.id || sector.id_sector}
-                    >
-                      {sector.nombre_sector}
-                      {sector.descripcion && ` - ${sector.descripcion}`}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {errors.sector && (
-                <span className="form-error">{errors.sector}</span>
-              )}
-            </div>
-
-            {/* Fecha de Asignación */}
-            <div className="form-field">
-              <label className="form-label"><Calendar></Calendar> Fecha de Asignación *</label>
-              <div className="input-wrapper">
-                <input
-                  type="date"
-                  name="fecha_asignacion"
-                  value={formData.fecha_asignacion}
-                  onChange={handleChange}
-                  className="form-input"
-                  min={getTodayDate()}
-                />
-              </div>
-              {errors.fecha_asignacion && (
-                <span className="form-error">{errors.fecha_asignacion}</span>
-              )}
-            </div>
-          </div>
-
-          <div className="form-actions">
-            <Botones
-              onClick={handleClear}
-              style={{ backgroundColor: "white", color: "black", opacity: 0.7 }}
-              disabled={loading}
-            >
-              Limpiar
-            </Botones>
-            <Botones onClick={handleSubmit} disabled={loading || loadingCobradores || loadingSectores}>
-              {loading ? "Registrando..." : "Registrar Asignación"}
-            </Botones>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  // Una vez que isLoading es false, renderiza el formulario
+  return <FormularioReutilizable config={formConfig} />;
 }

@@ -5,8 +5,9 @@ import { useTheme } from '../botones/ThemeContext';
 import { useAuth } from '../../services/authcontext';
 import '../../styles/styles.css';
 import Swal from 'sweetalert2';
+import { Link } from 'react-router-dom'; // <-- 1. IMPORTADO Link
 
-// <-- 1. Define tus roles para evitar errores de tipeo -->
+// Define tus roles
 const ROLES = {
   ADMIN: 'admin',
   SUPERVISOR: 'supervisor',
@@ -20,9 +21,24 @@ const Navbar: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [isScrolled, setIsScrolled] = useState(false);
 
-  // <-- 2. Crea una variable para la lógica de permisos -->
-  // Esto hace que el JSX sea mucho más limpio
   const canViewAdminPanel = usuario?.role === ROLES.ADMIN || usuario?.role === ROLES.SUPERVISOR;
+
+  // <-- 3. LÓGICA DE "INICIO" DINÁMICO -->
+  const getHomeLink = () => {
+    switch (usuario?.role) {
+      case ROLES.ADMIN:
+      case ROLES.SUPERVISOR:
+        return '/Main_card';
+      case ROLES.COBRADOR:
+        // Asegúrate de que esta sea la ruta correcta para cobradores
+        return '/Rutas_Cobrador'; 
+      default:
+        // Un 'fallback' seguro si el rol no existe o no ha cargado
+        return '/'; 
+    }
+  };
+  const homeLink = getHomeLink();
+  // <-- FIN DE LÓGICA DINÁMICA -->
 
   // Efecto para cerrar el menú (sin cambios)
   useEffect(() => {
@@ -78,9 +94,9 @@ const Navbar: React.FC = () => {
   return (
     <header className={`navbar-container ${theme} ${isScrolled ? 'scrolled' : ''}`}>
       <div className="navbar-section">
-        {/* <-- 3. Puedes usar la misma lógica aquí si 'Inicio' también es condicional --> */}
-        {/* Por ahora, asumimos que todos ven "Inicio" */}
-        <a href="/Main_card" className="nav-link">Inicio</a>
+        {/* <-- 1. CAMBIADO <a> por <Link> y href por to --> */}
+        {/* <-- 3. Usa el enlace dinámico --> */}
+        <Link to={homeLink} className="nav-link">Inicio</Link>
       </div>
 
       <div className="navbar-logo">
@@ -88,14 +104,24 @@ const Navbar: React.FC = () => {
       </div>
       
       <div className="navbar-section profile-section" ref={dropdownRef}>
-        <FaUserCircle
-          className="profile-icon"
+        
+        {/* <-- 2. MEJORA DE ACCESIBILIDAD --> */}
+        {/* Se cambió el ícono por un <button> para accesibilidad */}
+        <button
+          className="profile-button" // <-- Necesitarás añadir esta clase a tu CSS
           onClick={() => setDropdownOpen(!dropdownOpen)}
-        />
+          aria-label="Abrir menú de usuario"
+          aria-haspopup="true"
+          aria-expanded={dropdownOpen}
+        >
+          <FaUserCircle className="profile-icon" />
+        </button>
+        {/* <-- FIN DE MEJORA --> */}
 
         {/* Dropdown Menu */}
         {dropdownOpen && (
-          <div className="dropdown-menu">
+          // Se añadió 'role="menu"' por accesibilidad
+          <div className="dropdown-menu" role="menu"> 
             {/* Información del usuario (sin cambios) */}
             <div className="dropdown-item" style={{ 
               borderBottom: '1px solid #ddd', 
@@ -119,19 +145,19 @@ const Navbar: React.FC = () => {
               </div>
             </div>
 
-            {/* <-- 4. RENDERIZADO CONDICIONAL --> */}
-            {/* El enlace solo se mostrará si 'canViewAdminPanel' es true */}
+            {/* <-- 1. CAMBIADO <a> por <Link> y href por to --> */}
             {canViewAdminPanel && (
-              <a 
-                href="/Admin_Cards" 
+              <Link 
+                to="/Admin_Cards" 
                 className="dropdown-item"
                 onClick={() => setDropdownOpen(false)}
+                role="menuitem" // <-- Accesibilidad
               >
                 Panel de Administración
-              </a>
+              </Link>
             )}
             
-            {/* Opción de Cerrar Sesión (sin cambios) */}
+            {/* Opción de Cerrar Sesión (sin cambios, <a> está bien aquí) */}
             <a 
               href="#" 
               className="dropdown-item"
@@ -140,6 +166,7 @@ const Navbar: React.FC = () => {
                 handleLogout();
               }}
               style={{ color: '#ff4444' }} 
+              role="menuitem" // <-- Accesibilidad
             >
               Cerrar sesión
             </a>
