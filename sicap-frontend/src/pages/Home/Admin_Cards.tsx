@@ -10,13 +10,13 @@ import {
   Percent,
   Wrench,
   Settings,
-  TrendingUp,
-  Users,
+  //TrendingUp,
+  //Users,
 } from "lucide-react";
 
 
 // Componente para las tarjetas de estadísticas
-const StatCard = ({ 
+{/*const StatCard = ({ 
   icon: Icon, 
   value, 
   label, 
@@ -36,7 +36,7 @@ const StatCard = ({
       <div className="stat-label">{label}</div>
     </div>
   </div>
-);
+);*/}
 
 function Admin_Cards() {
   const navigate = useNavigate();
