@@ -130,7 +130,7 @@ function Admin_Cards() {
         </p>
       </div>
 
-      {/* Stats Section */}
+      {/* Stats Section 
       <div className="stats-grid">
         <StatCard 
           icon={Users} 
@@ -150,7 +150,7 @@ function Admin_Cards() {
           label="Sectores" 
           color="#ff9800" 
         />
-      </div>
+      </div>*/}
 
       {/* Cards Grid */}
       <div className="cards-grid">
