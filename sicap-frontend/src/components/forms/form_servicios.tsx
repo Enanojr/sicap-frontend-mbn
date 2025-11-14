@@ -160,7 +160,7 @@ const FormularioServicios: React.FC<FormularioServiciosProps> = ({
     showResetButton: true,
   };
 
-  return <FormularioReutilizable config={formConfig} />;
+  return <FormularioReutilizable config={formConfig} isEditMode={isEditMode} />;
 };
 
 export default FormularioServicios;
