@@ -840,14 +840,19 @@
   background-color: #f0f0f0;
 }
 
-/*------------------------------------------Registro cobradores------------------------*/
+/*------------------------------------------Registro cobradores y formularios------------------------*/
 
 .register-page-container {
   min-height: 50vh;
-  padding: 2rem;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+/* Cuando el formulario está dentro de un wrapper, no necesita padding */
+.servicios-content-wrapper .register-page-container {
+  padding: 0;
+  min-height: auto;
 }
 
 .register-card {
@@ -855,21 +860,26 @@
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   width: 100%;
-  max-width: 900px;
+  max-width: 1400px; /* Mismo ancho que la tabla */
   min-height: 800px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
+/* Ajuste para formulario de servicios dentro del wrapper */
+.servicios-content-wrapper .register-card {
+  min-height: auto;
+}
+
 .register-title {
   padding: 2rem;
   margin: 0;
   font-size: 1.75rem;
-  font-family: 'Poppins', Arial;
+  font-family: "Poppins", Arial;
   font-weight: 700;
   text-align: center;
-  color: #58b2ee  ;
+  color: #58b2ee;
 }
 
 .register-divider {
@@ -927,7 +937,7 @@
 .form-label {
   font-size: 0.875rem;
   font-weight: 500;
-  font-family: 'Poppins', Arial;  
+  font-family: "Poppins", Arial;
   color: white;
 }
 
@@ -986,7 +996,7 @@
   font-size: 0.75rem;
   color: #dc2626;
   margin-top: 0.25rem;
-  font-family: 'Poppins', Arial;
+  font-family: "Poppins", Arial;
 }
 
 /* Botones */
@@ -1183,10 +1193,6 @@
   transform: translateY(-50%) scale(1.1);
 }
 
-/* Estilos específicos para inputs numéricos */
-input[type="number"] {
-}
-
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -1242,7 +1248,11 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 
   .contracts-page-container {
-    padding: 1rem;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    display: block;
+    min-height: auto;
   }
 }
 
@@ -1275,7 +1285,6 @@ input[type="number"]::-webkit-inner-spin-button {
   border-color: #fbbf24;
 }
 
-
 /*------------------------------------------Registro sector y colonias------------------------*/
 
 .register-page-container-sector {
@@ -1302,10 +1311,10 @@ input[type="number"]::-webkit-inner-spin-button {
   padding: 2rem;
   margin: 0;
   font-size: 1.75rem;
-  font-family: 'Poppins', Arial;
+  font-family: "Poppins", Arial;
   font-weight: 700;
   text-align: center;
-  color: #58b2ee  ;
+  color: #58b2ee;
 }
 
 .register-divider-sector {
@@ -1323,13 +1332,12 @@ input[type="number"]::-webkit-inner-spin-button {
   justify-content: space-between;
 }
 
-
 @media (max-width: 480px) {
   .register-page-container-sector {
     padding: 1.5rem;
   }
 
-  .register-form-container-sector .input-wrapper{
+  .register-form-container-sector .input-wrapper {
     padding: 10px;
   }
 
@@ -1342,9 +1350,539 @@ input[type="number"]::-webkit-inner-spin-button {
     font-size: 1.5rem;
     padding: 1.5rem;
   }
-
 }
-/*--------------------------------------------Estandarización de texto a tipo oración--------------------------------------------*/
+
+/*--------------------------------------------ESTILOS PARA PÁGINA DE SERVICIOS--------------------------------------------*/
+
+/* Contenedor principal de la página */
+.servicios-page-container {
+  padding: 2rem;
+  min-height: 100vh;
+  background: #1a1d24;
+}
+
+/* Wrapper para centrar y limitar ancho */
+.servicios-content-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Banner de edición */
+.edit-banner {
+  background-color: #3b82f6;
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.edit-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.edit-banner-icon {
+  font-size: 1.5rem;
+}
+
+.edit-banner-text {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.edit-banner-button {
+  background-color: white;
+  color: #3b82f6;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.edit-banner-button:hover {
+  background-color: #f0f9ff;
+  transform: scale(1.05);
+}
+
+/* Responsive para página de servicios */
+@media (max-width: 768px) {
+  .servicios-page-container {
+    padding: 1rem;
+  }
+
+  .servicios-content-wrapper {
+    gap: 1.5rem;
+  }
+
+  .edit-banner {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .edit-banner-button {
+    width: 100%;
+  }
+}
+
+/*--------------------------------------------ESTILOS PARA TABLA REUTILIZABLE--------------------------------------------*/
+
+/* Contenedor de la página de tabla */
+.table-page-container {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  display: block;
+  min-height: auto;
+}
+
+/* Tarjeta principal de la tabla */
+.table-card {
+  background: #1a1d23;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 1400px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header de la tabla */
+.table-header {
+  padding: 2rem 2rem 0 2rem;
+}
+
+.table-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  text-align: center;
+  color: #58b2ee;
+  font-family: "Poppins", Arial, sans-serif;
+}
+
+.table-divider {
+  height: 4px;
+  max-width: 200px;
+  width: 50%;
+  background: #58b2ee;
+  margin: 1rem auto;
+  border-radius: 20px;
+}
+
+/* Contenido de la tabla */
+.table-content {
+  padding: 1.5rem 2rem 2rem;
+  flex: 1;
+}
+
+/* Toolbar de la tabla */
+.table-toolbar {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Contenedor de filtros */
+.table-filter-container {
+  position: relative;
+}
+
+.table-filter-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: #2b2e35;
+  border: 1px solid #3b3f47;
+  border-radius: 8px;
+  color: #e0e0e0;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.3s;
+  font-family: "Poppins", Arial, sans-serif;
+}
+
+.table-filter-button:hover {
+  background-color: #3b3f47;
+}
+
+/* Dropdown de filtros */
+.table-dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  background-color: #2b2e35;
+  border: 1px solid #3b3f47;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  min-width: 200px;
+}
+
+.table-dropdown ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.table-dropdown-item {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: background 0.2s;
+}
+
+.table-dropdown-item:hover {
+  background-color: #3b3f47;
+}
+
+.table-dropdown-item input[type="radio"] {
+  accent-color: #58b2ee;
+}
+
+.table-dropdown-item label {
+  color: #e0e0e0;
+  cursor: pointer;
+  flex: 1;
+}
+
+/* Contenedor de búsqueda */
+.table-search-container {
+  position: relative;
+  flex: 1;
+  min-width: 250px;
+}
+
+.table-search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  pointer-events: none;
+}
+
+.table-search-input {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 3rem;
+  background-color: #2b2e35;
+  border: 1px solid #3b3f47;
+  border-radius: 8px;
+  color: #e0e0e0;
+  font-size: 0.95rem;
+  outline: none;
+  box-sizing: border-box;
+  font-family: "Poppins", Arial, sans-serif;
+}
+
+.table-search-input:focus {
+  border-color: #58b2ee;
+  box-shadow: 0 0 0 3px rgba(88, 178, 238, 0.1);
+}
+
+.table-search-input::placeholder {
+  color: #666;
+}
+
+/* Contador de registros */
+.table-records-counter {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.table-counter-badge {
+  font-size: 0.8rem;
+  color: #999;
+  padding: 0.25rem 0.75rem;
+  background-color: #2b2e35;
+  border-radius: 6px;
+}
+
+.table-counter-badge strong {
+  color: #58b2ee;
+}
+
+/* Mensajes de estado */
+.table-loading,
+.table-error,
+.table-no-data {
+  text-align: center;
+  padding: 2rem;
+}
+
+.table-loading {
+  color: #999;
+}
+
+.table-error {
+  color: #ef4444;
+}
+
+.table-no-data {
+  color: #999;
+  font-size: 1.1rem;
+  padding: 3rem;
+}
+
+/* Wrapper de la tabla */
+.table-wrapper {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.data-table thead tr {
+  background: linear-gradient(135deg, #2b2e35 0%, #1e2028 100%);
+  border-bottom: 2px solid #58b2ee;
+}
+
+.data-table th {
+  padding: 1rem;
+  text-align: left;
+  color: #58b2ee;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+.data-table th.table-actions-header {
+  text-align: center;
+}
+
+.data-table tbody tr {
+  transition: background 0.2s;
+}
+
+.data-table tbody tr:nth-child(even) {
+  background-color: #252831;
+}
+
+.data-table tbody tr:nth-child(odd) {
+  background-color: #2b2e35;
+}
+
+.data-table tbody tr:hover {
+  background-color: #2f3b7e !important;
+}
+
+.data-table td {
+  padding: 1rem;
+  color: #e0e0e0;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.data-table td.table-actions-cell {
+  text-align: center;
+}
+
+/* Contenedor de acciones */
+.table-actions-container {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Botones de acción */
+.table-btn-edit,
+.table-btn-delete {
+  border: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: background 0.2s;
+  color: white;
+  font-family: "Poppins", Arial, sans-serif;
+}
+
+.table-btn-edit {
+  background-color: #3b82f6;
+}
+
+.table-btn-edit:hover {
+  background-color: #2563eb;
+}
+
+.table-btn-delete {
+  background-color: #ef4444;
+}
+
+.table-btn-delete:hover {
+  background-color: #dc2626;
+}
+
+/* Paginación */
+.table-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.table-pagination-btn {
+  border: none;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background 0.3s;
+  color: white;
+  background-color: #58b2ee;
+}
+
+.table-pagination-btn:disabled {
+  background-color: #2b2e35;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.table-pagination-btn:not(:disabled):hover {
+  background-color: #2f91d5;
+}
+
+.table-page-number {
+  border: 1px solid #3b3f47;
+  background-color: #2b2e35;
+  color: #ccc;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 400;
+  min-width: 40px;
+  transition: all 0.3s;
+  text-align: center;
+  font-family: "Poppins", Arial, sans-serif;
+}
+
+.table-page-number.active {
+  background-color: #58b2ee;
+  color: white;
+  border: 2px solid #2f3b7e;
+  font-weight: 600;
+}
+
+.table-page-number:hover:not(.active) {
+  background-color: #3b3f47;
+}
+
+.table-page-ellipsis {
+  color: #666;
+  padding: 0 0.25rem;
+}
+
+/* Responsive para tabla */
+@media (max-width: 768px) {
+  .table-page-container {
+    padding: 1rem;
+  }
+
+  .table-header {
+    padding: 1.5rem;
+  }
+
+  .table-title {
+    font-size: 1.5rem;
+  }
+
+  .table-content {
+    padding: 1rem;
+  }
+
+  .table-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .table-search-container {
+    min-width: 100%;
+    max-width: 100%;
+  }
+
+  .table-filter-container {
+    width: 100%;
+  }
+
+  .table-filter-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .data-table {
+    font-size: 0.85rem;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .table-actions-container {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .table-btn-edit,
+  .table-btn-delete {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .table-card {
+    border-radius: 12px;
+  }
+
+  .table-title {
+    font-size: 1.25rem;
+  }
+
+  .data-table {
+    font-size: 0.8rem;
+  }
+
+  .table-pagination {
+    gap: 0.25rem;
+  }
+
+  .table-page-number {
+    padding: 0.5rem 0.75rem;
+    min-width: 35px;
+    font-size: 0.85rem;
+  }
+}
+
 /*-----------------------------TicketPago-----------------------------------------------------*/
 
 @keyframes fadeIn {
@@ -1768,4 +2306,83 @@ input[type="number"]::-webkit-inner-spin-button {
   .ticket-body {
     padding: 20px;
   }
+}
+
+/* Ajustar tabla al estilo del formulario */
+.form-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  background: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.form-table th {
+  background: #f0f0f0;
+  padding: 12px;
+  font-weight: 600;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.form-table td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.form-table tr:hover {
+  background: #f9f9f9;
+}
+
+/* Acciones alineadas y limpias */
+.table-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Mensaje sin registros */
+.no-rows {
+  text-align: center;
+  padding: 20px;
+  font-style: italic;
+  color: #777;
+}
+
+/*----------------------------Unificar Formulario y Tabla-------------------------------*/
+
+.form_tabla {
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 900px;
+  overflow: hidden;
+  padding: 2.5rem;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+@media (max-width: 768px) {
+  .card-unificada {
+    max-width: 100%;
+    padding: 1.5rem;
+    border-radius: 12px;
+  }
+}
+
+.card-title {
+  margin: 0;
+  padding: 1rem 0;
+  text-align: center;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #58b2ee;
+}
+
+.card-title-divider {
+  height: 4px;
+  width: 120px;
+  background: #58b2ee;
+  margin: 0.5rem auto 1.5rem auto;
+  border-radius: 20px;
 }

@@ -30,18 +30,29 @@ export const createServicio = async (
 ): Promise<ServicioResponse> => {
   try {
     console.log("Enviando servicio:", data);
-    console.log(" URL:", SERVICIOS_URL);
+    console.log("URL:", SERVICIOS_URL);
     console.log("Headers:", authHeaders());
 
     const response = await api.post(SERVICIOS_URL, data, authHeaders());
 
-    console.log(" Servicio creado exitosamente:", response.data);
-    return response.data;
+    console.log("Servicio creado exitosamente:", response.data);
+
+    //  Convertir strings a números
+    const result: ServicioResponse = {
+      ...response.data,
+      costo:
+        typeof response.data.costo === "string"
+          ? parseFloat(response.data.costo)
+          : Number(response.data.costo),
+      id_servicio: Number(response.data.id_servicio),
+      id_tipo_servicio: Number(response.data.id_tipo_servicio),
+    };
+
+    return result;
   } catch (error: any) {
     console.error(" Error en createServicio:", error);
-    console.error(" Response data:", error.response?.data);
-    console.error(" Status:", error.response?.status);
-    console.error(" Headers:", error.response?.headers);
+    console.error("Response data:", error.response?.data);
+    console.error("Status:", error.response?.status);
 
     if (error.response?.status === 401 || error.response?.status === 403) {
       Swal.fire({
@@ -85,7 +96,34 @@ export const createServicio = async (
 export const getAllServicios = async (): Promise<ServicioResponse[]> => {
   try {
     const response = await api.get(SERVICIOS_URL, authHeaders());
-    return response.data;
+    console.log("Respuesta de la API:", response.data);
+
+    //  Extraer el array de la propiedad "results"
+    let servicios = response.data.results || response.data;
+
+    // Validar que sea un array
+    if (!Array.isArray(servicios)) {
+      console.error(" La API no devolvió un array válido:", response.data);
+      return [];
+    }
+
+    //  Convertir strings a números en cada servicio
+    const serviciosNormalizados = servicios.map((servicio: any) => ({
+      ...servicio,
+      costo:
+        typeof servicio.costo === "string"
+          ? parseFloat(servicio.costo)
+          : Number(servicio.costo),
+      id_servicio: Number(servicio.id_servicio || servicio.id_tipo_servicio),
+      id_tipo_servicio: Number(servicio.id_tipo_servicio),
+    }));
+
+    console.log(
+      " Servicios procesados:",
+      serviciosNormalizados.length,
+      "registros"
+    );
+    return serviciosNormalizados;
   } catch (error: any) {
     console.error(" Error en getAllServicios:", error);
     throw error;
@@ -97,7 +135,19 @@ export const getServicioById = async (
 ): Promise<ServicioResponse> => {
   try {
     const response = await api.get(`${SERVICIOS_URL}${id}/`, authHeaders());
-    return response.data;
+
+    // Convertir strings a números
+    const result: ServicioResponse = {
+      ...response.data,
+      costo:
+        typeof response.data.costo === "string"
+          ? parseFloat(response.data.costo)
+          : Number(response.data.costo),
+      id_servicio: Number(response.data.id_servicio),
+      id_tipo_servicio: Number(response.data.id_tipo_servicio),
+    };
+
+    return result;
   } catch (error: any) {
     console.error(" Error en getServicioById:", error);
     throw error;
@@ -114,7 +164,19 @@ export const updateServicio = async (
       data,
       authHeaders()
     );
-    return response.data;
+
+    // Convertir strings a números
+    const result: ServicioResponse = {
+      ...response.data,
+      costo:
+        typeof response.data.costo === "string"
+          ? parseFloat(response.data.costo)
+          : Number(response.data.costo),
+      id_servicio: Number(response.data.id_servicio),
+      id_tipo_servicio: Number(response.data.id_tipo_servicio),
+    };
+
+    return result;
   } catch (error: any) {
     console.error(" Error en updateServicio:", error);
     throw error;

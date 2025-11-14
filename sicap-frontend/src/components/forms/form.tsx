@@ -36,6 +36,7 @@ export interface FormConfig {
   showResetButton?: boolean;
   successMessage?: string;
   errorMessage?: string;
+  onReset?: () => void;
 }
 
 interface FormularioReutilizableProps {
@@ -450,12 +451,12 @@ const FormularioReutilizable: React.FC<FormularioReutilizableProps> = ({
   if (currentRow.length > 0) groupedFields.push(currentRow);
 
   return (
-    <div className="contracts-page-container">
-      <div className="contracts-card" style={{ maxWidth: "800px" }}>
-        <h2 className="contracts-title">
+    <div className="form-wrapper">
+      <div className="form_tabla">
+        <h2 className="card-title">
           <span className="contracts-title-gradient">{config.title}</span>
         </h2>
-        <div className="contracts-divider"></div>
+        <div className="card-title-divider"></div>
 
         <form onSubmit={handleSubmit} style={{ width: "100%" }}>
           <div className="form-grid">

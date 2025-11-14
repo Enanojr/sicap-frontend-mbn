@@ -14,7 +14,7 @@ import RegisterCuentahabiente from "../pages/Rcuentahabientes/Rcuentahabientes";
 import RegisterAsignacion from "../pages/Asignaciones/Asignaciones";
 import FormularioPago from "../components/forms/form_pago";
 import FormularioDescuentos from "../components/forms/form_descuentos";
-import FormularioServicios from "../components/forms/form_servicios";
+import ServiciosPage from "../pages/Principal_Form_Table/serviciospage";
 import Admin_Cards from "../pages/Home/Admin_Cards";
 
 const Rutas = [
@@ -79,14 +79,15 @@ const Rutas = [
             path: "/Descuento",
             element: <FormularioDescuentos />,
           },
-          {
-            path: "/Servicios",
-            element: <FormularioServicios />,
-          },
+
           {
             path: "/Admin_Cards",
             element: <Admin_Cards />,
-          }
+          },
+          {
+            path: "/servicios",
+            element: <ServiciosPage />,
+          },
         ],
       },
     ],
