@@ -1185,17 +1185,18 @@
   grid-template-columns: 1fr;
 }
 
+.form-input, 
 .form-select,
 .form-textarea {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #2b2e35;
-  border: 1px solid #3b3f47;
-  border-radius: 8px;
-  color: white;
-  font-size: 0.95rem;
-  transition: all 0.3s ease;
-  box-sizing: border-box;
+width: 100%;
+padding: 0.75rem;
+background-color: #2b2e35; /* <-- El fondo oscuro */
+border: 1px solid #3b3f47;
+border-radius: 8px;
+color: white; /* <-- El texto blanco */
+font-size: 0.95rem;
+transition: all 0.3s ease;
+box-sizing: border-box;
 }
 
 .form-select:focus,
