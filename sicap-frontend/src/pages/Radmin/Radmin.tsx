@@ -1,367 +1,207 @@
-import React, { useState } from "react";
 import { registerUser } from "../../services/Radmin.service";
-import { Botones } from "../../components/botones/Botones";
 import Swal from "sweetalert2";
-import "../../styles/styles.css";
-import {  User, Mail, Lock, UserPlus, Eye, EyeOff } from "lucide-react";
-
-interface FormData {
-  nombre: string;
-  apellidos: string;
-  email: string;
-  usuario: string;
-  password: string;
-  password2: string;
-  role: string;
-}
-
-interface FormErrors {
-  nombre?: string;
-  apellidos?: string;
-  email?: string;
-  usuario?: string;
-  password?: string;
-  password2?: string;
-  role?: string;
-  general?: string;
-}
+import { User, Mail, Lock, UserPlus } from "lucide-react";
+import FormularioReutilizable from "../../components/forms/form"; // Asegúrate que la ruta sea correcta
+import type { FormConfig } from "../../components/forms/form"; // Asegúrate que la ruta sea correcta
 
 export default function RegisterAdmin() {
-  const [formData, setFormData] = useState<FormData>({
-    nombre: "",
-    apellidos: "",
-    email: "",
-    usuario: "",
-    password: "",
-    password2: "",
-    role: "",
-  });
+  // --- Funciones de Validación Específicas ---
 
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [showPassword2, setShowPassword2] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    if (errors[name as keyof FormErrors]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
+  const validateEmail = (value: string): string | null => {
+    if (!value.trim()) {
+      return "El email es requerido";
     }
+    if (!/\S+@\S+\.\S+/.test(value)) {
+      return "El email no es válido";
+    }
+    return null;
   };
 
-  const validateForm = (): FormErrors => {
-    const newErrors: FormErrors = {};
-
-    if (!formData.nombre.trim()) {
-      newErrors.nombre = "El nombre es requerido";
+  const validatePassword = (value: string): string | null => {
+    if (!value) {
+      return "La contraseña es requerida";
     }
-
-    if (!formData.apellidos.trim()) {
-      newErrors.apellidos = "Los apellidos son requeridos";
+    if (value.length < 6) {
+      return "La contraseña debe tener al menos 6 caracteres";
     }
-
-    if (!formData.email.trim()) {
-      newErrors.email = "El email es requerido";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "El email no es válido";
-    }
-
-    if (!formData.usuario.trim()) {
-      newErrors.usuario = "El usuario es requerido";
-    }
-
-    if (!formData.password) {
-      newErrors.password = "La contraseña es requerida";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "La contraseña debe tener al menos 6 caracteres";
-    }
-
-    if (!formData.password2) {
-      newErrors.password2 = "Debe confirmar la contraseña";
-    } else if (formData.password !== formData.password2) {
-      newErrors.password2 = "Las contraseñas no coinciden";
-    }
-
-    if (!formData.role) {
-      newErrors.role = "Debe seleccionar un rol";
-    }
-
-    return newErrors;
+    return null;
   };
 
-  const handleSubmit = async () => {
-    const newErrors = validateForm();
+  // Asumimos que tu componente reutilizable pasa todos los datos del formulario
+  // a la función de validación para poder comparar campos.
+  const validatePassword2 = (
+  value: string,
+  allData?: Record<string, any> // <-- AÑADE EL '?' AQUÍ
+): string | null => {
+  if (!value) {
+    return "Debe confirmar la contraseña";
+  }
 
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+  // Como 'allData' ahora es opcional (allData?), 
+  // TypeScript nos pide que comprobemos si existe antes de usarlo.
+  if (!allData) {
+    return null; // No podemos comparar si no tenemos los demás datos
+  }
 
-      // Mostrar primer error encontrado
-      const firstError = Object.values(newErrors)[0];
-      Swal.fire({
-        icon: "warning",
-        title: "Campos incompletos",
-        text: firstError,
-        confirmButtonColor: "#667eea",
-      });
-      return;
-    }
+  if (value !== allData.password) {
+    return "Las contraseñas no coinciden";
+  }
+  
+  return null;
+};
 
-    setLoading(true);
+  // --- Configuración del Formulario ---
 
-    try {
-      const result = await registerUser(formData);
+  const formConfig: FormConfig = {
+    title: "Registro de Admin",
+    fields: [
+      {
+        name: "nombre",
+        label: "Nombre",
+        type: "text",
+        icon: User,
+        required: true,
+        placeholder: "Ingrese el nombre",
+        validation: (value: string) =>
+          !value.trim() ? "El nombre es requerido" : null,
+      },
+      {
+        name: "apellidos",
+        label: "Apellidos",
+        type: "text",
+        icon: User,
+        required: true,
+        placeholder: "Ingrese los apellidos",
+        validation: (value: string) =>
+          !value.trim() ? "Los apellidos son requeridos" : null,
+      },
+      {
+        name: "email",
+        label: "Email",
+        type: "email", // 'email' es más semántico que 'text'
+        icon: Mail,
+        required: true,
+        placeholder: "correo@ejemplo.com",
+        validation: validateEmail,
+      },
+      {
+        name: "usuario",
+        label: "Usuario",
+        type: "text",
+        icon: UserPlus,
+        required: true,
+        placeholder: "Nombre de usuario",
+        validation: (value: string) =>
+          !value.trim() ? "El usuario es requerido" : null,
+      },
+      {
+        name: "role",
+        label: "Rol",
+        type: "select",
+        icon: User,
+        required: true,
+        options: [
+          // El placeholder se maneja con 'placeholder'
+          { value: "admin", label: "Admin" },
+          { value: "supervisor", label: "Supervisor" },
+        ],
+        placeholder: "Seleccione un rol",
+        validation: (value: string) =>
+          !value ? "Debe seleccionar un rol" : null,
+      },
+      {
+        name: "password",
+        label: "Contraseña",
+        type: "password", // El tipo 'password' debería activar el toggle de visibilidad
+        icon: Lock,
+        required: true,
+        placeholder: "Ingrese contraseña",
+        validation: validatePassword,
+      },
+      {
+        name: "password2",
+        label: "Confirmar Contraseña",
+        type: "password",
+        icon: Lock,
+        required: true,
+        placeholder: "Confirme contraseña",
+        validation: validatePassword2, // Usamos la validación especial
+      },
+    ],
 
-      if (result.success) {
-        // Limpiar formulario
-        setFormData({
-          nombre: "",
-          apellidos: "",
-          email: "",
-          usuario: "",
-          password: "",
-          password2: "",
-          role: "",
-        });
-        setErrors({});
+    // --- Lógica de Envío ---
+    onSubmit: async (data) => {
+      // El componente reutilizable ya hizo la validación de campos
+      try {
+        // El 'data' que llega aquí es el 'formData' validado
+        const result = await registerUser(data as any);
 
-        // Mostrar éxito con SweetAlert
-        Swal.fire({
-          icon: "success",
-          title: "¡Registro exitoso!",
-          text: "El usuario ha sido registrado correctamente",
-          confirmButtonColor: "#667eea",
-          timer: 3000,
-          timerProgressBar: true,
-        });
-      } else {
-        // Manejar errores del servidor
-        let errorMessage = "Error al registrar usuario";
-
-        if (result.errors) {
-          // Si hay errores específicos de campos
-          if (typeof result.errors === "object") {
-            // Mostrar el primer error
-            const firstErrorKey = Object.keys(result.errors)[0];
-            const firstErrorValue = result.errors[firstErrorKey];
-
-            errorMessage = Array.isArray(firstErrorValue)
-              ? firstErrorValue[0]
-              : firstErrorValue;
-
-            // Actualizar errores en el formulario
-            setErrors(result.errors);
-          } else if (result.errors.general) {
-            errorMessage = result.errors.general;
+        if (result.success) {
+          Swal.fire({
+            icon: "success",
+            title: "¡Registro exitoso!",
+            text: "El usuario ha sido registrado correctamente",
+            confirmButtonColor: "#667eea",
+            timer: 3000,
+            timerProgressBar: true,
+          });
+          // El formulario reutilizable debería limpiarse solo si la promesa se resuelve
+        } else {
+          // Manejar errores específicos del servidor
+          let errorMessage = "Error al registrar usuario";
+          if (result.errors) {
+            if (typeof result.errors === "object") {
+              const firstErrorKey = Object.keys(result.errors)[0];
+              const firstErrorValue = result.errors[firstErrorKey];
+              errorMessage = Array.isArray(firstErrorValue)
+                ? firstErrorValue[0]
+                : firstErrorValue;
+            } else if (result.errors.general) {
+              errorMessage = result.errors.general;
+            }
           }
+
+          Swal.fire({
+            icon: "error",
+            title: "Error de registro",
+            text: errorMessage,
+            confirmButtonColor: "#667eea",
+          });
+
+          // Lanzamos un error para que el formulario reutilizable sepa que falló
+          throw new Error(errorMessage);
         }
-
-        Swal.fire({
-          icon: "error",
-          title: "Error de registro",
-          text: errorMessage,
-          confirmButtonColor: "#667eea",
-        });
+      } catch (error: any) {
+        console.error("Error inesperado:", error);
+        
+        // Si no es el error que ya mostramos, mostramos uno genérico
+        if (!error.message.includes("Error al registrar usuario")) {
+          Swal.fire({
+            icon: "error",
+            title: "Error inesperado",
+            text: "Ocurrió un error al registrar el usuario. Por favor, intente nuevamente.",
+            confirmButtonColor: "#667eea",
+          });
+        }
+        
+        // Relanzamos el error para el componente
+        throw error;
       }
-    } catch (error) {
-      console.error("Error inesperado:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error inesperado",
-        text: "Ocurrió un error al registrar el usuario. Por favor, intente nuevamente.",
-        confirmButtonColor: "#667eea",
-      });
-    } finally {
-      setLoading(false);
-    }
+    },
+
+    // --- Configuración de Botones ---
+    submitButtonText: "Registrar Usuario",
+    resetButtonText: "Limpiar Formulario",
+    showResetButton: true,
+
+    // Usamos Swal para los mensajes, por lo que no necesitamos
+    // los mensajes genéricos del formulario.
+    // successMessage: "¡Usuario registrado exitosamente!",
+    // errorMessage: "Error al registrar el usuario. Intente nuevamente.",
   };
 
-  const handleClear = () => {
-    setFormData({
-      nombre: "",
-      apellidos: "",
-      email: "",
-      usuario: "",
-      password: "",
-      password2: "",
-      role: "",
-    });
-    setErrors({});
-  };
-
-  return (
-    <div className="register-page-container">
-      <div className="register-card">
-        <h2 className="register-title">
-          <span className="register-title-gradient">REGISTRO DE ADMIN</span>
-        </h2>
-        <div className="register-divider"></div>
-
-        <div className="register-form-container">
-          <div className="register-form-grid">
-            {/* Nombre */}
-            <div className="form-field">
-              <label className="form-label"><User></User> Nombre *</label>
-              <div className="input-wrapper">
-                <input
-                  type="text"
-                  name="nombre"
-                  value={formData.nombre}
-                  onChange={handleChange}
-                  className="form-input"
-                  placeholder="Ingrese el nombre"
-                />
-              </div>
-              {errors.nombre && (
-                <span className="form-error">{errors.nombre}</span>
-              )}
-            </div>
-
-            {/* Apellidos */}
-            <div className="form-field">
-              <label className="form-label"><User></User> Apellidos *</label>
-              <div className="input-wrapper">
-                <input
-                  type="text"
-                  name="apellidos"
-                  value={formData.apellidos}
-                  onChange={handleChange}
-                  className="form-input"
-                  placeholder="Ingrese los apellidos"
-                />
-              </div>
-              {errors.apellidos && (
-                <span className="form-error">{errors.apellidos}</span>
-              )}
-            </div>
-
-            {/* Email */}
-            <div className="form-field">
-              <label className="form-label"><Mail></Mail> Email *</label>
-              <div className="input-wrapper">
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="form-input"
-                  placeholder="correo@ejemplo.com"
-                />
-              </div>
-              {errors.email && (
-                <span className="form-error">{errors.email}</span>
-              )}
-            </div>
-
-            {/* Usuario */}
-            <div className="form-field">
-              <label className="form-label"><UserPlus></UserPlus> Usuario *</label>
-              <div className="input-wrapper">
-                <input
-                  type="text"
-                  name="usuario"
-                  value={formData.usuario}
-                  onChange={handleChange}
-                  className="form-input"
-                  placeholder="Nombre de usuario"
-                />
-              </div>
-              {errors.usuario && (
-                <span className="form-error">{errors.usuario}</span>
-              )}
-            </div>
-
-            {/* Rol */}
-            <div className="form-field">
-              <label className="form-label"><User></User> Rol *</label>
-              <div className="input-wrapper">
-                <select
-                  name="role"
-                  value={formData.role}
-                  onChange={handleChange}
-                  className="form-input form-select"
-                >
-                  <option value="">Seleccione un rol</option>
-                  <option value="admin">Admin</option>
-                  <option value="supervisor">Supervisor</option>
-                </select>
-              </div>
-              {errors.role && (
-                <span className="form-error">{errors.role}</span>
-              )}
-            </div>
-
-            {/* Contraseña */}
-            <div className="form-field">
-              <label className="form-label"><Lock></Lock> Contraseña *</label>
-              <div className="input-wrapper">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="form-input"
-                  placeholder="Ingrese contraseña"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="password-toggle"
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-              {errors.password && (
-                <span className="form-error">{errors.password}</span>
-              )}
-            </div>
-
-            {/* Confirmar Contraseña */}
-            <div className="form-field">
-              <label className="form-label"><Lock></Lock> Confirmar Contraseña *</label>
-              <div className="input-wrapper">
-                <input
-                  type={showPassword2 ? "text" : "password"}
-                  name="password2"
-                  value={formData.password2}
-                  onChange={handleChange}
-                  className="form-input"
-                  placeholder="Confirme contraseña"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword2(!showPassword2)}
-                  className="password-toggle"
-                >
-                  {showPassword2 ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-              {errors.password2 && (
-                <span className="form-error">{errors.password2}</span>
-              )}
-            </div>
-          </div>
-
-          <div className="form-actions">
-            <Botones
-              onClick={handleClear}
-              style={{ backgroundColor: "white", color: "black", opacity: 0.7 }}
-              disabled={loading}
-            >
-              Limpiar
-            </Botones>
-            <Botones onClick={handleSubmit} disabled={loading}>
-              {loading ? "Registrando..." : "Registrar Usuario"}
-            </Botones>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  // El renderizado es mucho más simple.
+  // No necesitamos el 'loading' state aquí, el formulario reutilizable lo maneja.
+  // No necesitamos el 'useEffect' para cargar datos, como en Pagos.
+  return <FormularioReutilizable config={formConfig} />;
 }
