@@ -33,7 +33,7 @@ interface PaginatedResponse {
 interface Descuento {
   id_descuento: number;
   nombre_descuento: string;
-  porcentaje?: number;
+  porcentaje?: string;
 }
 
 interface PaginatedDescuentosResponse {
@@ -52,10 +52,8 @@ const FormularioPagos: React.FC = () => {
     Array<{ value: string; label: string }>
   >([]);
   const [loading, setLoading] = useState(true);
-
   const [showTicket, setShowTicket] = useState(false);
   const [ticketData, setTicketData] = useState<TicketData | null>(null);
-
   const [cuentahabientesMap, setCuentahabientesMap] = useState<
     Map<number, Cuentahabiente>
   >(new Map());
@@ -67,7 +65,6 @@ const FormularioPagos: React.FC = () => {
     const fetchCuentahabientes = async (): Promise<void> => {
       try {
         setLoading(true);
-
         const token = localStorage.getItem("access");
         if (!token) {
           Swal.fire({
@@ -79,14 +76,10 @@ const FormularioPagos: React.FC = () => {
           return;
         }
 
-        console.log("Cargando cuentahabientes...");
-
         const allCuentahabientes: Cuentahabiente[] = [];
         let nextUrl: string | null = "/cuentahabientes/";
-        let pageCount: number = 0;
 
         while (nextUrl) {
-          pageCount++;
           const response = await api.get<PaginatedResponse>(nextUrl);
           const data: PaginatedResponse = response.data;
 
@@ -115,7 +108,6 @@ const FormularioPagos: React.FC = () => {
         setCuentahabientes(formattedData);
       } catch (error: any) {
         console.error("Error al cargar cuentahabientes:", error);
-
         const message =
           error.response?.status === 403
             ? "Acceso prohibido. Tu sesión puede haber expirado."
@@ -172,7 +164,6 @@ const FormularioPagos: React.FC = () => {
         setDescuentos(formattedData);
       } catch (error: any) {
         console.error("Error al cargar descuentos:", error);
-
         Swal.fire({
           icon: "warning",
           title: "Advertencia",
@@ -287,7 +278,6 @@ const FormularioPagos: React.FC = () => {
         defaultValue: "",
       },
     ],
-
     onSubmit: async (data) => {
       try {
         const token = localStorage.getItem("access");
@@ -299,6 +289,47 @@ const FormularioPagos: React.FC = () => {
             confirmButtonColor: "#ef4444",
           });
           return;
+        }
+
+        const montoOriginal = parseFloat(data.monto_recibido);
+        const descuento =
+          data.descuento && data.descuento !== ""
+            ? descuentosMap.get(parseInt(data.descuento))
+            : null;
+
+        let montoFinal = montoOriginal;
+        let cantidadDescuento = 0;
+
+        if (descuento && descuento.porcentaje) {
+          cantidadDescuento = parseFloat(descuento.porcentaje);
+          montoFinal = montoOriginal - cantidadDescuento;
+
+          const resultadoConfirmacion = await Swal.fire({
+            title: "Confirmar descuento",
+            html: `
+              <div style="text-align: left;">
+                <p><strong>Monto original:</strong> $${montoOriginal.toFixed(
+                  2
+                )}</p>
+                <p><strong>Descuento:</strong> -$${cantidadDescuento.toFixed(
+                  2
+                )}</p>
+                <p><strong>Monto final a registrar:</strong> $${montoFinal.toFixed(
+                  2
+                )}</p>
+              </div>
+            `,
+            icon: "info",
+            showCancelButton: true,
+            confirmButtonText: "Confirmar",
+            cancelButtonText: "Cancelar",
+            confirmButtonColor: "#3b82f6",
+            cancelButtonColor: "#ef4444",
+          });
+
+          if (!resultadoConfirmacion.isConfirmed) {
+            return;
+          }
         }
 
         Swal.fire({
@@ -313,7 +344,7 @@ const FormularioPagos: React.FC = () => {
         const pagoData: PagoCreate = {
           cuentahabiente: parseInt(data.cuentahabiente),
           fecha_pago: data.fecha_pago,
-          monto_recibido: parseFloat(data.monto_recibido),
+          monto_recibido: montoFinal,
           mes: data.mes,
           anio: parseInt(data.anio),
           comentarios: data.comentarios || "",
@@ -322,16 +353,11 @@ const FormularioPagos: React.FC = () => {
         };
 
         const result = await createPago(pagoData);
-
         Swal.close();
 
         const cuentahabiente = cuentahabientesMap.get(
           parseInt(data.cuentahabiente)
         );
-        const descuento =
-          data.descuento && data.descuento !== ""
-            ? descuentosMap.get(parseInt(data.descuento))
-            : null;
 
         if (cuentahabiente) {
           const ticket: TicketData = {
@@ -339,8 +365,9 @@ const FormularioPagos: React.FC = () => {
               `${cuentahabiente.nombres} ${cuentahabiente.ap} ${cuentahabiente.am}`.trim(),
             numero_contrato: cuentahabiente.numero_contrato,
             fecha_pago: data.fecha_pago,
-            monto_recibido: data.monto_recibido,
+            monto_recibido: montoOriginal,
             nombre_descuento: descuento?.nombre_descuento || "Sin descuento",
+            porcentaje_descuento: cantidadDescuento,
             comentarios: data.comentarios || "",
           };
 
@@ -350,7 +377,7 @@ const FormularioPagos: React.FC = () => {
 
         console.log("Pago registrado:", result);
       } catch (error: any) {
-        console.error(" Error al registrar el pago:", error);
+        console.error("Error al registrar el pago:", error);
 
         if (error.response?.status === 401 || error.response?.status === 403) {
           const message =
@@ -380,7 +407,6 @@ const FormularioPagos: React.FC = () => {
         throw error;
       }
     },
-
     submitButtonText: "Registrar Pago",
     resetButtonText: "Limpiar Formulario",
     successMessage: "¡Pago registrado exitosamente!",
@@ -398,14 +424,13 @@ const FormularioPagos: React.FC = () => {
       },
     });
     return null;
-  } else {
-    Swal.close();
   }
+
+  Swal.close();
 
   return (
     <>
       <FormularioReutilizable config={formConfig} />
-
       {showTicket && ticketData && (
         <TicketPago
           ticketData={ticketData}
