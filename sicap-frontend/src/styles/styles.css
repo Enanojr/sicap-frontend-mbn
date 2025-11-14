@@ -63,8 +63,8 @@
   border-radius: 10px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
   width: 100%;
-  max-width: 400px; /* Ancho máximo para las tarjetas */
-  min-height: 600px; /* Altura mínima para las tarjetas */
+  max-width: 400px;
+  min-height: 600px;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -73,7 +73,7 @@
 
 /* --- CONTENIDO DEL PANEL IZQUIERDO --- */
 .title {
-  font-size: 1.5em; /* Ajustamos el tamaño para que quepa mejor */
+  font-size: 1.5em;
   font-weight: bold;
   margin-bottom: 1.5rem;
   color: #58b2ee;
@@ -81,9 +81,9 @@
 
 .logoWrapper {
   position: relative;
-  width: 120px; /* Un poco más pequeño */
+  width: 120px;
   height: 120px;
-  margin: 0 auto 1.5rem auto; /* Centrado */
+  margin: 0 auto 1.5rem auto;
 }
 
 .waterLogo {
@@ -154,7 +154,6 @@
   width: 100%;
 }
 
-/* El ícono que se posicionará de forma absoluta */
 .passwordIcon {
   position: absolute;
   top: 30%;
@@ -165,7 +164,7 @@
 }
 
 .passwordIcon:hover {
-  color: #333; /* Color más oscuro al pasar el ratón */
+  color: #333;
 }
 
 /* --- RESPONSIVE --- */
@@ -174,14 +173,13 @@
     flex-direction: column;
   }
   .leftPanel {
-    display: none; /* Mantenemos oculto el panel izquierdo en móviles */
+    display: none;
   }
 }
 
 /*-------------------------------------------------Estilos de tabla consulta------------------------------------*/
 .contracts-page-container {
   min-height: 100vh;
-
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -225,8 +223,7 @@
   gap: 1rem;
   justify-content: space-between;
   margin-bottom: 1.5rem;
-  align-items: center; /* Centra verticalmente todos los elementos */ /*anadido*/
-  flex-wrap: wrap; /*anadido*/
+  align-items: center;
 }
 
 .contracts-filter-button {
@@ -279,8 +276,7 @@
 .contracts-search-container {
   position: relative;
   flex: 1;
-  max-width: 250px;
-  max-width: 100%; /*recien anadido8*/
+  max-width: 100%;
 }
 .search-icon {
   position: absolute;
@@ -296,7 +292,7 @@
   border-radius: 8px;
   background-color: #2b2e35;
   color: white;
-  box-sizing: border-box; /* para que respete el ancho del contenedor */
+  box-sizing: border-box;
 }
 .contracts-search-input:focus {
   outline: none;
@@ -450,13 +446,11 @@
   border: 1px solid #22c55e;
   color: #22c55e;
 }
-
 .status-warning {
   background-color: rgba(234, 179, 8, 0.1);
   border: 1px solid #eab308;
   color: #eab308;
 }
-
 .status-danger {
   background-color: rgba(239, 68, 68, 0.1);
   border: 1px solid #ef4444;
@@ -468,7 +462,6 @@
     flex-direction: column;
     align-items: stretch;
   }
-
   .contracts-search-container {
     max-width: 100%;
   }
@@ -476,7 +469,7 @@
 
 /*-------------------------------------Cards-------------------------------*/
 
-/* Animaciones */
+/* Animaciones Base */
 @keyframes waterFall {
   0% {
     opacity: 1;
@@ -501,6 +494,26 @@
   }
 }
 
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes glow {
+  0%, 100% { 
+    opacity: 0.5; 
+  }
+  50% { 
+    opacity: 0.8; 
+  }
+}
+
 /* Container */
 .waterCardsContainer {
   display: flex;
@@ -521,7 +534,7 @@
   max-width: 100%;
 }
 
-/* Card */
+/* Card Base - Ahora con glassmorphism */
 .waterCard {
   background-color: #1a1d23;
   cursor: pointer;
@@ -539,6 +552,39 @@
   text-align: center;
 }
 
+/* Mejoras Modernas para Cards */
+.waterCard.modern-card {
+  background: rgba(26, 29, 35, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.waterCard.modern-card.card-visible {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+/* Efecto de brillo detrás de la card */
+.card-glow {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  filter: blur(40px);
+  animation: glow 3s ease-in-out infinite;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.waterCard.modern-card:hover .card-glow {
+  opacity: 0.15;
+}
+
+/* Efecto de barrido de luz */
 .waterCard::before {
   content: "";
   position: absolute;
@@ -553,19 +599,37 @@
     transparent
   );
   transition: left 0.6s ease;
+  z-index: 1;
 }
 
 .waterCard:hover::before {
   left: 100%;
 }
 
+/* Hover mejorado */
 .waterCard:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 30px rgba(88, 178, 238, 0.2);
   border-color: rgba(88, 178, 238, 0.3);
 }
 
-/* Icon Container */
+.waterCard.modern-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(88, 178, 238, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 40px rgba(88, 178, 238, 0.1);
+}
+
+/* Wrapper del contenido */
+.card-content-wrapper {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+/* Icon Container con mejoras */
 .waterCardIconContainer {
   width: 80px;
   height: 80px;
@@ -574,34 +638,85 @@
   justify-content: center;
   margin-bottom: 16px;
   position: relative;
-  z-index: 1;
+  z-index: 2;
   border-radius: 12px;
+  transition: all 0.4s ease;
 }
 
+.modern-icon-container {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.modern-icon-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.1);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.waterCard.modern-card:hover .modern-icon-container {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+.waterCard.modern-card:hover .modern-icon-container::before {
+  opacity: 1;
+}
+
+/* Icon */
 .waterCardIcon {
   width: 45px;
   height: 45px;
   stroke: white;
   stroke-width: 2;
   fill: none;
+  transition: transform 0.3s ease;
+}
+
+.modern-icon {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  transition: transform 0.3s ease;
+}
+
+.waterCard.modern-card:hover .modern-icon {
+  transform: scale(1.1);
 }
 
 /* Content */
 .waterCardContent {
   flex: 1;
   position: relative;
-  z-index: 1;
+  z-index: 2;
   margin-bottom: 16px;
 }
 
+.modern-card-text {
+  flex: 1;
+}
+
+/* Title */
 .waterCardTitle {
   font-size: 20px;
   font-weight: bold;
   color: #58b2ee;
   margin: 0 0 8px 0;
   line-height: 1.3;
+  transition: color 0.3s ease;
 }
 
+.modern-card-title {
+  transition: color 0.3s ease;
+}
+
+.waterCard.modern-card:hover .modern-card-title {
+  color: #58b2ee;
+}
+
+/* Description */
 .waterCardDescription {
   font-size: 13px;
   color: #ccc;
@@ -610,7 +725,13 @@
   padding: 0 8px;
 }
 
-/* Button */
+.modern-card-description {
+  font-size: 0.9375rem;
+  color: #aaa;
+  line-height: 1.6;
+}
+
+/* Button Base */
 .waterCardButton {
   padding: 12px 24px;
   color: white;
@@ -624,9 +745,33 @@
   letter-spacing: 0.5px;
   margin: 0;
   position: relative;
-  z-index: 1;
+  z-index: 2;
   display: inline-block;
   width: 100%;
+}
+
+/* Button Mejorado */
+.modern-card-button {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.modern-card-button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.1);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.modern-card-button:hover::before {
+  opacity: 1;
 }
 
 .waterCardButton:hover {
@@ -637,6 +782,15 @@
 
 .waterCardButton:active {
   transform: scale(0.98);
+}
+
+/* Flecha del botón */
+.button-arrow {
+  transition: transform 0.3s ease;
+}
+
+.modern-card-button:hover .button-arrow {
+  transform: translateX(4px);
 }
 
 /* Tablet - 768px */
@@ -727,7 +881,6 @@
 
 /*--------------------------------------------Navbar--------------------------------------------*/
 
-/* Contenedor principal de la barra de navegación */
 .navbar-container {
   display: flex;
   justify-content: space-between;
@@ -735,33 +888,31 @@
   padding: 0 40px;
   height: 80px;
   background-color: #ffffff00;
-
-  position: relative; /* Necesario para centrar el logo */
+  position: relative;
 }
 
 .navbar-container.light .nav-link {
-  color: #333; /* Color oscuro para las letras */
+  color: #333;
 }
 .navbar-container.light .profile-icon {
-  color: #555; /* Color oscuro para el ícono */
+  color: #555;
 }
 .navbar-container.light .nav-link:hover,
 .navbar-container.light .profile-icon:hover {
   color: #007bff;
 }
 
-/* --- Estilos para el Tema Oscuro --- */
 .navbar-container.dark .nav-link {
-  color: #f0f0f0; /* Color claro para las letras */
+  color: #f0f0f0;
 }
 .navbar-container.dark .profile-icon {
-  color: #ddd; /* Color claro para el ícono */
+  color: #ddd;
 }
 .navbar-container.dark .nav-link:hover,
 .navbar-container.dark .profile-icon:hover {
-  color: #89cff0; /* Un azul claro para el hover */
+  color: #89cff0;
 }
-/* Logo centrado */
+
 .navbar-logo {
   position: absolute;
   left: 50%;
@@ -772,15 +923,13 @@
   height: 65px;
 }
 
-/* Secciones izquierda y derecha */
 .navbar-section {
   display: flex;
   align-items: center;
-  gap: 25px; /* Espacio entre los links */
-  flex: 1; /* Ocupa el espacio disponible */
+  gap: 25px;
+  flex: 1;
 }
 
-/* Estilos para los links de navegación */
 .nav-link {
   text-decoration: none;
   color: #333;
@@ -793,18 +942,16 @@
   color: #007bff;
 }
 
-/* Asegura que la sección de perfil esté alineada a la derecha */
 .profile-section {
   display: flex;
-  align-items: center; /* Esto centrará verticalmente el botón y el icono */
+  align-items: center;
   justify-content: flex-end;
-  gap: 25px; /* Ajusta este espacio si quieres más o menos separación entre el botón y el icono */
+  gap: 25px;
   position: relative;
 }
 
-/* Ícono de perfil */
 .profile-icon {
-  font-size: 32px; /* Tamaño del ícono */
+  font-size: 32px;
   color: #555;
   cursor: pointer;
   transition: color 0.3s ease;
@@ -814,10 +961,9 @@
   color: #007bff;
 }
 
-/* Menú desplegable */
 .dropdown-menu {
   position: absolute;
-  top: 55px; /* Distancia desde el ícono */
+  top: 55px;
   right: 0;
   background-color: white;
   border-radius: 8px;
@@ -869,7 +1015,7 @@
   font-family: 'Poppins', Arial;
   font-weight: 700;
   text-align: center;
-  color: #58b2ee  ;
+  color: #58b2ee;
 }
 
 .register-divider {
@@ -878,7 +1024,6 @@
   margin: 0 2rem;
 }
 
-/* Alertas */
 .alert {
   padding: 1rem;
   margin: 1rem;
@@ -901,7 +1046,6 @@
   border: 1px solid #f5c6cb;
 }
 
-/* Formulario */
 .register-form-container {
   padding: 1.5rem 2rem 2rem;
   flex: 1;
@@ -924,6 +1068,7 @@
   flex-direction: column;
   gap: 0.75rem;
 }
+
 .form-label {
   font-size: 0.875rem;
   font-weight: 500;
@@ -989,7 +1134,6 @@
   font-family: 'Poppins', Arial;
 }
 
-/* Botones */
 .form-actions {
   display: flex;
   gap: 1rem;
@@ -1021,9 +1165,9 @@
     flex-direction: column;
   }
 }
-/*------------------------------------------------Formualarios----------------------------------------------*/
 
-/* Grid del formulario */
+/*------------------------------------------------Formularios----------------------------------------------*/
+
 .form-grid {
   display: flex;
   flex-direction: column;
@@ -1041,24 +1185,6 @@
   grid-template-columns: 1fr;
 }
 
-/* Campos del formulario */
-.form-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  position: relative;
-}
-
-.form-label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #e0e0e0;
-}
-
-.form-input,
 .form-select,
 .form-textarea {
   width: 100%;
@@ -1072,7 +1198,6 @@
   box-sizing: border-box;
 }
 
-.form-input:focus,
 .form-select:focus,
 .form-textarea:focus {
   outline: none;
@@ -1097,13 +1222,6 @@
   min-height: 100px;
 }
 
-.form-error {
-  font-size: 0.8rem;
-  color: #ef4444;
-  margin-top: 0.25rem;
-}
-
-/* Botones del formulario */
 .form-buttons {
   display: flex;
   gap: 1rem;
@@ -1159,7 +1277,6 @@
   margin: 0;
 }
 
-/* Botón de agregar campo dinámico */
 .form-add-button {
   position: absolute;
   right: -35px;
@@ -1183,40 +1300,22 @@
   transform: translateY(-50%) scale(1.1);
 }
 
-/* Estilos específicos para inputs numéricos */
-input[type="number"] {
-}
-
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-/* Placeholder styling */
 .form-input::placeholder,
 .form-textarea::placeholder {
   color: #666;
   opacity: 1;
 }
 
-/* Animación de entrada para formularios */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 .contracts-card {
   animation: fadeInUp 0.5s ease;
 }
 
-/* Responsive para formularios */
 @media (max-width: 768px) {
   .form-row {
     grid-template-columns: 1fr;
@@ -1266,7 +1365,6 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 }
 
-/* Estados de validación visuales */
 .form-input:valid:not(:placeholder-shown) {
   border-color: #4ade80;
 }
@@ -1274,7 +1372,6 @@ input[type="number"]::-webkit-inner-spin-button {
 .form-input:invalid:not(:placeholder-shown):not(:focus) {
   border-color: #fbbf24;
 }
-
 
 /*------------------------------------------Registro sector y colonias------------------------*/
 
@@ -1305,7 +1402,7 @@ input[type="number"]::-webkit-inner-spin-button {
   font-family: 'Poppins', Arial;
   font-weight: 700;
   text-align: center;
-  color: #58b2ee  ;
+  color: #58b2ee;
 }
 
 .register-divider-sector {
@@ -1314,7 +1411,6 @@ input[type="number"]::-webkit-inner-spin-button {
   margin: 0 2rem;
 }
 
-/* Formulario */
 .register-form-container-sector {
   padding: 1.5rem 2rem 2rem;
   flex: 1;
@@ -1323,13 +1419,12 @@ input[type="number"]::-webkit-inner-spin-button {
   justify-content: space-between;
 }
 
-
 @media (max-width: 480px) {
   .register-page-container-sector {
     padding: 1.5rem;
   }
 
-  .register-form-container-sector .input-wrapper{
+  .register-form-container-sector .input-wrapper {
     padding: 10px;
   }
 
@@ -1342,9 +1437,8 @@ input[type="number"]::-webkit-inner-spin-button {
     font-size: 1.5rem;
     padding: 1.5rem;
   }
-
 }
-/*--------------------------------------------Estandarización de texto a tipo oración--------------------------------------------*/
+
 /*-----------------------------TicketPago-----------------------------------------------------*/
 
 @keyframes fadeIn {
@@ -1367,7 +1461,6 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 }
 
-/* ========== OVERLAY DEL MODAL ========== */
 .ticket-modal-overlay {
   position: fixed;
   top: 0;
@@ -1384,7 +1477,6 @@ input[type="number"]::-webkit-inner-spin-button {
   animation: fadeIn 0.3s ease-out;
 }
 
-/* ========== CONTENEDOR PRINCIPAL DEL TICKET ========== */
 .ticket-container {
   background: linear-gradient(135deg, #1a1d29 0%, #252831 100%);
   border-radius: 16px;
@@ -1396,7 +1488,6 @@ input[type="number"]::-webkit-inner-spin-button {
   animation: slideIn 0.3s ease-out;
 }
 
-/* ========== BOTÓN DE CERRAR ========== */
 .ticket-close-button {
   position: absolute;
   top: 16px;
@@ -1421,7 +1512,6 @@ input[type="number"]::-webkit-inner-spin-button {
   transform: rotate(90deg);
 }
 
-/* ========== HEADER DEL TICKET ========== */
 .ticket-header {
   background: linear-gradient(135deg, #58b2ee 0%, #2f3b7e 100%);
   padding: 24px;
@@ -1430,7 +1520,6 @@ input[type="number"]::-webkit-inner-spin-button {
   position: relative;
 }
 
-/* Círculos decorativos en los bordes */
 .ticket-header::before,
 .ticket-header::after {
   content: "";
@@ -1470,12 +1559,10 @@ input[type="number"]::-webkit-inner-spin-button {
   text-transform: uppercase;
 }
 
-/* ========== CUERPO DEL TICKET ========== */
 .ticket-body {
   padding: 32px 24px;
 }
 
-/* ========== LOGO ========== */
 .ticket-logo-container {
   display: flex;
   justify-content: center;
@@ -1501,7 +1588,6 @@ input[type="number"]::-webkit-inner-spin-button {
   border: 2px solid rgba(88, 178, 238, 0.2);
 }
 
-/* ========== MONTO PRINCIPAL ========== */
 .ticket-amount-section {
   text-align: center;
   margin-bottom: 32px;
@@ -1537,7 +1623,6 @@ input[type="number"]::-webkit-inner-spin-button {
   text-transform: uppercase;
 }
 
-/* ========== INFORMACIÓN DETALLADA ========== */
 .ticket-details {
   border-top: 2px dashed #3b3f47;
   padding-top: 20px;
@@ -1579,7 +1664,6 @@ input[type="number"]::-webkit-inner-spin-button {
   color: #999;
 }
 
-/* ========== COMENTARIOS ========== */
 .ticket-comments-container {
   display: flex;
   flex-direction: column;
@@ -1602,7 +1686,6 @@ input[type="number"]::-webkit-inner-spin-button {
   text-transform: uppercase;
 }
 
-/* ========== PIE DEL TICKET ========== */
 .ticket-footer {
   margin-top: 32px;
   padding-top: 20px;
@@ -1635,7 +1718,6 @@ input[type="number"]::-webkit-inner-spin-button {
   margin-top: 8px;
 }
 
-/* ========== SECCIÓN DE BOTÓN DE DESCARGA ========== */
 .ticket-download-section {
   padding: 20px 24px;
   border-top: 1px solid #3b3f47;
@@ -1672,7 +1754,6 @@ input[type="number"]::-webkit-inner-spin-button {
   transform: translateY(0);
 }
 
-/* ========== RESPONSIVE ========== */
 @media (max-width: 480px) {
   .ticket-container {
     max-width: 100%;
@@ -1722,31 +1803,22 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 }
 
-/* ========== ESTADOS ADICIONALES ========== */
 .ticket-container:hover {
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(88, 178, 238, 0.2);
 }
 
-/* Efecto de brillo en el header */
-.ticket-header::after {
-  animation: none;
-}
-
-/* Transición suave para todos los elementos interactivos */
 .ticket-close-button,
 .ticket-download-button {
   -webkit-tap-highlight-color: transparent;
   user-select: none;
 }
 
-/* Accesibilidad - focus visible */
 .ticket-close-button:focus-visible,
 .ticket-download-button:focus-visible {
   outline: 2px solid #58b2ee;
   outline-offset: 2px;
 }
 
-/* Print styles (opcional) */
 @media print {
   .ticket-modal-overlay {
     background-color: white;
@@ -1767,5 +1839,179 @@ input[type="number"]::-webkit-inner-spin-button {
 
   .ticket-body {
     padding: 20px;
+  }
+}
+
+/*--------------------------------------------Admin Page Container--------------------------------------------*/
+
+/*--------------------------------------------Admin Page Container--------------------------------------------*/
+
+.admin-page-container {
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Header Section */
+.admin-header {
+  max-width: 1400px;
+  margin: 0 auto 3rem;
+  text-align: center;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(88, 178, 238, 0.1);
+  border-radius: 20px;
+  font-size: 0.875rem;
+  color: #58b2ee;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(88, 178, 238, 0.2);
+}
+
+.admin-title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 800;
+  background: linear-gradient(135deg, #58b2ee 0%, #2f3b7e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.02em;
+}
+
+.admin-subtitle {
+  font-size: 1.125rem;
+  color: #999;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Stats Grid */
+.stats-grid {
+  max-width: 1400px;
+  margin: 0 auto 3rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  animation: fadeInUp 0.6s ease-out 0.2s backwards;
+  padding: 0 1rem;
+}
+
+.stat-card {
+  background: rgba(26, 29, 35, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  background: rgba(26, 29, 35, 0.8);
+  border-color: rgba(88, 178, 238, 0.3);
+  box-shadow: 0 8px 30px rgba(88, 178, 238, 0.15);
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: white;
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Cards Grid - 3 columnas en desktop, 2 en tablet, 1 en móvil */
+.cards-grid {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 columnas por defecto */
+  gap: 1.5rem;
+  padding: 0 1rem;
+}
+
+/* Ajustes para las cards dentro del grid */
+.cards-grid .waterCard {
+  margin: 0;
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
+}
+
+.cards-grid .waterCardIconContainer {
+  margin-right: 0;
+  margin-bottom: 16px;
+}
+
+.cards-grid .waterCardContent {
+  text-align: center;
+}
+
+.cards-grid .waterCardButton {
+  width: 100%;
+  margin-left: 0;
+}
+
+.cards-grid .card-content-wrapper {
+  align-items: center;
+  text-align: center;
+}
+
+/* Tablet - 2 columnas */
+@media (max-width: 1024px) {
+  .cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Móvil - 1 columna */
+@media (max-width: 768px) {
+  .admin-page-container {
+    padding: 1.5rem 0.75rem;
+  }
+
+  .admin-header {
+    margin-bottom: 2rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    margin-bottom: 2rem;
+  }
+
+  .cards-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    padding: 0 0.5rem;
   }
 }
