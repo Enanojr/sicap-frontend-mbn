@@ -3,36 +3,47 @@ import type { FormConfig } from "../forms/form";
 import FormularioReutilizable from "../forms/form";
 import { DollarSign, Tag, ToggleLeft } from "lucide-react";
 import Swal from "sweetalert2";
+
 import {
   createDescuento,
+  updateDescuento,
   type DescuentoCreate,
+  type DescuentoResponse,
 } from "../../services/descuento.service";
+
 import { isAuthenticated, logout } from "../../services/auth.service";
 
-const FormularioDescuentos: React.FC = () => {
+interface FormularioDescuentosProps {
+  descuentoToEdit?: DescuentoResponse | null;
+  onSuccess?: () => void;
+  onCancel?: () => void;
+}
+
+const FormularioDescuentos: React.FC<FormularioDescuentosProps> = ({
+  descuentoToEdit,
+  onSuccess,
+}) => {
+  // Detectar modo edición
+  const isEditMode = !!descuentoToEdit;
+
+  // Validaciones
   const validateMonto = (value: any): string | null => {
     const num = parseFloat(value);
-    if (isNaN(num) || num < 0) {
-      return "Debe ser un monto mayor o igual a 0";
-    }
-    if (num > 999999.99) {
-      return "El monto no puede exceder $999,999.99";
-    }
+    if (isNaN(num) || num < 0) return "Debe ser un monto mayor o igual a 0";
+    if (num > 999999.99) return "El monto no puede exceder $999,999.99";
     return null;
   };
 
   const validateNombre = (value: any): string | null => {
-    if (!value || value.trim().length === 0) {
-      return "El nombre es requerido";
-    }
-    if (value.trim().length > 30) {
+    if (!value || value.trim().length === 0) return "El nombre es requerido";
+    if (value.trim().length > 30)
       return "El nombre no puede exceder 30 caracteres";
-    }
     return null;
   };
 
   const formConfig: FormConfig = {
-    title: "Registro de Descuentos",
+    title: isEditMode ? "Editar Descuento" : "Registro de Descuentos",
+
     fields: [
       {
         name: "nombre",
@@ -42,6 +53,7 @@ const FormularioDescuentos: React.FC = () => {
         icon: Tag,
         required: true,
         validation: validateNombre,
+        defaultValue: descuentoToEdit?.nombre_descuento || "",
       },
       {
         name: "monto",
@@ -51,7 +63,7 @@ const FormularioDescuentos: React.FC = () => {
         icon: DollarSign,
         required: true,
         validation: validateMonto,
-        defaultValue: "0",
+        defaultValue: descuentoToEdit?.porcentaje?.toString() || "0",
       },
       {
         name: "activo",
@@ -63,7 +75,10 @@ const FormularioDescuentos: React.FC = () => {
           { value: "true", label: "Activo" },
           { value: "false", label: "Inactivo" },
         ],
-        defaultValue: "true",
+        defaultValue:
+          descuentoToEdit?.activo !== undefined
+            ? descuentoToEdit.activo.toString()
+            : "true",
       },
     ],
 
@@ -81,8 +96,10 @@ const FormularioDescuentos: React.FC = () => {
         }
 
         Swal.fire({
-          title: "Enviando...",
-          text: "Registrando el descuento, por favor espera.",
+          title: isEditMode ? "Actualizando..." : "Registrando...",
+          text: isEditMode
+            ? "Actualizando descuento, por favor espera."
+            : "Creando descuento, por favor espera.",
           allowOutsideClick: false,
           didOpen: () => Swal.showLoading(),
         });
@@ -93,11 +110,22 @@ const FormularioDescuentos: React.FC = () => {
           activo: data.activo === "true",
         };
 
-        const result = await createDescuento(descuentoData);
+        let result: DescuentoResponse;
+
+        if (isEditMode) {
+          result = await updateDescuento(
+            descuentoToEdit!.id_descuento,
+            descuentoData
+          );
+        } else {
+          result = await createDescuento(descuentoData);
+        }
 
         Swal.fire({
           icon: "success",
-          title: "¡Descuento registrado exitosamente!",
+          title: isEditMode
+            ? "¡Descuento actualizado!"
+            : "¡Descuento registrado!",
           html: `
             <p><strong>Descuento:</strong> ${result.nombre_descuento}</p>
             <p><strong>Monto:</strong> $${parseFloat(result.porcentaje).toFixed(
@@ -110,25 +138,21 @@ const FormularioDescuentos: React.FC = () => {
             }</p>
           `,
           confirmButtonColor: "#58b2ee",
-          confirmButtonText: "Aceptar",
         });
-      } catch (error: any) {
-        console.error("Error al registrar el descuento:", error);
 
+        if (onSuccess) onSuccess();
+      } catch (error: any) {
         Swal.fire({
           icon: "error",
-          title: "Error",
-          text:
-            error.message ||
-            "Ocurrió un problema al procesar la solicitud. Intenta nuevamente.",
+          title: isEditMode ? "Error al actualizar" : "Error al registrar",
+          text: error.message || "Ocurrió un error inesperado",
           confirmButtonColor: "#ef4444",
-          confirmButtonText: "Cerrar",
         });
       }
     },
 
-    submitButtonText: "Registrar Descuento",
-    resetButtonText: "Limpiar Formulario",
+    submitButtonText: isEditMode ? "Guardar Cambios" : "Registrar Descuento",
+    resetButtonText: isEditMode ? "Cancelar" : "Limpiar Formulario",
     showResetButton: true,
   };
 
