@@ -2,48 +2,51 @@ import React, { useState } from "react";
 import { ReusableTable } from "./registros_general";
 import type { Column } from "./registros_general";
 import {
-  getAllServicios,
-  deleteServicio,
-  type ServicioResponse,
-} from "../../services/servicios.service";
+  getAllDescuentos,
+  deleteDescuento,
+  type DescuentoResponse,
+} from "../../services/descuento.service";
 import Swal from "sweetalert2";
 
-interface TablaServiciosProps {
-  onEdit: (servicio: ServicioResponse) => void;
+interface TablaDescuentosProps {
+  onEdit: (descuento: DescuentoResponse) => void;
 }
 
-const TablaServicios: React.FC<TablaServiciosProps> = ({ onEdit }) => {
+const TablaDescuentos: React.FC<TablaDescuentosProps> = ({ onEdit }) => {
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const columns: Column<ServicioResponse>[] = [
+  const columns: Column<DescuentoResponse>[] = [
     {
-      key: "nombre",
-      label: "Nombre del Servicio",
+      key: "nombre_descuento",
+      label: "Nombre del Descuento",
     },
-
     {
-      key: "costo",
-      label: "Costo",
+      key: "porcentaje",
+      label: "Monto del Descuento",
       render: (value) =>
         `$${Number(value || 0).toLocaleString("es-MX", {
           minimumFractionDigits: 2,
         })}`,
     },
+    {
+      key: "activo",
+      label: "Activo",
+      render: (value) => (value ? "Sí" : "No"),
+    },
   ];
 
-  const fetchData = async (): Promise<ServicioResponse[]> => {
-    const servicios = await getAllServicios();
-    return servicios;
+  const fetchData = async (): Promise<DescuentoResponse[]> => {
+    return await getAllDescuentos();
   };
 
-  const handleEdit = (servicio: ServicioResponse) => {
-    onEdit(servicio);
+  const handleEdit = (descuento: DescuentoResponse) => {
+    onEdit(descuento);
   };
 
-  const handleDelete = async (servicio: ServicioResponse) => {
+  const handleDelete = async (descuento: DescuentoResponse) => {
     const result = await Swal.fire({
       title: "¿Estás seguro?",
-      text: `¿Deseas eliminar el servicio "${servicio.nombre}"?`,
+      text: `¿Deseas eliminar el descuento "${descuento.nombre_descuento}"?`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#ef4444",
@@ -54,12 +57,12 @@ const TablaServicios: React.FC<TablaServiciosProps> = ({ onEdit }) => {
 
     if (result.isConfirmed) {
       try {
-        await deleteServicio(servicio.id_servicio!);
+        await deleteDescuento(descuento.id_descuento!);
 
         Swal.fire({
           icon: "success",
           title: "¡Eliminado!",
-          text: "El servicio ha sido eliminado correctamente",
+          text: "El descuento ha sido eliminado correctamente",
           confirmButtonColor: "#10b981",
         });
 
@@ -68,7 +71,7 @@ const TablaServicios: React.FC<TablaServiciosProps> = ({ onEdit }) => {
         Swal.fire({
           icon: "error",
           title: "Error",
-          text: "No se pudo eliminar el servicio",
+          text: "No se pudo eliminar el descuento",
           confirmButtonColor: "#ef4444",
         });
       }
@@ -76,19 +79,19 @@ const TablaServicios: React.FC<TablaServiciosProps> = ({ onEdit }) => {
   };
 
   return (
-    <ReusableTable<ServicioResponse>
+    <ReusableTable<DescuentoResponse>
       key={refreshKey}
       columns={columns}
       fetchData={fetchData}
-      searchableFields={["nombre"]}
+      searchableFields={["nombre_descuento"]}
       itemsPerPage={10}
-      title="Servicios Registrados"
+      title="Descuentos Registrados"
       showActions={true}
       onEdit={handleEdit}
       onDelete={handleDelete}
-      getRowId={(servicio) => servicio.id_servicio!}
+      getRowId={(row) => row.id_descuento!}
     />
   );
 };
 
-export default TablaServicios;
+export default TablaDescuentos;

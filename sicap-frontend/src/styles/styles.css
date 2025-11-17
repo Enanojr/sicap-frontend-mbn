@@ -16,23 +16,23 @@
 
 /*----------------Sweetalert----------------------------*/
 .swal2-popup {
-  font-family: 'Poppins', Arial, sans-serif !important;
+  font-family: "Poppins", Arial, sans-serif !important;
   /* <-- MODIFICADO */
 }
 
 .swal2-title {
-  font-family: 'Poppins', Arial, sans-serif !important;
+  font-family: "Poppins", Arial, sans-serif !important;
   /* <-- MODIFICADO */
 }
 
 .swal2-html-container {
-  font-family: 'Poppins', Arial, sans-serif !important;
+  font-family: "Poppins", Arial, sans-serif !important;
   /* <-- MODIFICADO */
 }
 
 .swal2-confirm,
 .swal2-cancel {
-  font-family: 'Poppins', Arial, sans-serif !important;
+  font-family: "Poppins", Arial, sans-serif !important;
   /* <-- MODIFICADO */
 }
 
@@ -41,7 +41,7 @@
   display: flex;
   width: 100vw;
   height: 100vh;
-  font-family: 'Poppins', Arial, sans-serif;
+  font-family: "Poppins", Arial, sans-serif;
   /* <-- MODIFICADO */
   gap: 24px;
   justify-content: center;
@@ -190,7 +190,7 @@
   justify-content: center;
   align-items: flex-start;
   padding: 2rem;
-  font-family: 'Poppins', Arial, sans-serif;
+  font-family: "Poppins", Arial, sans-serif;
   /* <-- MODIFICADO */
   color: white;
 }
@@ -548,7 +548,6 @@
 }
 
 @keyframes glow {
-
   0%,
   100% {
     opacity: 0.5;
@@ -568,7 +567,7 @@
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  font-family: 'Poppins', Arial, sans-serif;
+  font-family: "Poppins", Arial, sans-serif;
   /* <-- MODIFICADO */
 }
 
@@ -638,10 +637,12 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg,
-      transparent,
-      rgba(255, 255, 255, 0.1),
-      transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
   transition: left 0.6s ease;
   z-index: 1;
 }
@@ -1035,9 +1036,7 @@
   background-color: #f0f0f0;
 }
 
-<<<<<<< HEAD
 /*------------------------------------------Registro cobradores y formularios------------------------*/
-=======
 .profile-button {
   background: transparent;
   border: none;
@@ -1060,7 +1059,6 @@
 }
 
 /*------------------------------------------Registro cobradores------------------------*/
->>>>>>> origin/dev-chino
 
 .register-page-container {
   min-height: 50vh;
@@ -1096,12 +1094,9 @@
   padding: 2rem;
   margin: 0;
   font-size: 1.75rem;
-<<<<<<< HEAD
   font-family: "Poppins", Arial;
-=======
-  font-family: 'Poppins', Arial, sans-serif;
+  font-family: "Poppins", Arial, sans-serif;
   /* <-- MODIFICADO */
->>>>>>> origin/dev-chino
   font-weight: 700;
   text-align: center;
   color: #58b2ee;
@@ -1161,12 +1156,9 @@
 .form-label {
   font-size: 0.875rem;
   font-weight: 500;
-<<<<<<< HEAD
   font-family: "Poppins", Arial;
-=======
-  font-family: 'Poppins', Arial, sans-serif;
+  font-family: "Poppins", Arial, sans-serif;
   /* <-- MODIFICADO */
->>>>>>> origin/dev-chino
   color: white;
 }
 
@@ -1225,12 +1217,9 @@
   font-size: 0.75rem;
   color: #dc2626;
   margin-top: 0.25rem;
-<<<<<<< HEAD
   font-family: "Poppins", Arial;
-=======
-  font-family: 'Poppins', Arial, sans-serif;
+  font-family: "Poppins", Arial, sans-serif;
   /* <-- MODIFICADO */
->>>>>>> origin/dev-chino
 }
 
 .form-actions {
@@ -1506,12 +1495,9 @@ input[type="number"]::-webkit-inner-spin-button {
   padding: 2rem;
   margin: 0;
   font-size: 1.75rem;
-<<<<<<< HEAD
   font-family: "Poppins", Arial;
-=======
-  font-family: 'Poppins', Arial, sans-serif;
+  font-family: "Poppins", Arial, sans-serif;
   /* <-- MODIFICADO */
->>>>>>> origin/dev-chino
   font-weight: 700;
   text-align: center;
   color: #58b2ee;
@@ -1551,7 +1537,6 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 }
 
-<<<<<<< HEAD
 /*--------------------------------------------ESTILOS PARA PÁGINA DE SERVICIOS--------------------------------------------*/
 
 /* Contenedor principal de la página */
@@ -1669,7 +1654,6 @@ input[type="number"]::-webkit-inner-spin-button {
   font-weight: 700;
   text-align: center;
   color: #58b2ee;
-  font-family: "Poppins", Arial, sans-serif;
 }
 
 .table-divider {
@@ -2083,8 +2067,6 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 }
 
-=======
->>>>>>> origin/dev-chino
 /*-----------------------------TicketPago-----------------------------------------------------*/
 
 @keyframes fadeIn {
@@ -2491,7 +2473,6 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 }
 
-<<<<<<< HEAD
 /* Ajustar tabla al estilo del formulario */
 .form-table {
   width: 100%;
@@ -2578,13 +2559,12 @@ input[type="number"]::-webkit-inner-spin-button {
   border-radius: 12px;
   transition: all 0.2s ease;
 }
-=======
 /*--------------------------------------------Admin Page Container--------------------------------------------*/
 
 .admin-page-container {
   min-height: 100vh;
   padding: 2rem 1rem;
-  font-family: 'Poppins', Arial, sans-serif;
+  font-family: "Poppins", Arial, sans-serif;
   /* <-- MODIFICADO */
 }
 
@@ -2752,4 +2732,3 @@ input[type="number"]::-webkit-inner-spin-button {
     padding: 0 0.5rem;
   }
 }
->>>>>>> origin/dev-chino

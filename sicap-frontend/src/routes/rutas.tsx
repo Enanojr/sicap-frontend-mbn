@@ -13,9 +13,9 @@ import RegisterColonia from "../pages/Rcolonias/Rcolonias";
 import RegisterCuentahabiente from "../pages/Rcuentahabientes/Rcuentahabientes";
 import RegisterAsignacion from "../pages/Asignaciones/Asignaciones";
 import FormularioPago from "../components/forms/form_pago";
-import FormularioDescuentos from "../components/forms/form_descuentos";
 import ServiciosPage from "../pages/Principal_Form_Table/serviciospage";
 import Admin_Cards from "../pages/Home/Admin_Cards";
+import DescuentosPage from "../pages/Principal_Form_Table/descuentospage";
 
 const Rutas = [
   // Ruta #1: Login (pública)
@@ -77,7 +77,7 @@ const Rutas = [
           },
           {
             path: "/Descuento",
-            element: <FormularioDescuentos />,
+            element: <DescuentosPage />,
           },
 
           {
