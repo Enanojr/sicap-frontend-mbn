@@ -38,14 +38,17 @@ export interface FormConfig {
   showResetButton?: boolean;
   successMessage?: string;
   errorMessage?: string;
+  onReset?: () => void;
 }
 
 interface FormularioReutilizableProps {
   config: FormConfig;
+  isEditMode?: boolean;
 }
 
 const FormularioReutilizable: React.FC<FormularioReutilizableProps> = ({
   config,
+  isEditMode = false,
 }) => {
   const [fields, setFields] = useState<FormField[]>(config.fields);
   const [formData, setFormData] = useState<Record<string, any>>(
@@ -69,6 +72,32 @@ const FormularioReutilizable: React.FC<FormularioReutilizableProps> = ({
     Record<string, boolean>
   >({}); // <-- AÑADIDO
   const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  useEffect(() => {
+    // Cuando cambian los valores default, recarga todo el formulario
+    const newFormData = config.fields.reduce((acc, field) => {
+      acc[field.name] = field.defaultValue ?? "";
+      return acc;
+    }, {} as Record<string, any>);
+
+    setFormData(newFormData);
+    setErrors({});
+
+    const initialSearchInputs: Record<string, string> = {};
+
+    config.fields.forEach((field) => {
+      if (field.type === "search-select" && field.options) {
+        const selected = field.options.find(
+          (opt) => opt.value === newFormData[field.name]
+        );
+        if (selected) {
+          initialSearchInputs[field.name] = selected.label;
+        }
+      }
+    });
+
+    setSearchInputs(initialSearchInputs);
+  }, [config.fields]);
 
   // Inicializar searchInputs con las etiquetas de las opciones seleccionadas
   useEffect(() => {
@@ -503,12 +532,12 @@ const FormularioReutilizable: React.FC<FormularioReutilizableProps> = ({
   if (currentRow.length > 0) groupedFields.push(currentRow);
 
   return (
-    <div className="contracts-page-container">
-      <div className="contracts-card" style={{ maxWidth: "800px" }}>
-        <h2 className="contracts-title">
+    <div className="form-wrapper">
+      <div className={`form_tabla ${isEditMode ? "form-edit-mode" : ""}`}>
+        <h2 className="card-title">
           <span className="contracts-title-gradient">{config.title}</span>
         </h2>
-        <div className="contracts-divider"></div>
+        <div className="card-title-divider"></div>
 
         <form onSubmit={handleSubmit} style={{ width: "100%" }}>
           <div className="form-grid">

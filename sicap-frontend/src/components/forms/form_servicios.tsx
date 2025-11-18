@@ -5,11 +5,27 @@ import { DollarSign, Briefcase } from "lucide-react";
 import Swal from "sweetalert2";
 import {
   createServicio,
+  updateServicio,
   type ServicioCreate,
+  type ServicioResponse,
 } from "../../services/servicios.service";
 import { isAuthenticated, logout } from "../../services/auth.service";
 
-const FormularioServicios: React.FC = () => {
+// AGREGAR INTERFAZ DE PROPS
+interface FormularioServiciosProps {
+  servicioToEdit?: ServicioResponse | null;
+  onSuccess?: () => void;
+  onCancel?: () => void;
+}
+
+//  CAMBIAR LA FIRMA DEL COMPONENTE
+const FormularioServicios: React.FC<FormularioServiciosProps> = ({
+  servicioToEdit,
+  onSuccess,
+}) => {
+  // DETECTAR SI ESTAMOS EN MODO EDICIÓN
+  const isEditMode = !!servicioToEdit;
+
   const validateCosto = (value: any): string | null => {
     const num = parseFloat(value);
     if (isNaN(num) || num <= 0) {
@@ -35,7 +51,8 @@ const FormularioServicios: React.FC = () => {
   };
 
   const formConfig: FormConfig = {
-    title: "Registro de Servicios",
+    //  TÍTULO DINÁMICO
+    title: isEditMode ? "Editar Servicio" : "Registro de Servicios",
     fields: [
       {
         name: "nombre",
@@ -45,6 +62,7 @@ const FormularioServicios: React.FC = () => {
         icon: Briefcase,
         required: true,
         validation: validateNombre,
+        defaultValue: servicioToEdit?.nombre || "",
       },
       {
         name: "costo",
@@ -54,7 +72,7 @@ const FormularioServicios: React.FC = () => {
         icon: DollarSign,
         required: true,
         validation: validateCosto,
-        defaultValue: "0",
+        defaultValue: servicioToEdit?.costo?.toString() || "0",
       },
     ],
 
@@ -72,8 +90,10 @@ const FormularioServicios: React.FC = () => {
         }
 
         Swal.fire({
-          title: "Enviando...",
-          text: "Registrando el servicio, por favor espera.",
+          title: isEditMode ? "Actualizando..." : "Enviando...",
+          text: isEditMode
+            ? "Actualizando el servicio, por favor espera."
+            : "Registrando el servicio, por favor espera.",
           allowOutsideClick: false,
           didOpen: () => Swal.showLoading(),
         });
@@ -85,13 +105,24 @@ const FormularioServicios: React.FC = () => {
 
         console.log(" Datos a enviar:", servicioData);
 
-        // Llamar al servicio
-        const result = await createServicio(servicioData);
+        let result: ServicioResponse;
+
+        //  CREAR O ACTUALIZAR SEGÚN EL MODO
+        if (isEditMode) {
+          result = await updateServicio(
+            servicioToEdit!.id_servicio!,
+            servicioData
+          );
+        } else {
+          result = await createServicio(servicioData);
+        }
 
         // Mostrar éxito
         Swal.fire({
           icon: "success",
-          title: "¡Servicio registrado exitosamente!",
+          title: isEditMode
+            ? "¡Servicio actualizado exitosamente!"
+            : "¡Servicio registrado exitosamente!",
           html: `
             <div style="text-align: left; padding: 10px;">
               <p><strong>Servicio:</strong> ${result.nombre}</p>
@@ -101,14 +132,18 @@ const FormularioServicios: React.FC = () => {
           confirmButtonColor: "#58b2ee",
           confirmButtonText: "Aceptar",
         });
-      } catch (error: any) {
-        console.error(" Error al registrar el servicio:", error);
 
-        // Solo mostrar el error si no fue manejado por el servicio
+        // LLAMAR CALLBACK DE ÉXITO
+        if (onSuccess) {
+          onSuccess();
+        }
+      } catch (error: any) {
+        console.error(" Error al procesar el servicio:", error);
+
         if (!error.message?.includes("Sesión expirada")) {
           Swal.fire({
             icon: "error",
-            title: "Error al Registrar",
+            title: isEditMode ? "Error al Actualizar" : "Error al Registrar",
             text:
               error.message ||
               "Ocurrió un problema al procesar la solicitud. Intenta nuevamente.",
@@ -119,12 +154,13 @@ const FormularioServicios: React.FC = () => {
       }
     },
 
-    submitButtonText: "Registrar Servicio",
-    resetButtonText: "Limpiar Formulario",
+    //  TEXTOS DINÁMICOS
+    submitButtonText: isEditMode ? "Guardar Cambios" : "Registrar Servicio",
+    resetButtonText: isEditMode ? "Cancelar" : "Limpiar Formulario",
     showResetButton: true,
   };
 
-  return <FormularioReutilizable config={formConfig} />;
+  return <FormularioReutilizable config={formConfig} isEditMode={isEditMode} />;
 };
 
 export default FormularioServicios;
