@@ -10,12 +10,12 @@ import RegisterCobrador from "../pages/Rcobradores/Rcobradores";
 import RegisterAdmin from "../pages/Radmin/Radmin";
 import RegisterSector from "../pages/Rsector/Rsector";
 import RegisterColonia from "../pages/Rcolonias/Rcolonias";
-import RegisterCuentahabiente from "../pages/Rcuentahabientes/Rcuentahabientes";
 import RegisterAsignacion from "../pages/Asignaciones/Asignaciones";
 import FormularioPago from "../components/forms/form_pago";
 import ServiciosPage from "../pages/Principal_Form_Table/serviciospage";
 import Admin_Cards from "../pages/Home/Admin_Cards";
 import DescuentosPage from "../pages/Principal_Form_Table/descuentospage";
+import CuentahabientesPage from "../pages/Principal_Form_Table/cuentahabientespage";
 
 const Rutas = [
   // Ruta #1: Login (pública)
@@ -65,7 +65,7 @@ const Rutas = [
           },
           {
             path: "/Rcuentahabiente",
-            element: <RegisterCuentahabiente />,
+            element: <CuentahabientesPage />,
           },
           {
             path: "/Rasignacion",
