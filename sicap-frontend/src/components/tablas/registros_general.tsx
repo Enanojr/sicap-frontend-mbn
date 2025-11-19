@@ -28,13 +28,10 @@ export interface ReusableTableProps<T> {
   filterOptions?: FilterOption[];
   itemsPerPage?: number;
   title?: string;
-
-  /** NUEVO: identificar el ID */
   getRowId?: (row: T) => string | number;
-
-  /** Acciones */
   onEdit?: (item: T) => void;
-  onDelete?: (item: T) => void;
+  onDelete?: (item: T) => Promise<boolean>;
+
   showActions?: boolean;
 }
 
@@ -55,7 +52,6 @@ export function ReusableTable<T extends Record<string, any>>({
   const [search, setSearch] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [isDropdownOpen, setDropdownOpen] = useState(false);
-
   const [page, setPage] = useState(1);
 
   useEffect(() => {
@@ -90,6 +86,7 @@ export function ReusableTable<T extends Record<string, any>>({
   });
 
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
+
   const currentData = filtered.slice(
     (page - 1) * itemsPerPage,
     page * itemsPerPage
@@ -105,10 +102,36 @@ export function ReusableTable<T extends Record<string, any>>({
     return item[column.key];
   };
 
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    const maxVisible = 5;
+
+    if (totalPages <= maxVisible) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      if (page <= 3) {
+        for (let i = 1; i <= 4; i++) pages.push(i);
+        pages.push("...");
+        pages.push(totalPages);
+      } else if (page >= totalPages - 2) {
+        pages.push(1);
+        pages.push("...");
+        for (let i = totalPages - 3; i <= totalPages; i++) pages.push(i);
+      } else {
+        pages.push(1);
+        pages.push("...");
+        for (let i = page - 1; i <= page + 1; i++) pages.push(i);
+        pages.push("...");
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
+  };
+
   return (
     <div className="table-wrapper-outer">
       <div className="form_tabla">
-        {/* Título uniforme */}
         <div className="table-header">
           <h2 className="card-title">
             <span className="contracts-title-gradient">{title}</span>
@@ -117,7 +140,6 @@ export function ReusableTable<T extends Record<string, any>>({
         </div>
 
         <div className="table-content">
-          {/* Toolbar */}
           <div className="table-toolbar">
             {filterOptions.length > 0 && (
               <div className="table-filter-container">
@@ -162,7 +184,6 @@ export function ReusableTable<T extends Record<string, any>>({
               </div>
             )}
 
-            {/* Search */}
             <div className="table-search-container">
               <Search size={18} className="table-search-icon" />
               <input
@@ -174,7 +195,6 @@ export function ReusableTable<T extends Record<string, any>>({
             </div>
           </div>
 
-          {/* Tabla */}
           {!loading && (
             <div className="table-wrapper">
               <table className="data-table">
@@ -215,7 +235,12 @@ export function ReusableTable<T extends Record<string, any>>({
                             {onDelete && (
                               <button
                                 className="table-btn-delete"
-                                onClick={() => onDelete(row)}
+                                onClick={async () => {
+                                  const ok = await onDelete(row);
+                                  if (ok) {
+                                    await loadData(); // 🔥 Recarga la tabla sin refrescar toda la página
+                                  }
+                                }}
                               >
                                 Eliminar
                               </button>
@@ -234,7 +259,6 @@ export function ReusableTable<T extends Record<string, any>>({
             </div>
           )}
 
-          {/* Paginación */}
           {filtered.length > 0 && (
             <div className="table-pagination">
               <button
@@ -245,17 +269,23 @@ export function ReusableTable<T extends Record<string, any>>({
                 <ChevronLeft size={18} />
               </button>
 
-              {[...Array(totalPages)].map((_, i) => (
-                <button
-                  key={i}
-                  className={`table-page-number ${
-                    page === i + 1 ? "active" : ""
-                  }`}
-                  onClick={() => setPage(i + 1)}
-                >
-                  {i + 1}
-                </button>
-              ))}
+              {getPageNumbers().map((num, index) =>
+                num === "..." ? (
+                  <span key={index} className="table-page-ellipsis">
+                    …
+                  </span>
+                ) : (
+                  <button
+                    key={index}
+                    className={`table-page-number ${
+                      page === num ? "active" : ""
+                    }`}
+                    onClick={() => setPage(num as number)}
+                  >
+                    {num}
+                  </button>
+                )
+              )}
 
               <button
                 className="table-pagination-btn"
