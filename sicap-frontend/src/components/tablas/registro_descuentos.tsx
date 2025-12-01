@@ -43,7 +43,9 @@ const TablaDescuentos: React.FC<TablaDescuentosProps> = ({ onEdit }) => {
     onEdit(descuento);
   };
 
-  const handleDelete = async (descuento: DescuentoResponse) => {
+  const handleDelete = async (
+    descuento: DescuentoResponse
+  ): Promise<boolean> => {
     const result = await Swal.fire({
       title: "¿Estás seguro?",
       text: `¿Deseas eliminar el descuento "${descuento.nombre_descuento}"?`,
@@ -67,6 +69,7 @@ const TablaDescuentos: React.FC<TablaDescuentosProps> = ({ onEdit }) => {
         });
 
         setRefreshKey((prev) => prev + 1);
+        return true; // Deletion successful
       } catch (error) {
         Swal.fire({
           icon: "error",
@@ -74,8 +77,11 @@ const TablaDescuentos: React.FC<TablaDescuentosProps> = ({ onEdit }) => {
           text: "No se pudo eliminar el descuento",
           confirmButtonColor: "#ef4444",
         });
+        return false; // Deletion failed
       }
     }
+
+    return false; // User cancelled
   };
 
   return (
