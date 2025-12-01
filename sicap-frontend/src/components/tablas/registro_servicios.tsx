@@ -40,7 +40,7 @@ const TablaServicios: React.FC<TablaServiciosProps> = ({ onEdit }) => {
     onEdit(servicio);
   };
 
-  const handleDelete = async (servicio: ServicioResponse) => {
+  const handleDelete = async (servicio: ServicioResponse): Promise<boolean> => {
     const result = await Swal.fire({
       title: "¿Estás seguro?",
       text: `¿Deseas eliminar el servicio "${servicio.nombre}"?`,
@@ -64,6 +64,7 @@ const TablaServicios: React.FC<TablaServiciosProps> = ({ onEdit }) => {
         });
 
         setRefreshKey((prev) => prev + 1);
+        return true; // Deletion successful
       } catch (error) {
         Swal.fire({
           icon: "error",
@@ -71,8 +72,11 @@ const TablaServicios: React.FC<TablaServiciosProps> = ({ onEdit }) => {
           text: "No se pudo eliminar el servicio",
           confirmButtonColor: "#ef4444",
         });
+        return false; // Deletion failed
       }
     }
+
+    return false; // User cancelled
   };
 
   return (

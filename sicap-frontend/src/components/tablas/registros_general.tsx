@@ -238,7 +238,7 @@ export function ReusableTable<T extends Record<string, any>>({
                                 onClick={async () => {
                                   const ok = await onDelete(row);
                                   if (ok) {
-                                    await loadData(); // 🔥 Recarga la tabla sin refrescar toda la página
+                                    await loadData();
                                   }
                                 }}
                               >

@@ -3,14 +3,16 @@ import { ReusableTable, type Column } from "./registros_general";
 
 import {
   getCuentahabientes,
-  deleteCuentahabiente,
+  // deleteCuentahabiente,
   type CuentahabienteResponse,
 } from "../../services/Rcuentahabientes.service";
 
 import { getColonias } from "../../services/Rcolonias.service";
 import { getAllServicios } from "../../services/servicios.service";
 
-import Swal from "sweetalert2";
+//import Swal from "sweetalert2";
+
+//Los elementos comentados pertenecen a la acción de eliminación, si se requiere en el futuro, solo descomentarlos. Atte: Kirby :)
 
 interface CuentahabienteRow {
   id_cuentahabiente: number;
@@ -128,7 +130,8 @@ const TablaCuentahabientes: React.FC<{
     return await fetchAllCuentahabientes();
   };
 
-  const handleDelete = async (row: CuentahabienteRow): Promise<boolean> => {
+  {
+    /*const handleDelete = async (row: CuentahabienteRow): Promise<boolean> => {
     const confirm = await Swal.fire({
       title: "¿Eliminar cuentahabiente?",
       text: `Contrato: ${row.numero_contrato}`,
@@ -139,7 +142,7 @@ const TablaCuentahabientes: React.FC<{
       confirmButtonText: "Eliminar",
     });
 
-    // 🔥
+    
     if (!confirm.isConfirmed) return false;
 
     const resp = await deleteCuentahabiente(row.id_cuentahabiente);
@@ -151,7 +154,8 @@ const TablaCuentahabientes: React.FC<{
       Swal.fire("Error", "No se pudo eliminar", "error");
       return false;
     }
-  };
+  }; */
+  }
 
   return (
     <ReusableTable<CuentahabienteRow>
@@ -162,7 +166,7 @@ const TablaCuentahabientes: React.FC<{
       title="Cuentahabientes Registrados"
       showActions={true}
       onEdit={onEdit}
-      onDelete={handleDelete}
+      //onDelete={handleDelete}
     />
   );
 };
