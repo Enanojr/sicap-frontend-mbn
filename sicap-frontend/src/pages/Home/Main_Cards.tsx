@@ -30,7 +30,7 @@ function Main_Card() {
   const cards = [
     {
       title: "Consultas",
-      description: "Consulta tu consumo, saldo y detalles de tu cuenta.",
+      description: "Consulta los pagos de los cuentahabientes.",
       icon: Search,
       ctaText: "Consultar",
       gradientColors: ["#4ecdc4", "#2c9fb9"] as [string, string],
@@ -41,7 +41,7 @@ function Main_Card() {
       title: "Pagos",
       description: "Realiza el cobro de agua de los cuentahabientes.",
       icon: CreditCard,
-      ctaText: "Pagar Ahora",
+      ctaText: "Pagar",
       gradientColors: ["#ff6b6b", "#d63031"] as [string, string],
       waterDropColor: "rgba(255, 107, 107, 0.6)",
       onClick: handlePayment,

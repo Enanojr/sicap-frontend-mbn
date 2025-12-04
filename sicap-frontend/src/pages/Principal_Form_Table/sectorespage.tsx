@@ -33,10 +33,6 @@ const SectoresPage: React.FC = () => {
               Editando sector: <strong>{sectorToEdit.nombre_sector}</strong>
             </span>
           </div>
-
-          <button onClick={handleCancel} className="edit-banner-button">
-            ✖ Cancelar Edición
-          </button>
         </div>
       )}
 

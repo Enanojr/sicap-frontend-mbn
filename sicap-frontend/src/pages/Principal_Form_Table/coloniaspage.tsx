@@ -35,10 +35,6 @@ const ColoniasPage: React.FC = () => {
               Editando colonia: <strong>{coloniaToEdit.nombre_colonia}</strong>
             </span>
           </div>
-
-          <button onClick={handleCancel} className="edit-banner-button">
-            ✖ Cancelar Edición
-          </button>
         </div>
       )}
 

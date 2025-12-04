@@ -14,19 +14,18 @@ import {
 import { isAuthenticated, logout } from "../../services/auth.service";
 
 interface FormularioDescuentosProps {
-  descuentoToEdit?: DescuentoResponse | null;
-  onSuccess?: () => void;
-  onCancel?: () => void;
+  descuentoToEdit: DescuentoResponse | null;
+  onSuccess: () => void;
+  onCancel: () => void; // ← OBLIGATORIO
 }
 
 const FormularioDescuentos: React.FC<FormularioDescuentosProps> = ({
   descuentoToEdit,
   onSuccess,
+  onCancel,
 }) => {
-  // Detectar modo edición
   const isEditMode = !!descuentoToEdit;
 
-  // Validaciones
   const validateMonto = (value: any): string | null => {
     const num = parseFloat(value);
     if (isNaN(num) || num < 0) return "Debe ser un monto mayor o igual a 0";
@@ -74,7 +73,6 @@ const FormularioDescuentos: React.FC<FormularioDescuentosProps> = ({
             icon: "error",
             title: "Sesión expirada",
             text: "Por favor, inicia sesión nuevamente.",
-            confirmButtonColor: "#ef4444",
           });
           logout();
           return;
@@ -82,14 +80,11 @@ const FormularioDescuentos: React.FC<FormularioDescuentosProps> = ({
 
         Swal.fire({
           title: isEditMode ? "Actualizando..." : "Registrando...",
-          text: isEditMode
-            ? "Actualizando descuento, por favor espera."
-            : "Creando descuento, por favor espera.",
           allowOutsideClick: false,
           didOpen: () => Swal.showLoading(),
         });
 
-        const descuentoData: DescuentoCreate = {
+        const payload: DescuentoCreate = {
           nombre_descuento: data.nombre.trim(),
           porcentaje: parseFloat(data.monto).toFixed(2),
           activo: isEditMode ? descuentoToEdit!.activo : true,
@@ -100,10 +95,10 @@ const FormularioDescuentos: React.FC<FormularioDescuentosProps> = ({
         if (isEditMode) {
           result = await updateDescuento(
             descuentoToEdit!.id_descuento,
-            descuentoData
+            payload
           );
         } else {
-          result = await createDescuento(descuentoData);
+          result = await createDescuento(payload);
         }
 
         Swal.fire({
@@ -111,34 +106,27 @@ const FormularioDescuentos: React.FC<FormularioDescuentosProps> = ({
           title: isEditMode
             ? "¡Descuento actualizado!"
             : "¡Descuento registrado!",
-          html: `
-            <p><strong>Descuento:</strong> ${result.nombre_descuento}</p>
-            <p><strong>Monto:</strong> $${parseFloat(result.porcentaje).toFixed(
-              2
-            )}</p>
-            <p><strong>Estado:</strong> ${
-              result.activo
-                ? '<span style="color: #10b981;">Activo</span>'
-                : '<span style="color: #ef4444;">Inactivo</span>'
-            }</p>
-          `,
-          confirmButtonColor: "#58b2ee",
         });
 
-        if (onSuccess) onSuccess();
+        onSuccess();
       } catch (error: any) {
         Swal.fire({
           icon: "error",
-          title: isEditMode ? "Error al actualizar" : "Error al registrar",
+          title: "Error",
           text: error.message || "Ocurrió un error inesperado",
-          confirmButtonColor: "#ef4444",
         });
       }
     },
 
     submitButtonText: isEditMode ? "Guardar Cambios" : "Registrar Descuento",
-    resetButtonText: isEditMode ? "Cancelar" : "Limpiar Formulario",
+    resetButtonText: isEditMode ? "Cancelar" : "Limpiar",
     showResetButton: true,
+
+    onReset: () => {
+      if (isEditMode) {
+        onCancel();
+      }
+    },
   };
 
   return <FormularioReutilizable config={formConfig} />;

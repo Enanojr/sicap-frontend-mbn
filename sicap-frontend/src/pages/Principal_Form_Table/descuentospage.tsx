@@ -34,10 +34,6 @@ const DescuentosPage: React.FC = () => {
               <strong>{descuentoToEdit.nombre_descuento}</strong>
             </span>
           </div>
-
-          <button onClick={handleCancel} className="edit-banner-button">
-            ✖ Cancelar Edición
-          </button>
         </div>
       )}
 
