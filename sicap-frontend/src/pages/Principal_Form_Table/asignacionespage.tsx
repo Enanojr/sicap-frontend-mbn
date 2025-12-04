@@ -43,10 +43,6 @@ const AsignacionesPage: React.FC = () => {
               </strong>
             </span>
           </div>
-
-          <button onClick={handleCancel} className="edit-banner-button">
-            ✖ Cancelar Edición
-          </button>
         </div>
       )}
 

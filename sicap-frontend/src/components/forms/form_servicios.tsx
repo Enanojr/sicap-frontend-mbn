@@ -1,166 +1,100 @@
-import React from "react";
-import type { FormConfig } from "../forms/form";
-import FormularioReutilizable from "../forms/form";
-import { DollarSign, Briefcase } from "lucide-react";
+import { useEffect } from "react";
 import Swal from "sweetalert2";
+import { DollarSign, FileText } from "lucide-react";
+
+import type { FormConfig } from "./form";
+import FormularioReutilizable from "./form";
+
 import {
   createServicio,
   updateServicio,
-  type ServicioCreate,
   type ServicioResponse,
 } from "../../services/servicios.service";
-import { isAuthenticated, logout } from "../../services/auth.service";
 
-// AGREGAR INTERFAZ DE PROPS
 interface FormularioServiciosProps {
-  servicioToEdit?: ServicioResponse | null;
-  onSuccess?: () => void;
-  onCancel?: () => void;
+  servicioToEdit: ServicioResponse | null;
+  onSuccess: () => void;
+  onCancel: () => void;
 }
 
-//  CAMBIAR LA FIRMA DEL COMPONENTE
-const FormularioServicios: React.FC<FormularioServiciosProps> = ({
+export default function FormularioServicios({
   servicioToEdit,
   onSuccess,
-}) => {
-  // DETECTAR SI ESTAMOS EN MODO EDICIÓN
-  const isEditMode = !!servicioToEdit;
-
-  const validateCosto = (value: any): string | null => {
-    const num = parseFloat(value);
-    if (isNaN(num) || num <= 0) {
-      return "El costo debe ser mayor a 0";
-    }
-    if (num > 999999.99) {
-      return "El costo no puede exceder $999,999.99";
-    }
-    return null;
-  };
-
-  const validateNombre = (value: any): string | null => {
-    if (!value || value.trim().length === 0) {
-      return "El nombre es requerido";
-    }
-    if (value.trim().length < 3) {
-      return "El nombre debe tener al menos 3 caracteres";
-    }
-    if (value.trim().length > 100) {
-      return "El nombre no puede exceder 100 caracteres";
-    }
-    return null;
-  };
+  onCancel,
+}: FormularioServiciosProps) {
+  useEffect(() => {}, [servicioToEdit]);
 
   const formConfig: FormConfig = {
-    //  TÍTULO DINÁMICO
-    title: isEditMode ? "Editar Servicio" : "Registro de Servicios",
+    title: servicioToEdit ? "Editar Servicio" : "Registrar Servicio",
+
     fields: [
       {
         name: "nombre",
         label: "Nombre del Servicio",
         type: "text",
-        placeholder: "Ej: Agua Potable, Drenaje, Balneario...",
-        icon: Briefcase,
+        icon: FileText,
         required: true,
-        validation: validateNombre,
-        defaultValue: servicioToEdit?.nombre || "",
+        defaultValue: servicioToEdit?.nombre ?? "",
+        validation: (value: string | number) =>
+          !String(value).trim() ? "El nombre es obligatorio" : null,
       },
       {
         name: "costo",
         label: "Costo del Servicio (MXN)",
         type: "number",
-        placeholder: "0.00",
         icon: DollarSign,
         required: true,
-        validation: validateCosto,
-        defaultValue: servicioToEdit?.costo?.toString() || "0",
+        defaultValue: servicioToEdit?.costo ?? "",
+        validation: (value: string | number) =>
+          Number(value) <= 0 ? "El costo debe ser mayor que 0" : null,
       },
     ],
 
     onSubmit: async (data) => {
       try {
-        if (!isAuthenticated()) {
-          Swal.fire({
-            icon: "error",
-            title: "Sesión expirada",
-            text: "Por favor, inicia sesión nuevamente.",
-            confirmButtonColor: "#ef4444",
+        if (servicioToEdit) {
+          await updateServicio(servicioToEdit.id_servicio!, {
+            nombre: data.nombre,
+            costo: Number(data.costo),
           });
-          logout();
-          return;
-        }
 
-        Swal.fire({
-          title: isEditMode ? "Actualizando..." : "Enviando...",
-          text: isEditMode
-            ? "Actualizando el servicio, por favor espera."
-            : "Registrando el servicio, por favor espera.",
-          allowOutsideClick: false,
-          didOpen: () => Swal.showLoading(),
-        });
-
-        const servicioData: ServicioCreate = {
-          nombre: data.nombre.trim(),
-          costo: parseFloat(data.costo),
-        };
-
-        console.log(" Datos a enviar:", servicioData);
-
-        let result: ServicioResponse;
-
-        //  CREAR O ACTUALIZAR SEGÚN EL MODO
-        if (isEditMode) {
-          result = await updateServicio(
-            servicioToEdit!.id_servicio!,
-            servicioData
-          );
+          Swal.fire({
+            icon: "success",
+            title: "Servicio actualizado",
+            timer: 2000,
+          });
         } else {
-          result = await createServicio(servicioData);
-        }
+          await createServicio({
+            nombre: data.nombre,
+            costo: Number(data.costo),
+          });
 
-        // Mostrar éxito
-        Swal.fire({
-          icon: "success",
-          title: isEditMode
-            ? "¡Servicio actualizado exitosamente!"
-            : "¡Servicio registrado exitosamente!",
-          html: `
-            <div style="text-align: left; padding: 10px;">
-              <p><strong>Servicio:</strong> ${result.nombre}</p>
-              <p><strong>Costo:</strong> $${result.costo.toFixed(2)} MXN</p>
-            </div>
-          `,
-          confirmButtonColor: "#58b2ee",
-          confirmButtonText: "Aceptar",
-        });
-
-        // LLAMAR CALLBACK DE ÉXITO
-        if (onSuccess) {
-          onSuccess();
-        }
-      } catch (error: any) {
-        console.error(" Error al procesar el servicio:", error);
-
-        if (!error.message?.includes("Sesión expirada")) {
           Swal.fire({
-            icon: "error",
-            title: isEditMode ? "Error al Actualizar" : "Error al Registrar",
-            text:
-              error.message ||
-              "Ocurrió un problema al procesar la solicitud. Intenta nuevamente.",
-            confirmButtonColor: "#ef4444",
-            confirmButtonText: "Cerrar",
+            icon: "success",
+            title: "Servicio registrado",
+            timer: 2000,
           });
         }
+
+        onSuccess();
+      } catch (e) {
+        Swal.fire({
+          icon: "error",
+          title: "Error al guardar",
+        });
       }
     },
 
-    //  TEXTOS DINÁMICOS
-    submitButtonText: isEditMode ? "Guardar Cambios" : "Registrar Servicio",
-    resetButtonText: isEditMode ? "Cancelar" : "Limpiar Formulario",
+    submitButtonText: servicioToEdit ? "Guardar Cambios" : "Registrar Servicio",
+    resetButtonText: servicioToEdit ? "Cancelar" : "Limpiar",
     showResetButton: true,
+
+    onReset: () => {
+      if (servicioToEdit) {
+        onCancel();
+      }
+    },
   };
 
-  return <FormularioReutilizable config={formConfig} isEditMode={isEditMode} />;
-};
-
-export default FormularioServicios;
+  return <FormularioReutilizable config={formConfig} />;
+}
