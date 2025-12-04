@@ -3,18 +3,18 @@ import { ReusableTable } from "./registros_general";
 import type { Column } from "./registros_general";
 import {
   getAllServicios,
-  deleteServicio,
+  // deleteServicio,
   type ServicioResponse,
 } from "../../services/servicios.service";
-import Swal from "sweetalert2";
+//import Swal from "sweetalert2";
 
 interface TablaServiciosProps {
   onEdit: (servicio: ServicioResponse) => void;
 }
 
 const TablaServicios: React.FC<TablaServiciosProps> = ({ onEdit }) => {
-  const [refreshKey, setRefreshKey] = useState(0);
-
+  const [refreshKey] = useState(0);
+  //setRefreshKey adentro de la constante
   const columns: Column<ServicioResponse>[] = [
     {
       key: "nombre",
@@ -40,7 +40,9 @@ const TablaServicios: React.FC<TablaServiciosProps> = ({ onEdit }) => {
     onEdit(servicio);
   };
 
-  const handleDelete = async (servicio: ServicioResponse): Promise<boolean> => {
+  {
+    /*
+ const handleDelete = async (servicio: ServicioResponse): Promise<boolean> => {
     const result = await Swal.fire({
       title: "¿Estás seguro?",
       text: `¿Deseas eliminar el servicio "${servicio.nombre}"?`,
@@ -64,7 +66,7 @@ const TablaServicios: React.FC<TablaServiciosProps> = ({ onEdit }) => {
         });
 
         setRefreshKey((prev) => prev + 1);
-        return true; // Deletion successful
+        return true;
       } catch (error) {
         Swal.fire({
           icon: "error",
@@ -72,12 +74,13 @@ const TablaServicios: React.FC<TablaServiciosProps> = ({ onEdit }) => {
           text: "No se pudo eliminar el servicio",
           confirmButtonColor: "#ef4444",
         });
-        return false; // Deletion failed
+        return false;
       }
     }
 
-    return false; // User cancelled
-  };
+    return false;
+  };   */
+  }
 
   return (
     <ReusableTable<ServicioResponse>
@@ -89,7 +92,7 @@ const TablaServicios: React.FC<TablaServiciosProps> = ({ onEdit }) => {
       title="Servicios Registrados"
       showActions={true}
       onEdit={handleEdit}
-      onDelete={handleDelete}
+      //onDelete={handleDelete}
       getRowId={(servicio) => servicio.id_servicio!}
     />
   );

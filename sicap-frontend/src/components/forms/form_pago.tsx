@@ -130,13 +130,14 @@ const FormularioPagos: React.FC = () => {
             ? data.next.replace("https://sicap-backend.onrender.com", "")
             : null;
         }
+        const activos = all.filter((d) => (d as any).activo === true);
 
         const map = new Map<number, Descuento>();
-        all.forEach((d) => map.set(d.id_descuento, d));
+        activos.forEach((d) => map.set(d.id_descuento, d));
         setDescuentosMap(map);
 
         setDescuentos(
-          all.map((d) => ({
+          activos.map((d) => ({
             value: d.id_descuento.toString(),
             label: d.nombre_descuento,
           }))
@@ -289,14 +290,14 @@ const FormularioPagos: React.FC = () => {
     [cuentahabientesMap, descuentosMap]
   );
 
-  // ✅ FormConfig con useMemo
+  //  FormConfig con useMemo
   const formConfig: FormConfig = useMemo(
     () => ({
       title: "Registro de Pagos",
       fields: [
         {
           name: "cuentahabiente",
-          label: "Cuenta Habiente",
+          label: "Cuentahabiente",
           type: "search-select" as const,
           required: true,
           options: filteredOptions,

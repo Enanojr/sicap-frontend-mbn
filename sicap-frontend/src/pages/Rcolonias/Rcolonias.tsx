@@ -1,30 +1,31 @@
-
-import { registerUser } from "../../services/Rcolonias.service";
-// Importa los íconos
 import { House, MapPin } from "lucide-react";
 import Swal from "sweetalert2";
 
-// Importa los componentes y tipos del formulario reutilizable
-import FormularioReutilizable from "../../components/forms/form"; // Asegúrate que la ruta sea correcta
-import type { FormConfig } from "../../components/forms/form"; // Asegúrate que la ruta sea correcta
+import FormularioReutilizable from "../../components/forms/form";
+import type { FormConfig } from "../../components/forms/form";
 
-export default function RegisterColonia() {
-  // --- Función de Validación Específica (para C.P.) ---
-  const validatePostalCode = (value: string): string | null => {
-    if (!value) {
-      return "El código postal es requerido";
-    }
-    // Opcional: Podrías añadir más validaciones aquí, como:
-    // if (!/^\d{5}$/.test(value)) {
-    //   return "Debe ser un código postal de 5 dígitos";
-    // }
+import type { ColoniaResponse } from "../../services/Rcolonias.service";
+import { registerUser, updateColonia } from "../../services/Rcolonias.service";
+
+interface RegisterColoniaProps {
+  coloniaToEdit: ColoniaResponse | null;
+  onSuccess: () => void;
+  onCancel: () => void;
+}
+
+export default function RegisterColonia({
+  coloniaToEdit,
+  onSuccess,
+  onCancel,
+}: RegisterColoniaProps) {
+  const validatePostalCode = (value: string | number): string | null => {
+    const strValue = String(value);
+    if (!strValue.trim()) return "El código postal es requerido";
     return null;
   };
 
-  // --- Configuración del Formulario ---
-
   const formConfig: FormConfig = {
-    title: "REGISTRO DE COLONIA",
+    title: coloniaToEdit ? "Editar Colonia" : "Registro de Colonias",
     fields: [
       {
         name: "nombre_colonia",
@@ -33,87 +34,85 @@ export default function RegisterColonia() {
         icon: House,
         required: true,
         placeholder: "Ingrese la colonia",
-        validation: (value: string) =>
-          !value.trim() ? "La colonia es requerida" : null,
+        defaultValue: coloniaToEdit?.nombre_colonia ?? "",
+        validation: (value: string | number) =>
+          !String(value).trim() ? "La colonia es requerida" : null,
       },
       {
         name: "codigo_postal",
-        label: "Codigo Postal",
-        type: "number", // El tipo 'number' para el input
+        label: "Código Postal",
+        type: "number",
         icon: MapPin,
         required: true,
-        placeholder: "Ingrese el codigo postal",
-        validation: validatePostalCode, // Usa la función de validación
+        placeholder: "Ingrese el código postal",
+        defaultValue: coloniaToEdit?.codigo_postal ?? "",
+        validation: validatePostalCode,
       },
     ],
 
-    // --- Lógica de Envío ---
     onSubmit: async (data) => {
-      // El componente reutilizable ya hizo la validación
       try {
-        const result = await registerUser(data as any);
+        const payload = {
+          nombre_colonia: data.nombre_colonia,
+          codigo_postal: data.codigo_postal,
+        };
+
+        let result;
+
+        if (coloniaToEdit) {
+          result = await updateColonia(coloniaToEdit.id_colonia, payload);
+        } else {
+          result = await registerUser(payload);
+        }
 
         if (result.success) {
           Swal.fire({
             icon: "success",
-            title: "¡Registro exitoso!",
-            // Texto actualizado para 'colonia'
-            text: "La colonia ha sido registrada correctamente",
+            title: coloniaToEdit
+              ? "¡Colonia actualizada!"
+              : "¡Registro exitoso!",
+            text: coloniaToEdit
+              ? "La colonia fue modificada correctamente."
+              : "La colonia fue registrada correctamente.",
             confirmButtonColor: "#667eea",
             timer: 3000,
-            timerProgressBar: true,
           });
-          // El formulario se limpiará automáticamente
-        } else {
-          // Manejar errores específicos del servidor
-          let errorMessage = "Error al registrar la colonia"; // Texto actualizado
 
-          if (result.errors) {
-            if (typeof result.errors === "object") {
-              const firstErrorKey = Object.keys(result.errors)[0];
-              const firstErrorValue = result.errors[firstErrorKey];
-              errorMessage = Array.isArray(firstErrorValue)
-                ? firstErrorValue[0]
-                : firstErrorValue;
-            } else if (result.errors.general) {
-              errorMessage = result.errors.general;
-            }
-          }
+          onSuccess();
+        } else {
+          let errorMessage = "Error al procesar la solicitud.";
+          const firstKey = Object.keys(result.errors)[0];
+          const firstValue = result.errors[firstKey];
+          errorMessage = Array.isArray(firstValue) ? firstValue[0] : firstValue;
 
           Swal.fire({
             icon: "error",
-            title: "Error de registro",
+            title: "Error",
             text: errorMessage,
             confirmButtonColor: "#667eea",
           });
 
-          // Lanzamos un error para que el formulario reutilizable sepa que falló
           throw new Error(errorMessage);
         }
       } catch (error: any) {
-        console.error("Error inesperado:", error);
-        
-        // Evita mostrar dos alertas si el error ya fue manejado
-        if (!error.message.includes("Error al registrar")) {
-          Swal.fire({
-            icon: "error",
-            title: "Error inesperado",
-            text: "Ocurrió un error al registrar la colonia. Por favor, intente nuevamente.",
-            confirmButtonColor: "#667eea",
-          });
-        }
-        
-        // Relanzamos el error para el componente
+        Swal.fire({
+          icon: "error",
+          title: "Error inesperado",
+          text: "Ocurrió un problema al guardar los datos.",
+          confirmButtonColor: "#667eea",
+        });
         throw error;
       }
     },
 
-    // --- Configuración de Botones ---
-    submitButtonText: "Registrar Colonia",
-    resetButtonText: "Limpiar",
+    submitButtonText: coloniaToEdit ? "Guardar Cambios" : "Registrar Colonia",
+    resetButtonText: coloniaToEdit ? "Cancelar" : "Limpiar",
     showResetButton: true,
+
+    onReset: () => {
+      if (coloniaToEdit) onCancel();
+    },
   };
 
-  // Simplemente renderiza el formulario reutilizable con la config
   return <FormularioReutilizable config={formConfig} />;
 }

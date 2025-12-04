@@ -1,147 +1,73 @@
-import api from '../api_axios'; // Ajusta la ruta según tu estructura
+import api from "../api_axios";
 
-const API_URL = "/sector/"; // O la ruta que uses para registro
+const API_URL = "/sector/";
 
-/**
- * Obtiene el token del administrador desde localStorage
- */
 const getAdminToken = (): string | null => {
-  return localStorage.getItem('access');
+  return localStorage.getItem("access");
 };
 
-/**
- * Registra un nuevo sector (solo admins)
- * @param userData - Datos del sector a registrar
- * @returns Promise con el resultado del registro
- */
-export const registerSector = async (userData: {
+export interface SectorBase {
   nombre_sector: string;
   descripcion: string;
-}) => {
+}
+
+export interface SectorResponse extends SectorBase {
+  id_sector: number;
+}
+
+/* -------------------- CREATE -------------------- */
+export const registerSector = async (data: SectorBase) => {
   try {
     const token = getAdminToken();
-    
     if (!token) {
-      return {
-        success: false,
-        errors: {
-          general: 'No se encontró token de administrador. Por favor, inicie sesión.'
-        }
-      };
+      return { success: false, errors: { general: "No hay token" } };
     }
 
-    const response = await api.post(`${API_URL}`, {
-      nombre_sector: userData.nombre_sector,
-      descripcion: userData.descripcion,
-    });
-
-    return {
-      success: true,
-      data: response.data
-    };
-
+    const response = await api.post(API_URL, data);
+    return { success: true, data: response.data };
   } catch (error: any) {
-    console.error('Error en registerSector:', error);
-    
-    if (error.response && error.response.data) {
-      return {
-        success: false,
-        errors: error.response.data
-      };
-    }
-    
     return {
       success: false,
-      errors: {
-        general: 'Error al conectar con el servidor. Por favor, intente nuevamente.'
-      }
+      errors: error.response?.data || { general: "Error al crear sector" },
     };
   }
 };
 
-/**
- * Obtiene todos los sectores
- * @returns Promise con la lista de sectores
- */
+/* -------------------- UPDATE -------------------- */
+export const updateSector = async (id: number, data: SectorBase) => {
+  try {
+    const token = getAdminToken();
+    if (!token) return { success: false, errors: { general: "No hay token" } };
+
+    const response = await api.put(`${API_URL}${id}/`, data);
+    return { success: true, data: response.data };
+  } catch (error: any) {
+    return {
+      success: false,
+      errors: error.response?.data || { general: "Error al actualizar sector" },
+    };
+  }
+};
+
+/* -------------------- GET ALL -------------------- */
 export const getSectores = async () => {
   try {
-    const token = getAdminToken();
-    
-    if (!token) {
-      return {
-        success: false,
-        errors: {
-          general: 'No se encontró token de administrador. Por favor, inicie sesión.'
-        }
-      };
-    }
-
-    const response = await api.get(`${API_URL}`);
-
-    return {
-      success: true,
-      data: response.data
-    };
-
+    const response = await api.get(API_URL);
+    return { success: true, data: response.data };
   } catch (error: any) {
-    console.error('Error en getSectores:', error);
-    
-    if (error.response && error.response.data) {
-      return {
-        success: false,
-        errors: error.response.data
-      };
-    }
-    
-    return {
-      success: false,
-      errors: {
-        general: 'Error al obtener los sectores. Por favor, intente nuevamente.'
-      }
-    };
+    return { success: false, errors: error.response?.data };
   }
 };
 
-/**
- * Obtiene un sector por su ID
- * @param id - ID del sector
- * @returns Promise con los datos del sector
- */
-export const getSectorById = async (id: string | number) => {
+/* -------------------- DELETE -------------------- */
+export const deleteSector = async (id: number) => {
   try {
-    const token = getAdminToken();
-    
-    if (!token) {
-      return {
-        success: false,
-        errors: {
-          general: 'No se encontró token de administrador. Por favor, inicie sesión.'
-        }
-      };
-    }
-
-    const response = await api.get(`${API_URL}${id}/`);
-
-    return {
-      success: true,
-      data: response.data
-    };
-
+    const response = await api.delete(`${API_URL}${id}/`);
+    return { success: true, data: response.data };
   } catch (error: any) {
-    console.error('Error en getSectorById:', error);
-    
-    if (error.response && error.response.data) {
-      return {
-        success: false,
-        errors: error.response.data
-      };
-    }
-    
     return {
       success: false,
-      errors: {
-        general: 'Error al obtener el sector. Por favor, intente nuevamente.'
-      }
+      errors: error.response?.data || { general: "Error al eliminar sector" },
     };
   }
 };

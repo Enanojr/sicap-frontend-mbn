@@ -173,7 +173,7 @@ const FormularioCuentahabientes: React.FC<Props> = ({
 
       {
         name: "numero",
-        label: "Número",
+        label: "Número de Casa",
         type: "number",
         icon: Home,
         required: true,

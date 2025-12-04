@@ -2842,3 +2842,35 @@ input[type="number"]::-webkit-inner-spin-button {
   box-shadow: 0 0 0 3px rgba(88, 178, 238, 0.1);
   outline: none;
 }
+
+.chip-status {
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+  display: inline-block;
+  user-select: none;
+  transition: all 0.25s ease;
+}
+
+/* Activo: verde profesional */
+.chip-status.on {
+  background-color: #10b981; /* verde tailwind */
+  color: white;
+  border: 1px solid #0c8a68;
+}
+
+/* Inactivo: gris elegante */
+.chip-status.off {
+  background-color: #6b7280;
+  color: white;
+  border: 1px solid #4b5563;
+}
+
+/* Hover sutil */
+.chip-status:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+}

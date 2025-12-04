@@ -232,7 +232,7 @@ const ContractTable: React.FC = () => {
     <div className="contracts-page-container">
       <div className="contracts-card">
         <h2 className="contracts-title">
-          <span className="contracts-title-gradient">CONSULTAS</span>
+          <span className="contracts-title-gradient">Consultas</span>
         </h2>
         <div className="contracts-divider"></div>
 
