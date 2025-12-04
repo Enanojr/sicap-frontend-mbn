@@ -98,7 +98,7 @@ const TablaCuentahabientes: React.FC<{
   }, []);
 
   const columns: Column<CuentahabienteRow>[] = [
-    { key: "numero_contrato", label: "Contrato" },
+    { key: "numero_contrato", label: "Número de Contrato" },
 
     {
       key: "nombres",
@@ -120,9 +120,9 @@ const TablaCuentahabientes: React.FC<{
     },
 
     {
-      key: "servicio",
-      label: "Servicio",
-      render: (value) => servicioMap[value] ?? `ID: ${value}`,
+      key: "telefono",
+      label: "Teléfono",
+      render: (value) => servicioMap[value] ?? ` ${value}`,
     },
   ];
 

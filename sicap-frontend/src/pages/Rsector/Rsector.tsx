@@ -1,18 +1,29 @@
-
-import { registerSector } from "../../services/Rsector.service";
-// Importa los íconos
 import { MapPinHouse, BookOpenText } from "lucide-react";
 import Swal from "sweetalert2";
 
-// Importa los componentes y tipos del formulario reutilizable
-import FormularioReutilizable from "../../components/forms/form"; // Asegúrate que la ruta sea correcta
-import type { FormConfig } from "../../components/forms/form"; // Asegúrate que la ruta sea correcta
+import FormularioReutilizable from "../../components/forms/form";
+import type { FormConfig } from "../../components/forms/form";
 
-export default function RegisterSector() {
-  // --- Configuración del Formulario ---
+import {
+  registerSector,
+  updateSector,
+  type SectorResponse,
+} from "../../services/Rsector.service";
 
+interface RegisterSectorProps {
+  sectorToEdit: SectorResponse | null;
+  onSuccess: () => void;
+  onCancel: () => void;
+}
+
+export default function RegisterSector({
+  sectorToEdit,
+  onSuccess,
+  onCancel,
+}: RegisterSectorProps) {
   const formConfig: FormConfig = {
-    title: "REGISTRO DE SECTOR",
+    title: sectorToEdit ? "Editar Sector" : "Registro de Sectores",
+
     fields: [
       {
         name: "nombre_sector",
@@ -21,88 +32,73 @@ export default function RegisterSector() {
         icon: MapPinHouse,
         required: true,
         placeholder: "Ingrese el sector",
-        validation: (value: string) =>
-          !value.trim() ? "El sector es requerido" : null,
+        defaultValue: sectorToEdit?.nombre_sector ?? "",
+        validation: (value: string | number) =>
+          !value || value.toString().trim() === ""
+            ? "El nombre del sector es requerido"
+            : null,
       },
       {
         name: "descripcion",
-        label: "Descripcion",
-        type: "text", // El original usa 'input', no 'textarea'
+        label: "Descripción",
+        type: "text",
         icon: BookOpenText,
         required: true,
-        placeholder: "Ingrese una descripción del sector",
-        validation: (value: string) =>
-          !value.trim() ? "La descripción es requerida" : null,
+        placeholder: "Ingrese una descripción",
+        defaultValue: sectorToEdit?.descripcion ?? "",
+        validation: (value: string | number) =>
+          !value || value.toString().trim() === ""
+            ? "La descripción es requerida"
+            : null,
       },
     ],
 
-    // --- Lógica de Envío ---
     onSubmit: async (data) => {
-      // El componente reutilizable ya hizo la validación
+      const payload = {
+        nombre_sector: data.nombre_sector,
+        descripcion: data.descripcion,
+      };
+
+      let result;
+
       try {
-        const result = await registerSector(data as any);
+        if (sectorToEdit) {
+          // 🔥 EDITAR
+          result = await updateSector(sectorToEdit.id_sector, payload);
+        } else {
+          // 🟢 REGISTRAR
+          result = await registerSector(payload);
+        }
 
         if (result.success) {
           Swal.fire({
             icon: "success",
-            title: "¡Registro exitoso!",
-            // Texto actualizado para 'sector'
-            text: "El sector ha sido registrado correctamente",
+            title: sectorToEdit ? "¡Sector actualizado!" : "¡Registro exitoso!",
+            timer: 2500,
             confirmButtonColor: "#667eea",
-            timer: 3000,
-            timerProgressBar: true,
           });
-          // El formulario se limpiará automáticamente
+
+          onSuccess();
         } else {
-          // Manejar errores específicos del servidor
-          let errorMessage = "Error al registrar el sector"; // Texto actualizado
-
-          if (result.errors) {
-            if (typeof result.errors === "object") {
-              const firstErrorKey = Object.keys(result.errors)[0];
-              const firstErrorValue = result.errors[firstErrorKey];
-              errorMessage = Array.isArray(firstErrorValue)
-                ? firstErrorValue[0]
-                : firstErrorValue;
-            } else if (result.errors.general) {
-              errorMessage = result.errors.general;
-            }
-          }
-
-          Swal.fire({
-            icon: "error",
-            title: "Error de registro",
-            text: errorMessage,
-            confirmButtonColor: "#667eea",
-          });
-
-          // Lanzamos un error para que el formulario reutilizable sepa que falló
-          throw new Error(errorMessage);
+          throw new Error("Error en la operación");
         }
-      } catch (error: any) {
-        console.error("Error inesperado:", error);
-        
-        // Evita mostrar dos alertas si el error ya fue manejado
-        if (!error.message.includes("Error al registrar")) {
-          Swal.fire({
-            icon: "error",
-            title: "Error inesperado",
-            text: "Ocurrió un error al registrar el sector. Por favor, intente nuevamente.",
-            confirmButtonColor: "#667eea",
-          });
-        }
-        
-        // Relanzamos el error para el componente
-        throw error;
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "No se pudo guardar el sector",
+        });
       }
     },
 
-    // --- Configuración de Botones ---
-    submitButtonText: "Registrar Sector",
-    resetButtonText: "Limpiar",
+    submitButtonText: sectorToEdit ? "Guardar Cambios" : "Registrar Sector",
+    resetButtonText: sectorToEdit ? "Cancelar" : "Limpiar",
     showResetButton: true,
+
+    onReset: () => {
+      if (sectorToEdit) onCancel();
+    },
   };
 
-  // Simplemente renderiza el formulario reutilizable con la config
   return <FormularioReutilizable config={formConfig} />;
 }

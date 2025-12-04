@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { ReusableTable } from "./registros_general";
 import type { Column } from "./registros_general";
+
 import {
   getAllDescuentos,
-  deleteDescuento,
+  updateDescuento,
   type DescuentoResponse,
 } from "../../services/descuento.service";
-import Swal from "sweetalert2";
 
 interface TablaDescuentosProps {
   onEdit: (descuento: DescuentoResponse) => void;
@@ -30,8 +30,15 @@ const TablaDescuentos: React.FC<TablaDescuentosProps> = ({ onEdit }) => {
     },
     {
       key: "activo",
-      label: "Activo",
-      render: (value) => (value ? "Sí" : "No"),
+      label: "Estado",
+      render: (_value, item) => (
+        <span
+          className={`chip-status ${item.activo ? "on" : "off"}`}
+          onClick={() => handleToggleActivo(item)}
+        >
+          {item.activo ? "ACTIVO" : "INACTIVO"}
+        </span>
+      ),
     },
   ];
 
@@ -43,45 +50,18 @@ const TablaDescuentos: React.FC<TablaDescuentosProps> = ({ onEdit }) => {
     onEdit(descuento);
   };
 
-  const handleDelete = async (
-    descuento: DescuentoResponse
-  ): Promise<boolean> => {
-    const result = await Swal.fire({
-      title: "¿Estás seguro?",
-      text: `¿Deseas eliminar el descuento "${descuento.nombre_descuento}"?`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#ef4444",
-      cancelButtonColor: "#6b7280",
-      confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar",
-    });
+  const handleToggleActivo = async (descuento: DescuentoResponse) => {
+    try {
+      await updateDescuento(descuento.id_descuento, {
+        nombre_descuento: descuento.nombre_descuento,
+        porcentaje: descuento.porcentaje,
+        activo: !descuento.activo,
+      });
 
-    if (result.isConfirmed) {
-      try {
-        await deleteDescuento(descuento.id_descuento!);
-
-        Swal.fire({
-          icon: "success",
-          title: "¡Eliminado!",
-          text: "El descuento ha sido eliminado correctamente",
-          confirmButtonColor: "#10b981",
-        });
-
-        setRefreshKey((prev) => prev + 1);
-        return true; // Deletion successful
-      } catch (error) {
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: "No se pudo eliminar el descuento",
-          confirmButtonColor: "#ef4444",
-        });
-        return false; // Deletion failed
-      }
+      setRefreshKey((prev) => prev + 1);
+    } catch (error) {
+      console.error("Error al actualizar estado del descuento:", error);
     }
-
-    return false; // User cancelled
   };
 
   return (
@@ -94,7 +74,6 @@ const TablaDescuentos: React.FC<TablaDescuentosProps> = ({ onEdit }) => {
       title="Descuentos Registrados"
       showActions={true}
       onEdit={handleEdit}
-      onDelete={handleDelete}
       getRowId={(row) => row.id_descuento!}
     />
   );

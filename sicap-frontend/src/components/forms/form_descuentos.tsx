@@ -1,7 +1,7 @@
 import React from "react";
 import type { FormConfig } from "../forms/form";
 import FormularioReutilizable from "../forms/form";
-import { DollarSign, Tag, ToggleLeft } from "lucide-react";
+import { DollarSign, Tag } from "lucide-react";
 import Swal from "sweetalert2";
 
 import {
@@ -65,21 +65,6 @@ const FormularioDescuentos: React.FC<FormularioDescuentosProps> = ({
         validation: validateMonto,
         defaultValue: descuentoToEdit?.porcentaje?.toString() || "0",
       },
-      {
-        name: "activo",
-        label: "Estado del Descuento",
-        type: "select",
-        icon: ToggleLeft,
-        required: true,
-        options: [
-          { value: "true", label: "Activo" },
-          { value: "false", label: "Inactivo" },
-        ],
-        defaultValue:
-          descuentoToEdit?.activo !== undefined
-            ? descuentoToEdit.activo.toString()
-            : "true",
-      },
     ],
 
     onSubmit: async (data) => {
@@ -107,7 +92,7 @@ const FormularioDescuentos: React.FC<FormularioDescuentosProps> = ({
         const descuentoData: DescuentoCreate = {
           nombre_descuento: data.nombre.trim(),
           porcentaje: parseFloat(data.monto).toFixed(2),
-          activo: data.activo === "true",
+          activo: isEditMode ? descuentoToEdit!.activo : true,
         };
 
         let result: DescuentoResponse;
