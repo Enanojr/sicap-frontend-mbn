@@ -6,6 +6,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ArrowLeft,
+  RefreshCw,
 } from "lucide-react";
 import Swal from "sweetalert2";
 import type { Progreso } from "../../services/progreso.service";
@@ -28,10 +29,12 @@ const filterOptions: FilterOption[] = [
 
 // Componente de icono de batería con color según progreso
 const BatteryIcon: React.FC<{ progreso: string }> = ({ progreso }) => {
-  const progressValue = parseInt(progreso.replace("%", ""));
+  // Validación mejorada del valor de progreso
+  const progressStr = String(progreso || "0").replace("%", "").trim();
+  const progressValue = parseInt(progressStr) || 0;
 
   let color = "#10b981"; // Verde
-  let fillLevel = progressValue;
+  let fillLevel = Math.min(Math.max(progressValue, 0), 100); // Asegurar entre 0-100
 
   if (progressValue >= 80 && progressValue <= 100) {
     color = "#10b981"; // Verde
@@ -63,7 +66,6 @@ const BatteryIcon: React.FC<{ progreso: string }> = ({ progreso }) => {
           backgroundColor: "#f9fafb",
         }}
       >
-        {/* Punta de la batería */}
         <div
           style={{
             position: "absolute",
@@ -76,8 +78,6 @@ const BatteryIcon: React.FC<{ progreso: string }> = ({ progreso }) => {
             borderRadius: "0 2px 2px 0",
           }}
         />
-
-        {/* Nivel de llenado */}
         <div
           style={{
             height: "100%",
@@ -95,7 +95,7 @@ const BatteryIcon: React.FC<{ progreso: string }> = ({ progreso }) => {
           color: color,
         }}
       >
-        {progreso}
+        {fillLevel}%
       </span>
     </div>
   );
@@ -108,18 +108,34 @@ const ProgresoTable: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
+  const [retryCount, setRetryCount] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  
+  // Estado para detectar tamaño de ventana
+  const [windowWidth, setWindowWidth] = useState<number>(
+    typeof window !== 'undefined' ? window.innerWidth : 1024
+  );
+
+  const itemsPerPage = 15;
 
   const getStatusClass = (estatus: string) => {
-    const value = estatus.trim().toLowerCase();
+    if (!estatus) return "status-pending-light";
+    const value = String(estatus).trim().toLowerCase();
     if (["pagado", "corriente"].includes(value)) return "status-complete-light";
     if (["rezagado"].includes(value)) return "status-warning-light";
     if (["adeudo"].includes(value)) return "status-danger-light";
     return "status-pending-light";
   };
 
-  // Paginación
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const itemsPerPage = 15;
+  // Detectar cambios en el tamaño de ventana
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     loadData();
@@ -130,42 +146,102 @@ const ProgresoTable: React.FC = () => {
     setCurrentPage(1);
   }, [searchTerm, selectedFilter]);
 
-  const loadData = async () => {
+  const loadData = async (isRetry: boolean = false) => {
     try {
       setLoading(true);
       setError(null);
 
+      console.log("Iniciando carga de datos de progreso...");
+
       const response = await getAllProgresos();
 
+      console.log("Respuesta recibida:", response);
+
       if (response.success && response.data) {
-        setProgresos(response.data);
+        // Validar que sea un array
+        if (!Array.isArray(response.data)) {
+          console.error("Los datos recibidos no son un array:", response.data);
+          throw new Error("Formato de datos inválido");
+        }
+
+        // Validar que cada elemento tenga las propiedades necesarias
+        const validData = response.data.filter((item: any) => {
+          return (
+            item &&
+            typeof item === "object" &&
+            item.numero_contrato !== undefined &&
+            item.nombre !== undefined
+          );
+        });
+
+        console.log(`Datos válidos: ${validData.length} de ${response.data.length}`);
+
+        setProgresos(validData);
+        setRetryCount(0); // Reset retry count on success
       } else {
-        setError("Error al cargar los datos de progreso");
+        const errorMsg = response.errors?.general || "Error al cargar los datos de progreso";
+        console.error("Error en respuesta:", response.errors);
+        throw new Error(errorMsg);
       }
     } catch (err: any) {
-      const message = "Ocurrió un error al cargar los datos.";
+      console.error("Error en loadData:", err);
+      
+      const message = err.response?.data?.detail || 
+                     err.response?.data?.message || 
+                     err.message || 
+                     "Ocurrió un error al cargar los datos.";
+      
       setError(message);
 
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: message,
-      });
+      // Solo mostrar Swal si no es un retry automático
+      if (!isRetry) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: message,
+          showCancelButton: true,
+          confirmButtonText: "Reintentar",
+          cancelButtonText: "Cerrar",
+          confirmButtonColor: "#3b82f6",
+          cancelButtonColor: "#6b7280",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            loadData();
+          }
+        });
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  // Retry automático con backoff
+  useEffect(() => {
+    if (error && retryCount < 3) {
+      const timeout = setTimeout(() => {
+        console.log(`Reintento automático ${retryCount + 1}/3`);
+        setRetryCount(retryCount + 1);
+        loadData(true);
+      }, 2000 * (retryCount + 1)); // 2s, 4s, 6s
+
+      return () => clearTimeout(timeout);
+    }
+  }, [error, retryCount]);
+
   const filteredProgresos = progresos.filter((progreso) => {
+    if (!progreso) return false;
+
     const matchesSearch =
-      String(progreso.numero_contrato)
+      String(progreso.numero_contrato || "")
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
-      String(progreso.nombre).toLowerCase().includes(searchTerm.toLowerCase());
+      String(progreso.nombre || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
 
     const matchesStatus =
       selectedFilter === "all" ||
-      progreso.estatus.toLowerCase() === selectedFilter.toLowerCase();
+      String(progreso.estatus || "").toLowerCase() === selectedFilter.toLowerCase();
 
     return matchesSearch && matchesStatus;
   });
@@ -220,12 +296,17 @@ const ProgresoTable: React.FC = () => {
       "https://comisiondeaguaguadalupehidalgo.wordpress.com/";
   };
 
+  const handleRetry = () => {
+    setRetryCount(0);
+    loadData();
+  };
+
   return (
     <div
       style={{
         minHeight: "100vh",
         backgroundColor: "#f3f4f6",
-        padding: "2rem 1rem",
+        padding: "1rem",
       }}
     >
       <div
@@ -241,10 +322,12 @@ const ProgresoTable: React.FC = () => {
         {/* Botón de regreso */}
         <div
           style={{
-            padding: "1rem 1.5rem",
+            padding: "1rem",
             borderBottom: "1px solid #e5e7eb",
             display: "flex",
             alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
             gap: "1rem",
           }}
         >
@@ -272,14 +355,51 @@ const ProgresoTable: React.FC = () => {
             }
           >
             <ArrowLeft size={18} />
-            Regresar al Sitio Principal
+            <span style={{ display: windowWidth < 640 ? "none" : "inline" }}>
+              Regresar al Sitio Principal
+            </span>
+            <span style={{ display: windowWidth >= 640 ? "none" : "inline" }}>
+              Regresar
+            </span>
+          </button>
+
+          <button
+            onClick={handleRetry}
+            disabled={loading}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              padding: "0.5rem 1rem",
+              backgroundColor: loading ? "#9ca3af" : "#10b981",
+              color: "white",
+              border: "none",
+              borderRadius: "6px",
+              cursor: loading ? "not-allowed" : "pointer",
+              fontSize: "0.875rem",
+              fontWeight: 500,
+              transition: "background-color 0.3s",
+            }}
+            onMouseEnter={(e) => {
+              if (!loading) e.currentTarget.style.backgroundColor = "#059669";
+            }}
+            onMouseLeave={(e) => {
+              if (!loading) e.currentTarget.style.backgroundColor = "#10b981";
+            }}
+          >
+            <RefreshCw size={18} style={{ 
+              animation: loading ? "spin 1s linear infinite" : "none" 
+            }} />
+            <span style={{ display: windowWidth < 640 ? "none" : "inline" }}>
+              Actualizar
+            </span>
           </button>
         </div>
 
-        <div style={{ padding: "2rem" }}>
+        <div style={{ padding: "1rem" }}>
           <h2
             style={{
-              fontSize: "2rem",
+              fontSize: windowWidth < 640 ? "1.5rem" : "2rem",
               fontWeight: "bold",
               color: "#1f2937",
               textAlign: "center",
@@ -293,7 +413,7 @@ const ProgresoTable: React.FC = () => {
               height: "4px",
               width: "100px",
               backgroundColor: "#3b82f6",
-              margin: "0 auto 2rem",
+              margin: "0 auto 1.5rem",
               borderRadius: "2px",
             }}
           ></div>
@@ -302,13 +422,17 @@ const ProgresoTable: React.FC = () => {
           <div
             style={{
               display: "flex",
-              gap: "1rem",
+              gap: "0.75rem",
               marginBottom: "1.5rem",
-              flexWrap: "wrap",
-              alignItems: "center",
+              flexDirection: windowWidth < 768 ? "column" : "row",
             }}
           >
-            <div style={{ position: "relative" }}>
+            {/* Filtro de estatus */}
+            <div style={{ 
+              position: "relative",
+              width: windowWidth < 768 ? "100%" : "auto",
+              minWidth: windowWidth >= 768 ? "200px" : "auto"
+            }}>
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 style={{
@@ -323,12 +447,15 @@ const ProgresoTable: React.FC = () => {
                   fontSize: "0.875rem",
                   color: "#374151",
                   transition: "all 0.3s",
-                  whiteSpace: "nowrap",
+                  width: "100%",
+                  justifyContent: "space-between",
                 }}
                 type="button"
               >
-                <Battery size={18} color="#6b7280" />
-                <span>{getFilterLabel()}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                  <Battery size={18} color="#6b7280" />
+                  <span>{getFilterLabel()}</span>
+                </div>
                 <ChevronDown size={16} color="#6b7280" />
               </button>
 
@@ -338,13 +465,13 @@ const ProgresoTable: React.FC = () => {
                     position: "absolute",
                     top: "100%",
                     left: 0,
+                    right: 0,
                     marginTop: "0.5rem",
                     backgroundColor: "white",
                     border: "1px solid #e5e7eb",
                     borderRadius: "8px",
                     boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
                     zIndex: 10,
-                    minWidth: "200px",
                   }}
                 >
                   <ul
@@ -397,11 +524,13 @@ const ProgresoTable: React.FC = () => {
               )}
             </div>
 
+            {/* Barra de búsqueda */}
             <div
               style={{
                 position: "relative",
-                width: "400px",
-                maxWidth: "100%",
+                flex: 1,
+                width: windowWidth < 768 ? "100%" : "auto",
+                maxWidth: windowWidth >= 768 ? "500px" : "100%",
               }}
             >
               <Search
@@ -412,6 +541,8 @@ const ProgresoTable: React.FC = () => {
                   left: "0.75rem",
                   top: "50%",
                   transform: "translateY(-50%)",
+                  pointerEvents: "none",
+                  zIndex: 1,
                 }}
               />
               <input
@@ -420,7 +551,7 @@ const ProgresoTable: React.FC = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{
                   width: "100%",
-                  padding: "0.75rem 40rem 0.75rem 2.5rem",
+                  padding: "0.75rem 0.75rem 0.75rem 2.5rem",
                   border: "1px solid #d1d5db",
                   borderRadius: "8px",
                   fontSize: "0.875rem",
@@ -428,6 +559,7 @@ const ProgresoTable: React.FC = () => {
                   backgroundColor: "white",
                   outline: "none",
                   transition: "border-color 0.2s",
+                  boxSizing: "border-box",
                 }}
                 onFocus={(e) => (e.currentTarget.style.borderColor = "#3b82f6")}
                 onBlur={(e) => (e.currentTarget.style.borderColor = "#d1d5db")}
@@ -441,7 +573,7 @@ const ProgresoTable: React.FC = () => {
             <div
               style={{
                 display: "flex",
-                justifyContent: "flex-end",
+                justifyContent: windowWidth < 640 ? "center" : "flex-end",
                 padding: "0.75rem 0",
                 marginBottom: "1rem",
               }}
@@ -464,18 +596,54 @@ const ProgresoTable: React.FC = () => {
 
           {/* TABLA */}
           {loading && (
-            <p
-              style={{ textAlign: "center", padding: "3rem", color: "#6b7280" }}
-            >
-              Cargando datos...
-            </p>
+            <div style={{ textAlign: "center", padding: "3rem" }}>
+              <div style={{
+                display: "inline-block",
+                width: "40px",
+                height: "40px",
+                border: "4px solid #f3f4f6",
+                borderTopColor: "#3b82f6",
+                borderRadius: "50%",
+                animation: "spin 1s linear infinite",
+              }} />
+              <p style={{ marginTop: "1rem", color: "#6b7280" }}>
+                Cargando datos...
+              </p>
+            </div>
           )}
-          {error && (
-            <p
-              style={{ color: "#ef4444", textAlign: "center", padding: "3rem" }}
-            >
-              {error}
-            </p>
+          
+          {error && !loading && (
+            <div style={{ 
+              textAlign: "center", 
+              padding: "3rem",
+              backgroundColor: "#fef2f2",
+              borderRadius: "8px",
+              border: "1px solid #fecaca"
+            }}>
+              <p style={{ color: "#ef4444", marginBottom: "1rem", fontWeight: 600 }}>
+                {error}
+              </p>
+              {retryCount > 0 && retryCount < 3 && (
+                <p style={{ color: "#6b7280", fontSize: "0.875rem", marginBottom: "1rem" }}>
+                  Reintentando automáticamente ({retryCount}/3)...
+                </p>
+              )}
+              <button
+                onClick={handleRetry}
+                style={{
+                  padding: "0.5rem 1rem",
+                  backgroundColor: "#3b82f6",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontSize: "0.875rem",
+                  fontWeight: 500,
+                }}
+              >
+                Reintentar ahora
+              </button>
+            </div>
           )}
 
           {!loading && !error && (
@@ -485,12 +653,14 @@ const ProgresoTable: React.FC = () => {
                   overflowX: "auto",
                   borderRadius: "8px",
                   border: "1px solid #e5e7eb",
+                  WebkitOverflowScrolling: "touch",
                 }}
               >
                 <table
                   style={{
                     width: "100%",
                     borderCollapse: "collapse",
+                    minWidth: "600px",
                   }}
                 >
                   <thead
@@ -501,7 +671,7 @@ const ProgresoTable: React.FC = () => {
                     <tr>
                       <th
                         style={{
-                          padding: "1rem",
+                          padding: windowWidth < 640 ? "0.75rem 0.5rem" : "1rem",
                           textAlign: "left",
                           fontSize: "0.75rem",
                           fontWeight: 600,
@@ -515,7 +685,7 @@ const ProgresoTable: React.FC = () => {
                       </th>
                       <th
                         style={{
-                          padding: "1rem",
+                          padding: windowWidth < 640 ? "0.75rem 0.5rem" : "1rem",
                           textAlign: "left",
                           fontSize: "0.75rem",
                           fontWeight: 600,
@@ -529,7 +699,7 @@ const ProgresoTable: React.FC = () => {
                       </th>
                       <th
                         style={{
-                          padding: "1rem",
+                          padding: windowWidth < 640 ? "0.75rem 0.5rem" : "1rem",
                           textAlign: "left",
                           fontSize: "0.75rem",
                           fontWeight: 600,
@@ -543,7 +713,7 @@ const ProgresoTable: React.FC = () => {
                       </th>
                       <th
                         style={{
-                          padding: "1rem",
+                          padding: windowWidth < 640 ? "0.75rem 0.5rem" : "1rem",
                           textAlign: "left",
                           fontSize: "0.75rem",
                           fontWeight: 600,
@@ -553,11 +723,11 @@ const ProgresoTable: React.FC = () => {
                           borderBottom: "2px solid #e5e7eb",
                         }}
                       >
-                        Saldo Pendiente
+                        Saldo
                       </th>
                       <th
                         style={{
-                          padding: "1rem",
+                          padding: windowWidth < 640 ? "0.75rem 0.5rem" : "1rem",
                           textAlign: "center",
                           fontSize: "0.75rem",
                           fontWeight: 600,
@@ -591,28 +761,28 @@ const ProgresoTable: React.FC = () => {
                       >
                         <td
                           style={{
-                            padding: "1rem",
+                            padding: windowWidth < 640 ? "0.75rem 0.5rem" : "1rem",
                             fontSize: "0.875rem",
                             color: "#374151",
                             borderBottom: "1px solid #e5e7eb",
                           }}
                         >
-                          {progreso.numero_contrato}
+                          {progreso.numero_contrato || "—"}
                         </td>
                         <td
                           style={{
-                            padding: "1rem",
+                            padding: windowWidth < 640 ? "0.75rem 0.5rem" : "1rem",
                             fontSize: "0.875rem",
                             color: "#111827",
                             fontWeight: 500,
                             borderBottom: "1px solid #e5e7eb",
                           }}
                         >
-                          {progreso.nombre}
+                          {progreso.nombre || "Sin nombre"}
                         </td>
                         <td
                           style={{
-                            padding: "1rem",
+                            padding: windowWidth < 640 ? "0.75rem 0.5rem" : "1rem",
                             borderBottom: "1px solid #e5e7eb",
                           }}
                         >
@@ -622,6 +792,7 @@ const ProgresoTable: React.FC = () => {
                               borderRadius: "9999px",
                               fontSize: "0.75rem",
                               fontWeight: 600,
+                              whiteSpace: "nowrap",
                               ...(getStatusClass(progreso.estatus) ===
                                 "status-complete-light" && {
                                 backgroundColor: "#d1fae5",
@@ -639,26 +810,27 @@ const ProgresoTable: React.FC = () => {
                               }),
                             }}
                           >
-                            {progreso.estatus}
+                            {progreso.estatus || "Pendiente"}
                           </span>
                         </td>
                         <td
                           style={{
-                            padding: "1rem",
+                            padding: windowWidth < 640 ? "0.75rem 0.5rem" : "1rem",
                             fontSize: "0.875rem",
                             color: "#374151",
                             borderBottom: "1px solid #e5e7eb",
+                            whiteSpace: "nowrap",
                           }}
                         >
                           $
-                          {Number(progreso.saldo).toLocaleString("es-MX", {
+                          {Number(progreso.saldo || 0).toLocaleString("es-MX", {
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2,
                           })}
                         </td>
                         <td
                           style={{
-                            padding: "1rem",
+                            padding: windowWidth < 640 ? "0.75rem 0.5rem" : "1rem",
                             borderBottom: "1px solid #e5e7eb",
                             textAlign: "center",
                           }}
@@ -673,7 +845,7 @@ const ProgresoTable: React.FC = () => {
                 {currentProgresos.length === 0 && (
                   <div
                     style={{
-                      padding: "3rem",
+                      padding: "3rem 1rem",
                       textAlign: "center",
                       color: "#9ca3af",
                       fontSize: "0.875rem",
@@ -692,8 +864,9 @@ const ProgresoTable: React.FC = () => {
                     justifyContent: "center",
                     alignItems: "center",
                     gap: "0.5rem",
-                    marginTop: "2rem",
+                    marginTop: "1.5rem",
                     flexWrap: "wrap",
+                    padding: "0.5rem",
                   }}
                 >
                   <button
@@ -726,11 +899,11 @@ const ProgresoTable: React.FC = () => {
                           color: currentPage === page ? "white" : "#374151",
                           border:
                             currentPage === page ? "none" : "1px solid #e5e7eb",
-                          padding: "0.6rem 1rem",
+                          padding: windowWidth < 640 ? "0.5rem 0.75rem" : "0.6rem 1rem",
                           borderRadius: "8px",
                           cursor: "pointer",
                           fontWeight: currentPage === page ? 600 : 400,
-                          minWidth: "40px",
+                          minWidth: windowWidth < 640 ? "36px" : "40px",
                           transition: "all 0.3s",
                         }}
                       >
@@ -774,6 +947,14 @@ const ProgresoTable: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* CSS para animaciones */}
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };
