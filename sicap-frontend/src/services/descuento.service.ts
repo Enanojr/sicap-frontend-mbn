@@ -64,15 +64,9 @@ export const createDescuento = async (
     throw error;
   }
 };
-
 export const getAllDescuentos = async (): Promise<DescuentoResponse[]> => {
-  try {
-    const response = await api.get(DESCUENTOS_URL, authHeaders());
-    return response.data;
-  } catch (error: any) {
-    console.error(" Error en getAllDescuentos:", error);
-    throw error;
-  }
+  const response = await api.get(DESCUENTOS_URL, authHeaders());
+  return response.data.results;
 };
 
 export const getDescuentoById = async (

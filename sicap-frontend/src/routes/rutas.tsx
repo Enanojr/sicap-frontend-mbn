@@ -6,17 +6,16 @@ import ContractTable from "../components/tablas/tabla";
 import Main_Card from "../pages/Home/Main_Cards";
 import RootLayout from "../components/layout/layout";
 import ProtectedRoute from "../routes/ProtectedRoute";
-import RegisterCobrador from "../pages/Rcobradores/Rcobradores";
 import RegisterAdmin from "../pages/Radmin/Radmin";
-import RegisterSector from "../pages/Rsector/Rsector";
-import RegisterColonia from "../pages/Rcolonias/Rcolonias";
-import RegisterCuentahabiente from "../pages/Rcuentahabientes/Rcuentahabientes";
-import RegisterAsignacion from "../pages/Asignaciones/Asignaciones";
 import FormularioPago from "../components/forms/form_pago";
-import FormularioDescuentos from "../components/forms/form_descuentos";
 import ServiciosPage from "../pages/Principal_Form_Table/serviciospage";
 import Admin_Cards from "../pages/Home/Admin_Cards";
-
+import DescuentosPage from "../pages/Principal_Form_Table/descuentospage";
+import CuentahabientesPage from "../pages/Principal_Form_Table/cuentahabientespage";
+import CobradoresPage from "../pages/Principal_Form_Table/cobradorespage";
+import ColoniasPage from "../pages/Principal_Form_Table/coloniaspage";
+import AsignacionesPage from "../pages/Principal_Form_Table/asignacionespage";
+import SectoresPage from "../pages/Principal_Form_Table/sectorespage";
 const Rutas = [
   // Ruta #1: Login (pública)
   {
@@ -49,7 +48,7 @@ const Rutas = [
           },
           {
             path: "/Rcobradores",
-            element: <RegisterCobrador />,
+            element: <CobradoresPage />,
           },
           {
             path: "/Radmin",
@@ -57,19 +56,19 @@ const Rutas = [
           },
           {
             path: "/Rsector",
-            element: <RegisterSector />,
+            element: <SectoresPage />,
           },
           {
             path: "/Rcolonia",
-            element: <RegisterColonia />,
+            element: <ColoniasPage />,
           },
           {
             path: "/Rcuentahabiente",
-            element: <RegisterCuentahabiente />,
+            element: <CuentahabientesPage />,
           },
           {
             path: "/Rasignacion",
-            element: <RegisterAsignacion />,
+            element: <AsignacionesPage />,
           },
           {
             path: "/Pago",
@@ -77,7 +76,7 @@ const Rutas = [
           },
           {
             path: "/Descuento",
-            element: <FormularioDescuentos />,
+            element: <DescuentosPage />,
           },
 
           {

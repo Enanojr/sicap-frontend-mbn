@@ -1,12 +1,20 @@
-import api from '../api_axios'; // Ajusta la ruta según tu estructura
+import api from "../api_axios"; // Ajusta la ruta según tu estructura
 
 const API_URL = "/auth"; // O la ruta que uses para registro
+
+export interface CobradorResponse {
+  id_cobrador: number;
+  nombre: string;
+  apellidos: string;
+  email: string;
+  usuario: string;
+}
 
 /**
  * Obtiene el token del administrador desde localStorage
  */
 const getAdminToken = (): string | null => {
-  return localStorage.getItem('access');
+  return localStorage.getItem("access");
 };
 
 /**
@@ -24,13 +32,14 @@ export const registerUser = async (userData: {
 }) => {
   try {
     const token = getAdminToken();
-    
+
     if (!token) {
       return {
         success: false,
         errors: {
-          general: 'No se encontró token de administrador. Por favor, inicie sesión.'
-        }
+          general:
+            "No se encontró token de administrador. Por favor, inicie sesión.",
+        },
       };
     }
 
@@ -40,29 +49,29 @@ export const registerUser = async (userData: {
       email: userData.email,
       usuario: userData.usuario,
       password: userData.password,
-      password2: userData.password2
+      password2: userData.password2,
     });
 
     return {
       success: true,
-      data: response.data
+      data: response.data,
     };
-
   } catch (error: any) {
-    console.error('Error en registerUser:', error);
-    
+    console.error("Error en registerUser:", error);
+
     if (error.response && error.response.data) {
       return {
         success: false,
-        errors: error.response.data
+        errors: error.response.data,
       };
     }
-    
+
     return {
       success: false,
       errors: {
-        general: 'Error al conectar con el servidor. Por favor, intente nuevamente.'
-      }
+        general:
+          "Error al conectar con el servidor. Por favor, intente nuevamente.",
+      },
     };
   }
 };
@@ -74,13 +83,14 @@ export const registerUser = async (userData: {
 export const getCobradores = async () => {
   try {
     const token = getAdminToken();
-    
+
     if (!token) {
       return {
         success: false,
         errors: {
-          general: 'No se encontró token de administrador. Por favor, inicie sesión.'
-        }
+          general:
+            "No se encontró token de administrador. Por favor, inicie sesión.",
+        },
       };
     }
 
@@ -88,24 +98,24 @@ export const getCobradores = async () => {
 
     return {
       success: true,
-      data: response.data
+      data: response.data,
     };
-
   } catch (error: any) {
-    console.error('Error en getCobradores:', error);
-    
+    console.error("Error en getCobradores:", error);
+
     if (error.response && error.response.data) {
       return {
         success: false,
-        errors: error.response.data
+        errors: error.response.data,
       };
     }
-    
+
     return {
       success: false,
       errors: {
-        general: 'Error al obtener los cobradores. Por favor, intente nuevamente.'
-      }
+        general:
+          "Error al obtener los cobradores. Por favor, intente nuevamente.",
+      },
     };
   }
 };
@@ -118,13 +128,14 @@ export const getCobradores = async () => {
 export const getCobradorById = async (id: string | number) => {
   try {
     const token = getAdminToken();
-    
+
     if (!token) {
       return {
         success: false,
         errors: {
-          general: 'No se encontró token de administrador. Por favor, inicie sesión.'
-        }
+          general:
+            "No se encontró token de administrador. Por favor, inicie sesión.",
+        },
       };
     }
 
@@ -132,24 +143,23 @@ export const getCobradorById = async (id: string | number) => {
 
     return {
       success: true,
-      data: response.data
+      data: response.data,
     };
-
   } catch (error: any) {
-    console.error('Error en getCobradorById:', error);
-    
+    console.error("Error en getCobradorById:", error);
+
     if (error.response && error.response.data) {
       return {
         success: false,
-        errors: error.response.data
+        errors: error.response.data,
       };
     }
-    
+
     return {
       success: false,
       errors: {
-        general: 'Error al obtener el cobrador. Por favor, intente nuevamente.'
-      }
+        general: "Error al obtener el cobrador. Por favor, intente nuevamente.",
+      },
     };
   }
 };

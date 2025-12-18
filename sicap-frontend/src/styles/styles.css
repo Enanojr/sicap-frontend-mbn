@@ -16,23 +16,23 @@
 
 /*----------------Sweetalert----------------------------*/
 .swal2-popup {
-  font-family: 'Poppins', Arial, sans-serif !important;
+  font-family: "Poppins", Arial, sans-serif !important;
   /* <-- MODIFICADO */
 }
 
 .swal2-title {
-  font-family: 'Poppins', Arial, sans-serif !important;
+  font-family: "Poppins", Arial, sans-serif !important;
   /* <-- MODIFICADO */
 }
 
 .swal2-html-container {
-  font-family: 'Poppins', Arial, sans-serif !important;
+  font-family: "Poppins", Arial, sans-serif !important;
   /* <-- MODIFICADO */
 }
 
 .swal2-confirm,
 .swal2-cancel {
-  font-family: 'Poppins', Arial, sans-serif !important;
+  font-family: "Poppins", Arial, sans-serif !important;
   /* <-- MODIFICADO */
 }
 
@@ -41,7 +41,7 @@
   display: flex;
   width: 100vw;
   height: 100vh;
-  font-family: 'Poppins', Arial, sans-serif;
+  font-family: "Poppins", Arial, sans-serif;
   /* <-- MODIFICADO */
   gap: 24px;
   justify-content: center;
@@ -190,7 +190,7 @@
   justify-content: center;
   align-items: flex-start;
   padding: 2rem;
-  font-family: 'Poppins', Arial, sans-serif;
+  font-family: "Poppins", Arial, sans-serif;
   /* <-- MODIFICADO */
   color: white;
 }
@@ -548,7 +548,6 @@
 }
 
 @keyframes glow {
-
   0%,
   100% {
     opacity: 0.5;
@@ -568,7 +567,7 @@
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  font-family: 'Poppins', Arial, sans-serif;
+  font-family: "Poppins", Arial, sans-serif;
   /* <-- MODIFICADO */
 }
 
@@ -638,10 +637,12 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg,
-      transparent,
-      rgba(255, 255, 255, 0.1),
-      transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
   transition: left 0.6s ease;
   z-index: 1;
 }
@@ -1035,6 +1036,7 @@
   background-color: #f0f0f0;
 }
 
+/*------------------------------------------Registro cobradores y formularios------------------------*/
 .profile-button {
   background: transparent;
   border: none;
@@ -1092,7 +1094,8 @@
   padding: 2rem;
   margin: 0;
   font-size: 1.75rem;
-  font-family: 'Poppins', Arial, sans-serif;
+  font-family: "Poppins", Arial;
+  font-family: "Poppins", Arial, sans-serif;
   /* <-- MODIFICADO */
   font-weight: 700;
   text-align: center;
@@ -1153,7 +1156,8 @@
 .form-label {
   font-size: 0.875rem;
   font-weight: 500;
-  font-family: 'Poppins', Arial, sans-serif;
+  font-family: "Poppins", Arial;
+  font-family: "Poppins", Arial, sans-serif;
   /* <-- MODIFICADO */
   color: white;
 }
@@ -1213,7 +1217,8 @@
   font-size: 0.75rem;
   color: #dc2626;
   margin-top: 0.25rem;
-  font-family: 'Poppins', Arial, sans-serif;
+  font-family: "Poppins", Arial;
+  font-family: "Poppins", Arial, sans-serif;
   /* <-- MODIFICADO */
 }
 
@@ -1490,7 +1495,8 @@ input[type="number"]::-webkit-inner-spin-button {
   padding: 2rem;
   margin: 0;
   font-size: 1.75rem;
-  font-family: 'Poppins', Arial, sans-serif;
+  font-family: "Poppins", Arial;
+  font-family: "Poppins", Arial, sans-serif;
   /* <-- MODIFICADO */
   font-weight: 700;
   text-align: center;
@@ -1648,7 +1654,6 @@ input[type="number"]::-webkit-inner-spin-button {
   font-weight: 700;
   text-align: center;
   color: #58b2ee;
-  font-family: "Poppins", Arial, sans-serif;
 }
 
 .table-divider {
@@ -2468,12 +2473,98 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 }
 
+/* Ajustar tabla al estilo del formulario */
+.form-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  background: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.form-table th {
+  background: #f0f0f0;
+  padding: 12px;
+  font-weight: 600;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.form-table td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.form-table tr:hover {
+  background: #f9f9f9;
+}
+
+/* Acciones alineadas y limpias */
+.table-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Mensaje sin registros */
+.no-rows {
+  text-align: center;
+  padding: 20px;
+  font-style: italic;
+  color: #777;
+}
+
+/*----------------------------Unificar Formulario y Tabla-------------------------------*/
+
+.form_tabla {
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 900px;
+  overflow: hidden;
+  padding: 2.5rem;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+@media (max-width: 768px) {
+  .card-unificada {
+    max-width: 100%;
+    padding: 1.5rem;
+    border-radius: 12px;
+  }
+}
+
+.card-title {
+  margin: 0;
+  padding: 1rem 0;
+  text-align: center;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #58b2ee;
+}
+
+.card-title-divider {
+  height: 4px;
+  width: 120px;
+  background: #58b2ee;
+  margin: 0.5rem auto 1.5rem auto;
+  border-radius: 20px;
+}
+
+.form-edit-mode {
+  border: 2px solid #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
 /*--------------------------------------------Admin Page Container--------------------------------------------*/
 
 .admin-page-container {
   min-height: 100vh;
   padding: 2rem 1rem;
-  font-family: 'Poppins', Arial, sans-serif;
+  font-family: "Poppins", Arial, sans-serif;
   /* <-- MODIFICADO */
 }
 
@@ -2652,78 +2743,144 @@ input[type="number"]::-webkit-inner-spin-button {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 
-.form-table th {
-  background: #f0f0f0;
-  padding: 12px;
-  font-weight: 600;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
-}
+/* ============================================
+   ESTILOS PARA SEARCH-SELECT
+   Copiar y pegar en tu archivo styles.css
+   ============================================ */
 
-.form-table td {
-  padding: 12px;
-  border-bottom: 1px solid #eee;
-}
+/* ============================================
+   ESTILOS PARA SEARCH-SELECT
+   ============================================ */
 
-.form-table tr:hover {
-  background: #f9f9f9;
-}
-
-/* Acciones alineadas y limpias */
-.table-actions {
-  display: flex;
-  gap: 10px;
-}
-
-/* Mensaje sin registros */
-.no-rows {
-  text-align: center;
-  padding: 20px;
-  font-style: italic;
-  color: #777;
-}
-
-/*----------------------------Unificar Formulario y Tabla-------------------------------*/
-
-.form_tabla {
-  border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+.search-select-container {
+  position: relative;
   width: 100%;
-  max-width: 900px;
-  overflow: hidden;
-  padding: 2.5rem;
-  margin: 0 auto;
-  box-sizing: border-box;
 }
-@media (max-width: 768px) {
-  .card-unificada {
-    max-width: 100%;
-    padding: 1.5rem;
-    border-radius: 12px;
+
+.search-select-container input {
+  width: 100%;
+}
+
+.dropdown-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 280px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 2px solid #58b2ee;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(88, 178, 238, 0.15),
+    0 4px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  animation: fadeInDown 0.2s ease;
+  margin-top: 0;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-.card-title {
-  margin: 0;
-  padding: 1rem 0;
+.dropdown-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f4f8;
+  transition: all 0.15s ease;
+  font-size: 14px;
+  color: #374151;
+  background: white;
+}
+
+.dropdown-item:hover {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  color: #0284c7;
+  padding-left: 20px;
+  border-left: 3px solid #58b2ee;
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+.dropdown-item:first-child {
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+
+/* Scrollbar personalizado */
+.dropdown-panel::-webkit-scrollbar {
+  width: 10px;
+}
+
+.dropdown-panel::-webkit-scrollbar-track {
+  background: #f8fafc;
+  border-radius: 0 8px 8px 0;
+}
+
+.dropdown-panel::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #58b2ee 0%, #3b82f6 100%);
+  border-radius: 5px;
+  border: 2px solid #f8fafc;
+}
+
+.dropdown-panel::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+}
+
+/* Mensaje cuando no hay resultados */
+.dropdown-no-results {
+  padding: 20px 16px;
   text-align: center;
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #58b2ee;
+  color: #6b7280;
+  font-size: 14px;
+  font-style: italic;
 }
 
-.card-title-divider {
-  height: 4px;
-  width: 120px;
-  background: #58b2ee;
-  margin: 0.5rem auto 1.5rem auto;
-  border-radius: 20px;
+/* Estado del input cuando está activo */
+.search-select-container input:focus {
+  border-color: #58b2ee;
+  box-shadow: 0 0 0 3px rgba(88, 178, 238, 0.1);
+  outline: none;
 }
 
-.form-edit-mode {
-  border: 2px solid #3b82f6;
-  background: rgba(59, 130, 246, 0.05);
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-  border-radius: 12px;
-  transition: all 0.2s ease;
+.chip-status {
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+  display: inline-block;
+  user-select: none;
+  transition: all 0.25s ease;
+}
+
+/* Activo: verde profesional */
+.chip-status.on {
+  background-color: #10b981; /* verde tailwind */
+  color: white;
+  border: 1px solid #0c8a68;
+}
+
+/* Inactivo: gris elegante */
+.chip-status.off {
+  background-color: #6b7280;
+  color: white;
+  border: 1px solid #4b5563;
+}
+
+/* Hover sutil */
+.chip-status:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
 }

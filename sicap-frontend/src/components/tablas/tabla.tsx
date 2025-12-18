@@ -19,14 +19,24 @@ interface FilterOption {
 }
 
 const filterOptions: FilterOption[] = [
+  { id: "all", label: "Todos los registros", value: "all" },
   { id: "last-day", label: "Último día", value: "day" },
   { id: "last-week", label: "Últimos 7 días", value: "week" },
   { id: "last-month", label: "Últimos 30 días", value: "month" },
   { id: "last-year", label: "Último año", value: "year" },
-  { id: "all", label: "Todos los registros", value: "all" },
 ];
 
-// ✅ Formatea YYYY-MM-DD a DD/MM/YYYY sin convertir a UTC
+/* -------------------------------------------------------
+   ✔ NUEVO FILTRO POR ESTADO (solo 3 valores)
+-------------------------------------------------------- */
+const statusOptions: FilterOption[] = [
+  { id: "all-status", label: "Todos los estados", value: "all" },
+  { id: "pagado", label: "Pagado", value: "pagado" },
+  { id: "rezagado", label: "Rezagado", value: "rezagado" },
+  { id: "adeudo", label: "Adeudo", value: "adeudo" },
+];
+
+// Formatea fecha sin modificar zona horaria
 const formatFechaLocal = (fechaString: string): string => {
   if (!fechaString) return "—";
   const fechaLimpia = fechaString.includes("T")
@@ -46,18 +56,30 @@ const ContractTable: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
+
+  // Filtros existentes
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
+
+  // ✔ Filtro por estado (nuevo)
+  const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [isStatusDropdownOpen, setIsStatusDropdownOpen] =
+    useState<boolean>(false);
+
   const [selectedContract, setSelectedContract] =
     useState<ContractSummary | null>(null);
 
-  const getStatusClass = (estatus_deuda: string) => {
-    const value = estatus_deuda.trim().toLowerCase();
-    if (["completado", "corriente", "pagado"].includes(value))
-      return "status-complete";
-    if (["rezagado"].includes(value)) return "status-warning";
-    if (["vencido", "pendiente"].includes(value)) return "status-danger";
-    return "status-pending";
+  /* -------------------------------------------------------
+     ✔ Colores según los 3 estados reales
+  -------------------------------------------------------- */
+  const getStatusClass = (estatus: string) => {
+    const value = estatus.trim().toLowerCase();
+
+    if (value === "pagado") return "status-complete"; // verde
+    if (value === "rezagado") return "status-warning"; // amarillo
+    if (value === "adeudo") return "status-danger"; // rojo
+
+    return "status-pending"; // fallback
   };
 
   // Paginación
@@ -68,32 +90,24 @@ const ContractTable: React.FC = () => {
     loadData();
   }, []);
 
-  // Reset page when filters change
+  // Resetear página cuando filtros cambian
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, selectedFilter]);
+  }, [searchTerm, selectedFilter, selectedStatus]);
 
   const loadData = async () => {
     try {
       setLoading(true);
-      setError(null);
-
       const token = localStorage.getItem("access");
+
       if (!token) {
         setError("Sesión expirada. Por favor, inicia sesión nuevamente.");
         return;
       }
 
-      // 🧹 Logs sin backticks para evitar errores de TS
-      // console.log("Iniciando carga de datos..."); // <-- ELIMINADO
       const data = await getContractData();
-      // console.log("Total de contratos cargados: " + data.length); // <-- ELIMINADO
-      // console.log("Primeros 3 contratos:", data.slice(0, 3)); // <-- ELIMINADO
       setContracts(data);
-      // console.log("Contratos guardados en state"); // <-- ELIMINADO
     } catch (err: any) {
-      // console.error("Error al cargar contratos:", err); // <-- ELIMINADO (Este era el más importante)
-
       const message =
         err.response?.status === 403
           ? "Acceso prohibido. Tu sesión puede haber expirado."
@@ -103,11 +117,7 @@ const ContractTable: React.FC = () => {
 
       setError(message);
 
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: message,
-      });
+      Swal.fire({ icon: "error", title: "Error", text: message });
 
       if (err.response?.status === 401 || err.response?.status === 403) {
         localStorage.removeItem("access");
@@ -118,7 +128,9 @@ const ContractTable: React.FC = () => {
     }
   };
 
-  // ✅ Filtro por rango de fecha sin conversión a UTC
+  /* -------------------------------------------------------
+     ✔ Filtro por fecha
+  -------------------------------------------------------- */
   const filterByDateRange = (contract: ContractSummary): boolean => {
     if (selectedFilter === "all") return true;
     if (!contract.ultimo_pago) return false;
@@ -133,8 +145,9 @@ const ContractTable: React.FC = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const diffTime = today.getTime() - lastPaymentDate.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const diffDays = Math.ceil(
+      (today.getTime() - lastPaymentDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
 
     switch (selectedFilter) {
       case "day":
@@ -150,53 +163,54 @@ const ContractTable: React.FC = () => {
     }
   };
 
+  const filterByStatus = (contract: ContractSummary): boolean => {
+    const estatus = contract.estatus_deuda.trim().toLowerCase();
+
+    switch (selectedStatus) {
+      case "pagado":
+        return estatus === "pagado";
+      case "rezagado":
+        return estatus === "rezagado";
+      case "adeudo":
+        return estatus === "adeudo";
+      case "all":
+      default:
+        return true;
+    }
+  };
+
+  /* -------------------------------------------------------
+     ✔ Filtro principal (texto + fecha + estatus)
+  -------------------------------------------------------- */
   const filteredContracts = contracts.filter((contract) => {
     const matchesSearch =
-      String(contract.numero_contrato)
+      contract.numero_contrato
+        .toString()
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
-      String(contract.nombre_completo)
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
+      contract.nombre_completo.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesDateRange = filterByDateRange(contract);
-
-    return matchesSearch && matchesDateRange;
+    return (
+      matchesSearch && filterByDateRange(contract) && filterByStatus(contract)
+    );
   });
 
   const totalPages = Math.ceil(filteredContracts.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentContracts = filteredContracts.slice(startIndex, endIndex);
-
-  // Pequeño log seguro
-  /* <-- ELIMINADO
-  console.log(
-    "Estado de filtros:",
-    JSON.stringify(
-      {
-        totalContracts: contracts.length,
-        filteredContracts: filteredContracts.length,
-        selectedFilter,
-        searchTerm,
-        currentPage,
-        totalPages,
-      },
-      null,
-      2
-    )
+  const currentContracts = filteredContracts.slice(
+    (currentPage - 1) * itemsPerPage,
+    (currentPage - 1) * itemsPerPage + itemsPerPage
   );
-  */
 
-  const getFilterLabel = () => {
-    const option = filterOptions.find((opt) => opt.value === selectedFilter);
-    return option ? option.label : "Todos los registros";
-  };
+  const getFilterLabel = () =>
+    filterOptions.find((opt) => opt.value === selectedFilter)?.label ||
+    "Filtrar";
+
+  const getStatusLabel = () =>
+    statusOptions.find((opt) => opt.value === selectedStatus)?.label ||
+    "Estado";
 
   const goToPage = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
   const getPageNumbers = () => {
@@ -204,9 +218,7 @@ const ContractTable: React.FC = () => {
     const maxVisible = 5;
 
     if (totalPages <= maxVisible) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
     } else {
       if (currentPage <= 3) {
         for (let i = 1; i <= 4; i++) pages.push(i);
@@ -219,7 +231,9 @@ const ContractTable: React.FC = () => {
       } else {
         pages.push(1);
         pages.push("...");
-        for (let i = currentPage - 1; i <= currentPage + 1; i++) pages.push(i);
+        pages.push(currentPage - 1);
+        pages.push(currentPage);
+        pages.push(currentPage + 1);
         pages.push("...");
         pages.push(totalPages);
       }
@@ -232,12 +246,15 @@ const ContractTable: React.FC = () => {
     <div className="contracts-page-container">
       <div className="contracts-card">
         <h2 className="contracts-title">
-          <span className="contracts-title-gradient">CONSULTAS</span>
+          <span className="contracts-title-gradient">Consultas</span>
         </h2>
         <div className="contracts-divider"></div>
 
-        {/* TOOLBAR */}
+        {/* -------------------------------------------------------
+            TOOLBAR (Fecha + Estado + Buscador)
+        -------------------------------------------------------- */}
         <div className="contracts-toolbar">
+          {/* FILTRO POR FECHA */}
           <div className="contracts-dropdown-container">
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -252,22 +269,22 @@ const ContractTable: React.FC = () => {
             {isDropdownOpen && (
               <div className="contracts-dropdown">
                 <ul className="contracts-dropdown-list">
-                  {filterOptions.map((option) => (
-                    <li key={option.id}>
+                  {filterOptions.map((opt) => (
+                    <li key={opt.id}>
                       <div
                         className="contracts-dropdown-item"
                         onClick={() => {
-                          setSelectedFilter(option.value);
+                          setSelectedFilter(opt.value);
                           setIsDropdownOpen(false);
                         }}
                       >
                         <input
                           type="radio"
-                          checked={selectedFilter === option.value}
-                          onChange={() => {}}
+                          checked={selectedFilter === opt.value}
+                          readOnly
                           className="radio"
                         />
-                        <label className="radio-label">{option.label}</label>
+                        <label className="radio-label">{opt.label}</label>
                       </div>
                     </li>
                   ))}
@@ -276,6 +293,46 @@ const ContractTable: React.FC = () => {
             )}
           </div>
 
+          {/* ✔ FILTRO POR ESTADO */}
+          <div className="contracts-dropdown-container">
+            <button
+              onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
+              className="contracts-filter-button"
+              type="button"
+            >
+              <Clock className="icon" />
+              <span>{getStatusLabel()}</span>
+              <ChevronDown className="icon-small" />
+            </button>
+
+            {isStatusDropdownOpen && (
+              <div className="contracts-dropdown">
+                <ul className="contracts-dropdown-list">
+                  {statusOptions.map((opt) => (
+                    <li key={opt.id}>
+                      <div
+                        className="contracts-dropdown-item"
+                        onClick={() => {
+                          setSelectedStatus(opt.value);
+                          setIsStatusDropdownOpen(false);
+                        }}
+                      >
+                        <input
+                          type="radio"
+                          checked={selectedStatus === opt.value}
+                          readOnly
+                          className="radio"
+                        />
+                        <label className="radio-label">{opt.label}</label>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          {/* BUSCADOR */}
           <div className="contracts-search-container">
             <Search className="search-icon" />
             <input
@@ -288,7 +345,7 @@ const ContractTable: React.FC = () => {
           </div>
         </div>
 
-        {/* INDICADOR DE TOTAL DE CONTRATOS */}
+        {/* INDICADOR DE TOTAL */}
         {!loading && !error && (
           <div
             style={{
@@ -320,7 +377,7 @@ const ContractTable: React.FC = () => {
           </p>
         )}
         {error && (
-          <p style={{ color: "#ff6b6b", textAlign: "center", padding: "2rem" }}>
+          <p style={{ textAlign: "center", padding: "2rem", color: "#ff6b6b" }}>
             {error}
           </p>
         )}
@@ -386,7 +443,6 @@ const ContractTable: React.FC = () => {
                 style={{
                   display: "flex",
                   justifyContent: "center",
-                  alignItems: "center",
                   gap: "0.5rem",
                   marginTop: "1.5rem",
                   flexWrap: "wrap",
@@ -402,9 +458,6 @@ const ContractTable: React.FC = () => {
                     padding: "0.6rem 0.8rem",
                     borderRadius: "8px",
                     cursor: currentPage === 1 ? "not-allowed" : "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    transition: "background 0.3s",
                   }}
                 >
                   <ChevronLeft size={18} />
@@ -426,18 +479,12 @@ const ContractTable: React.FC = () => {
                         padding: "0.6rem 1rem",
                         borderRadius: "8px",
                         cursor: "pointer",
-                        fontWeight: currentPage === page ? 600 : 400,
-                        minWidth: "40px",
-                        transition: "all 0.3s",
                       }}
                     >
                       {page}
                     </button>
                   ) : (
-                    <span
-                      key={index}
-                      style={{ color: "#666", padding: "0 0.25rem" }}
-                    >
+                    <span key={index} style={{ color: "#666" }}>
                       ...
                     </span>
                   )
@@ -455,9 +502,6 @@ const ContractTable: React.FC = () => {
                     borderRadius: "8px",
                     cursor:
                       currentPage === totalPages ? "not-allowed" : "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    transition: "background 0.3s",
                   }}
                 >
                   <ChevronRight size={18} />
@@ -486,6 +530,7 @@ const ContractTable: React.FC = () => {
             </div>
 
             <div className="modal-body">
+              {/* INFO GENERAL */}
               <div className="detail-section">
                 <h4 className="section-title">Información General</h4>
                 <div className="detail-grid">
@@ -495,18 +540,21 @@ const ContractTable: React.FC = () => {
                       {selectedContract.numero_contrato}
                     </div>
                   </div>
+
                   <div className="detail-item">
                     <div className="detail-label">Nombre del Cliente</div>
                     <div className="detail-value">
                       {selectedContract.nombre_completo}
                     </div>
                   </div>
+
                   <div className="detail-item">
                     <div className="detail-label">Servicio</div>
                     <div className="detail-value">
                       {selectedContract.nombre_servicio}
                     </div>
                   </div>
+
                   <div className="detail-item">
                     <div className="detail-label">Estatus</div>
                     <div className="detail-value">
@@ -522,8 +570,10 @@ const ContractTable: React.FC = () => {
                 </div>
               </div>
 
+              {/* RESUMEN FINANCIERO */}
               <div className="detail-section">
                 <h4 className="section-title">Resumen Financiero</h4>
+
                 <div className="detail-grid">
                   <div className="detail-item">
                     <div className="detail-label">Total Pagado</div>
@@ -534,12 +584,14 @@ const ContractTable: React.FC = () => {
                       ).toLocaleString()}
                     </div>
                   </div>
+
                   <div className="detail-item">
                     <div className="detail-label">Primer pago</div>
                     <div className="detail-value">
                       {formatFechaLocal(selectedContract.fecha_inicio)}
                     </div>
                   </div>
+
                   <div className="detail-item">
                     <div className="detail-label">Último Pago</div>
                     <div className="detail-value">
@@ -549,10 +601,12 @@ const ContractTable: React.FC = () => {
                 </div>
               </div>
 
+              {/* HISTORIAL */}
               <div className="detail-section">
                 <h4 className="section-title">
                   Historial de Pagos ({selectedContract.pagos?.length || 0})
                 </h4>
+
                 <div className="overflow-x-auto rounded-lg">
                   <table className="payments-table">
                     <thead>
@@ -563,6 +617,7 @@ const ContractTable: React.FC = () => {
                         <th>Descuento Aplicado</th>
                       </tr>
                     </thead>
+
                     <tbody>
                       {selectedContract.pagos &&
                       selectedContract.pagos.length > 0 ? (
@@ -594,8 +649,10 @@ const ContractTable: React.FC = () => {
                 </div>
               </div>
 
+              {/* COMENTARIOS */}
               <div className="detail-section">
                 <h4 className="section-title">Comentarios</h4>
+
                 <div
                   style={{
                     backgroundColor: "#1e2028",
@@ -606,7 +663,9 @@ const ContractTable: React.FC = () => {
                   }}
                 >
                   {selectedContract.pagos &&
-                  selectedContract.pagos.length > 0 ? (
+                  selectedContract.pagos.some(
+                    (p) => p.comentarios && p.comentarios.trim() !== ""
+                  ) ? (
                     <div
                       style={{
                         display: "flex",
@@ -627,14 +686,12 @@ const ContractTable: React.FC = () => {
                               padding: "0.75rem 1rem",
                               borderRadius: "6px",
                               borderLeft: "3px solid #58b2ee",
-                              boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
                             }}
                           >
                             <div
                               style={{
                                 display: "flex",
                                 justifyContent: "space-between",
-                                alignItems: "center",
                                 marginBottom: "0.5rem",
                               }}
                             >
@@ -642,49 +699,22 @@ const ContractTable: React.FC = () => {
                                 style={{
                                   fontSize: "0.75rem",
                                   color: "#58b2ee",
-                                  fontWeight: 600,
                                 }}
                               >
                                 Pago del {formatFechaLocal(pago.fecha_pago)}
                               </span>
                               <span
-                                style={{
-                                  fontSize: "0.7rem",
-                                  color: "#999",
-                                  backgroundColor: "#1e2028",
-                                  padding: "0.15rem 0.5rem",
-                                  borderRadius: "4px",
-                                }}
+                                style={{ fontSize: "0.7rem", color: "#999" }}
                               >
                                 #{index + 1}
                               </span>
                             </div>
-                            <p
-                              style={{
-                                margin: 0,
-                                color: "#e0e0e0",
-                                fontSize: "0.9rem",
-                                lineHeight: "1.5",
-                              }}
-                            >
+
+                            <p style={{ margin: 0, color: "#e0e0e0" }}>
                               {pago.comentarios}
                             </p>
                           </div>
                         ))}
-                      {selectedContract.pagos.filter(
-                        (p) => p.comentarios && p.comentarios.trim() !== ""
-                      ).length === 0 && (
-                        <div
-                          style={{
-                            textAlign: "center",
-                            color: "#999",
-                            padding: "1.5rem",
-                            fontSize: "0.9rem",
-                          }}
-                        >
-                          No hay comentarios registrados para este contrato
-                        </div>
-                      )}
                     </div>
                   ) : (
                     <div
@@ -692,10 +722,9 @@ const ContractTable: React.FC = () => {
                         textAlign: "center",
                         color: "#999",
                         padding: "1.5rem",
-                        fontSize: "0.9rem",
                       }}
                     >
-                      No hay comentarios registrados para este contrato
+                      No hay comentarios registrados
                     </div>
                   )}
                 </div>

@@ -1,57 +1,16 @@
-
 import { registerUser } from "../../services/Rcobradores.service";
 import Swal from "sweetalert2";
 import { User, Mail, Lock, UserPlus } from "lucide-react";
 
 // Importa los componentes y tipos del formulario reutilizable
-import FormularioReutilizable from "../../components/forms/form"; // Asegúrate que la ruta sea correcta
-import type { FormConfig } from "../../components/forms/form"; // Asegúrate que la ruta sea correcta
+import FormularioReutilizable from "../../components/forms/form";
+import type { FormConfig } from "../../components/forms/form";
 
 export default function RegisterCobrador() {
-  // --- Funciones de Validación Específicas ---
-  // (Son las mismas que definimos para RegisterAdmin)
-
-  const validateEmail = (value: string): string | null => {
-    if (!value.trim()) {
-      return "El email es requerido";
-    }
-    if (!/\S+@\S+\.\S+/.test(value)) {
-      return "El email no es válido";
-    }
-    return null;
-  };
-
-  const validatePassword = (value: string): string | null => {
-    if (!value) {
-      return "La contraseña es requerida";
-    }
-    if (value.length < 6) {
-      return "La contraseña debe tener al menos 6 caracteres";
-    }
-    return null;
-  };
-
-  // Usamos la versión corregida que acepta 'allData' como opcional
-  const validatePassword2 = (
-    value: string,
-    allData?: Record<string, any>
-  ): string | null => {
-    if (!value) {
-      return "Debe confirmar la contraseña";
-    }
-    if (!allData) {
-      return null; // No se puede comparar si no hay datos
-    }
-    if (value !== allData.password) {
-      return "Las contraseñas no coinciden";
-    }
-    return null;
-  };
-
   // --- Configuración del Formulario ---
 
   const formConfig: FormConfig = {
-    title: "REGISTRO DE COBRADORES", // Título actualizado
+    title: "Registro de Cobradores",
     fields: [
       {
         name: "nombre",
@@ -60,8 +19,10 @@ export default function RegisterCobrador() {
         icon: User,
         required: true,
         placeholder: "Ingrese el nombre",
-        validation: (value: string) =>
-          !value.trim() ? "El nombre es requerido" : null,
+        validation: (value: string | number) =>
+          typeof value === "string" && !value.trim()
+            ? "El nombre es requerido"
+            : null,
       },
       {
         name: "apellidos",
@@ -70,8 +31,10 @@ export default function RegisterCobrador() {
         icon: User,
         required: true,
         placeholder: "Ingrese los apellidos",
-        validation: (value: string) =>
-          !value.trim() ? "Los apellidos son requeridos" : null,
+        validation: (value: string | number) =>
+          typeof value === "string" && !value.trim()
+            ? "Los apellidos son requeridos"
+            : null,
       },
       {
         name: "email",
@@ -80,7 +43,19 @@ export default function RegisterCobrador() {
         icon: Mail,
         required: true,
         placeholder: "correo@ejemplo.com",
-        validation: validateEmail,
+        validation: (
+          value: string | number,
+          _allData?: Record<string, any>
+        ) => {
+          const strValue = String(value);
+          if (!strValue.trim()) {
+            return "El email es requerido";
+          }
+          if (!/\S+@\S+\.\S+/.test(strValue)) {
+            return "El email no es válido";
+          }
+          return null;
+        },
       },
       {
         name: "usuario",
@@ -89,8 +64,10 @@ export default function RegisterCobrador() {
         icon: UserPlus,
         required: true,
         placeholder: "Nombre de usuario",
-        validation: (value: string) =>
-          !value.trim() ? "El usuario es requerido" : null,
+        validation: (value: string | number) =>
+          typeof value === "string" && !value.trim()
+            ? "El usuario es requerido"
+            : null,
       },
       {
         name: "password",
@@ -99,7 +76,16 @@ export default function RegisterCobrador() {
         icon: Lock,
         required: true,
         placeholder: "Ingrese contraseña",
-        validation: validatePassword,
+        validation: (value: string | number) => {
+          const strValue = String(value);
+          if (!strValue) {
+            return "La contraseña es requerida";
+          }
+          if (strValue.length < 6) {
+            return "La contraseña debe tener al menos 6 caracteres";
+          }
+          return null;
+        },
       },
       {
         name: "password2",
@@ -108,17 +94,25 @@ export default function RegisterCobrador() {
         icon: Lock,
         required: true,
         placeholder: "Confirme contraseña",
-        validation: validatePassword2, // Usa la validación corregida
+        validation: (value: string | number, allData?: Record<string, any>) => {
+          const strValue = String(value);
+          if (!strValue) {
+            return "Debe confirmar la contraseña";
+          }
+          if (!allData) {
+            return null;
+          }
+          if (strValue !== allData.password) {
+            return "Las contraseñas no coinciden";
+          }
+          return null;
+        },
       },
-      // Nota: Este formulario no tiene el campo 'role', así que simplemente
-      // no se añade al array de 'fields'.
     ],
 
     // --- Lógica de Envío ---
     onSubmit: async (data) => {
-      // El componente reutilizable ya hizo la validación
       try {
-        // Usamos el 'registerUser' importado de 'Rcobradores.service'
         const result = await registerUser(data as any);
 
         if (result.success) {
@@ -130,7 +124,6 @@ export default function RegisterCobrador() {
             timer: 3000,
             timerProgressBar: true,
           });
-          // El formulario se limpiará automáticamente si la promesa se resuelve
         } else {
           // Manejar errores específicos del servidor
           let errorMessage = "Error al registrar usuario";
@@ -153,13 +146,11 @@ export default function RegisterCobrador() {
             confirmButtonColor: "#667eea",
           });
 
-          // Lanzamos un error para que el formulario reutilizable sepa que falló
           throw new Error(errorMessage);
         }
       } catch (error: any) {
         console.error("Error inesperado:", error);
-        
-        // Si no es el error que ya mostramos, mostramos uno genérico
+
         if (!error.message.includes("Error al registrar usuario")) {
           Swal.fire({
             icon: "error",
@@ -168,8 +159,7 @@ export default function RegisterCobrador() {
             confirmButtonColor: "#667eea",
           });
         }
-        
-        // Relanzamos el error para el componente
+
         throw error;
       }
     },
@@ -180,6 +170,5 @@ export default function RegisterCobrador() {
     showResetButton: true,
   };
 
-  // Simplemente renderiza el formulario reutilizable con la config
   return <FormularioReutilizable config={formConfig} />;
 }

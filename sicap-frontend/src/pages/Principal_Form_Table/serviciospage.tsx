@@ -34,9 +34,6 @@ const ServiciosPage: React.FC = () => {
               Editando: <strong>{servicioToEdit.nombre}</strong>
             </span>
           </div>
-          <button onClick={handleCancel} className="edit-banner-button">
-            ✖ Cancelar Edición
-          </button>
         </div>
       )}
 

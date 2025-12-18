@@ -1,17 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { FaUserCircle } from 'react-icons/fa';
-import Logo from '../../assets/Logo.png';
-import { useTheme } from '../botones/ThemeContext';
-import { useAuth } from '../../services/authcontext';
-import '../../styles/styles.css';
-import Swal from 'sweetalert2';
-import { Link } from 'react-router-dom'; // <-- 1. IMPORTADO Link
+import React, { useState, useEffect, useRef } from "react";
+import { FaUserCircle } from "react-icons/fa";
+import Logo from "../../assets/Logo.png";
+import { useTheme } from "../botones/ThemeContext";
+import { useAuth } from "../../services/authcontext";
+import "../../styles/styles.css";
+import Swal from "sweetalert2";
+import { Link } from "react-router-dom"; // <-- 1. IMPORTADO Link
 
 // Define tus roles
 const ROLES = {
-  ADMIN: 'admin',
-  SUPERVISOR: 'supervisor',
-  COBRADOR: 'cobrador'
+  ADMIN: "admin",
+  SUPERVISOR: "supervisor",
+  COBRADOR: "cobrador",
 };
 
 const Navbar: React.FC = () => {
@@ -21,20 +21,21 @@ const Navbar: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [isScrolled, setIsScrolled] = useState(false);
 
-  const canViewAdminPanel = usuario?.role === ROLES.ADMIN || usuario?.role === ROLES.SUPERVISOR;
+  const canViewAdminPanel =
+    usuario?.role === ROLES.ADMIN || usuario?.role === ROLES.SUPERVISOR;
 
   // <-- 3. LÓGICA DE "INICIO" DINÁMICO -->
   const getHomeLink = () => {
     switch (usuario?.role) {
       case ROLES.ADMIN:
       case ROLES.SUPERVISOR:
-        return '/Main_card';
+        return "/Main_card";
       case ROLES.COBRADOR:
         // Asegúrate de que esta sea la ruta correcta para cobradores
-        return '/Rutas_Cobrador'; 
+        return "/Rutas_Cobrador";
       default:
         // Un 'fallback' seguro si el rol no existe o no ha cargado
-        return '/'; 
+        return "/";
     }
   };
   const homeLink = getHomeLink();
@@ -43,7 +44,10 @@ const Navbar: React.FC = () => {
   // Efecto para cerrar el menú (sin cambios)
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setDropdownOpen(false);
       }
     }
@@ -58,53 +62,56 @@ const Navbar: React.FC = () => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
   // Lógica de Logout (sin cambios)
   const handleLogout = () => {
     Swal.fire({
-      title: '¿Cerrar sesión?',
+      title: "¿Cerrar sesión?",
       text: "¿Estás seguro de que quieres salir?",
-      icon: 'question',
+      icon: "question",
       showCancelButton: true,
-      confirmButtonColor: '#58b2ee',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Sí, cerrar sesión',
-      cancelButtonText: 'Cancelar'
+      confirmButtonColor: "#58b2ee",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí, cerrar sesión",
+      cancelButtonText: "Cancelar",
     }).then((result) => {
       if (result.isConfirmed) {
         logout();
         setDropdownOpen(false);
-        
+
         Swal.fire({
-          icon: 'success',
-          title: 'Sesión cerrada',
-          text: 'Has cerrado sesión correctamente',
+          icon: "success",
+          title: "Sesión cerrada",
+          text: "Has cerrado sesión correctamente",
           timer: 1500,
-          showConfirmButton: false
+          showConfirmButton: false,
         });
       }
     });
   };
 
   return (
-    <header className={`navbar-container ${theme} ${isScrolled ? 'scrolled' : ''}`}>
+    <header
+      className={`navbar-container ${theme} ${isScrolled ? "scrolled" : ""}`}
+    >
       <div className="navbar-section">
         {/* <-- 1. CAMBIADO <a> por <Link> y href por to --> */}
         {/* <-- 3. Usa el enlace dinámico --> */}
-        <Link to={homeLink} className="nav-link">Inicio</Link>
+        <Link to={homeLink} className="nav-link">
+          Inicio
+        </Link>
       </div>
 
       <div className="navbar-logo">
         <img src={Logo} alt="Logo de la empresa" />
       </div>
-      
+
       <div className="navbar-section profile-section" ref={dropdownRef}>
-        
         {/* <-- 2. MEJORA DE ACCESIBILIDAD --> */}
         {/* Se cambió el ícono por un <button> para accesibilidad */}
         <button
@@ -121,34 +128,39 @@ const Navbar: React.FC = () => {
         {/* Dropdown Menu */}
         {dropdownOpen && (
           // Se añadió 'role="menu"' por accesibilidad
-          <div className="dropdown-menu" role="menu"> 
+          <div className="dropdown-menu" role="menu">
             {/* Información del usuario (sin cambios) */}
-            <div className="dropdown-item" style={{ 
-              borderBottom: '1px solid #ddd', 
-              fontWeight: 'bold',
-              pointerEvents: 'none',
-              paddingBottom: '8px',
-              marginBottom: '8px'
-            }}>
-              <div style={{ fontSize: '14px', color: '#333' }}>
+            <div
+              className="dropdown-item"
+              style={{
+                borderBottom: "1px solid #ddd",
+                fontWeight: "bold",
+                pointerEvents: "none",
+                paddingBottom: "8px",
+                marginBottom: "8px",
+              }}
+            >
+              <div style={{ fontSize: "14px", color: "#333" }}>
                 {usuario?.nombre} {usuario?.apellidos}
               </div>
-              <div style={{ 
-                fontSize: '11px', 
-                color: '#888',
-                fontFamily: 'Arial', 
-                fontWeight: 'normal',
-                textTransform: 'uppercase',
-                marginTop: '4px'
-              }}>
+              <div
+                style={{
+                  fontSize: "11px",
+                  color: "#888",
+                  fontFamily: "Arial",
+                  fontWeight: "normal",
+                  textTransform: "uppercase",
+                  marginTop: "4px",
+                }}
+              >
                 {usuario?.role}
               </div>
             </div>
 
             {/* <-- 1. CAMBIADO <a> por <Link> y href por to --> */}
             {canViewAdminPanel && (
-              <Link 
-                to="/Admin_Cards" 
+              <Link
+                to="/Admin_Cards"
                 className="dropdown-item"
                 onClick={() => setDropdownOpen(false)}
                 role="menuitem" // <-- Accesibilidad
@@ -156,16 +168,16 @@ const Navbar: React.FC = () => {
                 Panel de Administración
               </Link>
             )}
-            
+
             {/* Opción de Cerrar Sesión (sin cambios, <a> está bien aquí) */}
-            <a 
-              href="#" 
+            <a
+              href="#"
               className="dropdown-item"
               onClick={(e) => {
                 e.preventDefault();
                 handleLogout();
               }}
-              style={{ color: '#ff4444' }} 
+              style={{ color: "#ff4444" }}
               role="menuitem" // <-- Accesibilidad
             >
               Cerrar sesión
@@ -175,6 +187,6 @@ const Navbar: React.FC = () => {
       </div>
     </header>
   );
-}
+};
 
 export default Navbar;
