@@ -7,53 +7,37 @@ import type { FormConfig } from "../../components/forms/form"; // Asegúrate que
 export default function RegisterAdmin() {
   // --- Funciones de Validación Específicas ---
 
-  const validateEmail = (value: string): string | null => {
-    if (!value.trim()) {
-      return "El email es requerido";
-    }
-    if (!/\S+@\S+\.\S+/.test(value)) {
-      return "El email no es válido";
-    }
+  const validateEmail = (value: string | number): string | null => {
+    const v = String(value);
+    if (!v.trim()) return "El email es requerido";
+    if (!/\S+@\S+\.\S+/.test(v)) return "El email no es válido";
     return null;
   };
 
-  const validatePassword = (value: string): string | null => {
-    if (!value) {
-      return "La contraseña es requerida";
-    }
-    if (value.length < 6) {
-      return "La contraseña debe tener al menos 6 caracteres";
-    }
+  const validatePassword = (value: string | number): string | null => {
+    const v = String(value);
+    if (!v) return "La contraseña es requerida";
+    if (v.length < 6) return "La contraseña debe tener al menos 6 caracteres";
     return null;
   };
 
   // Asumimos que tu componente reutilizable pasa todos los datos del formulario
   // a la función de validación para poder comparar campos.
   const validatePassword2 = (
-  value: string,
-  allData?: Record<string, any> // <-- AÑADE EL '?' AQUÍ
-): string | null => {
-  if (!value) {
-    return "Debe confirmar la contraseña";
-  }
-
-  // Como 'allData' ahora es opcional (allData?), 
-  // TypeScript nos pide que comprobemos si existe antes de usarlo.
-  if (!allData) {
-    return null; // No podemos comparar si no tenemos los demás datos
-  }
-
-  if (value !== allData.password) {
-    return "Las contraseñas no coinciden";
-  }
-  
-  return null;
-};
+    value: string | number,
+    allData?: Record<string, any>
+  ): string | null => {
+    const v = String(value);
+    if (!v) return "Debe confirmar la contraseña";
+    if (!allData) return null;
+    if (v !== allData.password) return "Las contraseñas no coinciden";
+    return null;
+  };
 
   // --- Configuración del Formulario ---
 
   const formConfig: FormConfig = {
-    title: "Registro de Admin",
+    title: "Registro de Administradores",
     fields: [
       {
         name: "nombre",
@@ -62,8 +46,8 @@ export default function RegisterAdmin() {
         icon: User,
         required: true,
         placeholder: "Ingrese el nombre",
-        validation: (value: string) =>
-          !value.trim() ? "El nombre es requerido" : null,
+        validation: (value: string | number) =>
+          !String(value).trim() ? "El nombre es requerido" : null,
       },
       {
         name: "apellidos",
@@ -72,8 +56,8 @@ export default function RegisterAdmin() {
         icon: User,
         required: true,
         placeholder: "Ingrese los apellidos",
-        validation: (value: string) =>
-          !value.trim() ? "Los apellidos son requeridos" : null,
+        validation: (value: string | number) =>
+          !String(value).trim() ? "El Apellido es requerido" : null,
       },
       {
         name: "email",
@@ -91,8 +75,8 @@ export default function RegisterAdmin() {
         icon: UserPlus,
         required: true,
         placeholder: "Nombre de usuario",
-        validation: (value: string) =>
-          !value.trim() ? "El usuario es requerido" : null,
+        validation: (value: string | number) =>
+          !String(value).trim() ? "El usuario es requerido" : null,
       },
       {
         name: "role",
@@ -106,7 +90,7 @@ export default function RegisterAdmin() {
           { value: "supervisor", label: "Supervisor" },
         ],
         placeholder: "Seleccione un rol",
-        validation: (value: string) =>
+        validation: (value: string | number) =>
           !value ? "Debe seleccionar un rol" : null,
       },
       {
@@ -173,7 +157,7 @@ export default function RegisterAdmin() {
         }
       } catch (error: any) {
         console.error("Error inesperado:", error);
-        
+
         // Si no es el error que ya mostramos, mostramos uno genérico
         if (!error.message.includes("Error al registrar usuario")) {
           Swal.fire({
@@ -183,7 +167,7 @@ export default function RegisterAdmin() {
             confirmButtonColor: "#667eea",
           });
         }
-        
+
         // Relanzamos el error para el componente
         throw error;
       }

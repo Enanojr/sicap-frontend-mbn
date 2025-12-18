@@ -1,3 +1,7 @@
+body {
+  font-family: "Poppins", Arial, sans-serif;
+}
+
 body.dark {
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
@@ -27,7 +31,10 @@ body.light {
 .slider {
   position: absolute;
   cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: #23272f;
   border-radius: 36px;
   transition: background 0.3s;

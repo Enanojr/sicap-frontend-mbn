@@ -14,9 +14,9 @@ import {
   //Users,
 } from "lucide-react";
 
-
 // Componente para las tarjetas de estadísticas
-{/*const StatCard = ({ 
+{
+  /*const StatCard = ({ 
   icon: Icon, 
   value, 
   label, 
@@ -36,7 +36,8 @@ import {
       <div className="stat-label">{label}</div>
     </div>
   </div>
-);*/}
+);*/
+}
 
 function Admin_Cards() {
   const navigate = useNavigate();
@@ -62,7 +63,7 @@ function Admin_Cards() {
     },
     {
       title: "Registro de Cobradores",
-      description: "Registra nuevos cobradores para gestionar el sistema.",
+      description: "Registra nuevos cobradores.",
       icon: UserSquare,
       ctaText: "Registrar Cobrador",
       gradientColors: ["#4caf50", "#388e3c"] as [string, string],
@@ -71,7 +72,7 @@ function Admin_Cards() {
     },
     {
       title: "Registro de Sectores",
-      description: "Registra nuevos sectores para gestionar el sistema.",
+      description: "Registra nuevos sectores en el sistema.",
       icon: MapPin,
       ctaText: "Registrar Sector",
       gradientColors: ["#ff9800", "#f57c00"] as [string, string],
@@ -80,7 +81,7 @@ function Admin_Cards() {
     },
     {
       title: "Registro de Colonias",
-      description: "Registra nuevas colonias para gestionar el sistema.",
+      description: "Registra nuevas colonias en el sistema.",
       icon: Home,
       ctaText: "Registrar Colonia",
       gradientColors: ["#009688", "#00796b"] as [string, string],

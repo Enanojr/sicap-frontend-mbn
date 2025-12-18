@@ -1,12 +1,32 @@
-import api from '../api_axios'; // Ajusta la ruta según tu estructura
+import api from "../api_axios"; // Ajusta la ruta según tu estructura
 
 const API_URL = "/asignaciones/"; // Ajusta la ruta según tu API
 
 /**
  * Obtiene el token del administrador desde localStorage
  */
+export interface AsignacionResponse {
+  id_asignacion: number;
+  fecha_asignacion: string;
+
+  cobrador: {
+    id_cobrador: number;
+    nombre: string;
+    apellidos: string;
+    usuario: string;
+    email: string;
+    role: string;
+  };
+
+  sector: {
+    id_sector: number;
+    nombre_sector: string;
+    descripcion: string;
+  };
+}
+
 const getAdminToken = (): string | null => {
-  return localStorage.getItem('access');
+  return localStorage.getItem("access");
 };
 
 /**
@@ -21,13 +41,14 @@ export const registerAsignacion = async (asignacionData: {
 }) => {
   try {
     const token = getAdminToken();
-    
+
     if (!token) {
       return {
         success: false,
         errors: {
-          general: 'No se encontró token de administrador. Por favor, inicie sesión.'
-        }
+          general:
+            "No se encontró token de administrador. Por favor, inicie sesión.",
+        },
       };
     }
 
@@ -39,24 +60,24 @@ export const registerAsignacion = async (asignacionData: {
 
     return {
       success: true,
-      data: response.data
+      data: response.data,
     };
-
   } catch (error: any) {
-    console.error('Error en registerAsignacion:', error);
-    
+    console.error("Error en registerAsignacion:", error);
+
     if (error.response && error.response.data) {
       return {
         success: false,
-        errors: error.response.data
+        errors: error.response.data,
       };
     }
-    
+
     return {
       success: false,
       errors: {
-        general: 'Error al conectar con el servidor. Por favor, intente nuevamente.'
-      }
+        general:
+          "Error al conectar con el servidor. Por favor, intente nuevamente.",
+      },
     };
   }
 };
@@ -68,13 +89,14 @@ export const registerAsignacion = async (asignacionData: {
 export const getAsignaciones = async () => {
   try {
     const token = getAdminToken();
-    
+
     if (!token) {
       return {
         success: false,
         errors: {
-          general: 'No se encontró token de administrador. Por favor, inicie sesión.'
-        }
+          general:
+            "No se encontró token de administrador. Por favor, inicie sesión.",
+        },
       };
     }
 
@@ -82,24 +104,24 @@ export const getAsignaciones = async () => {
 
     return {
       success: true,
-      data: response.data
+      data: response.data,
     };
-
   } catch (error: any) {
-    console.error('Error en getAsignaciones:', error);
-    
+    console.error("Error en getAsignaciones:", error);
+
     if (error.response && error.response.data) {
       return {
         success: false,
-        errors: error.response.data
+        errors: error.response.data,
       };
     }
-    
+
     return {
       success: false,
       errors: {
-        general: 'Error al obtener las asignaciones. Por favor, intente nuevamente.'
-      }
+        general:
+          "Error al obtener las asignaciones. Por favor, intente nuevamente.",
+      },
     };
   }
 };
@@ -112,13 +134,14 @@ export const getAsignaciones = async () => {
 export const getAsignacionById = async (id: string | number) => {
   try {
     const token = getAdminToken();
-    
+
     if (!token) {
       return {
         success: false,
         errors: {
-          general: 'No se encontró token de administrador. Por favor, inicie sesión.'
-        }
+          general:
+            "No se encontró token de administrador. Por favor, inicie sesión.",
+        },
       };
     }
 
@@ -126,24 +149,24 @@ export const getAsignacionById = async (id: string | number) => {
 
     return {
       success: true,
-      data: response.data
+      data: response.data,
     };
-
   } catch (error: any) {
-    console.error('Error en getAsignacionById:', error);
-    
+    console.error("Error en getAsignacionById:", error);
+
     if (error.response && error.response.data) {
       return {
         success: false,
-        errors: error.response.data
+        errors: error.response.data,
       };
     }
-    
+
     return {
       success: false,
       errors: {
-        general: 'Error al obtener la asignación. Por favor, intente nuevamente.'
-      }
+        general:
+          "Error al obtener la asignación. Por favor, intente nuevamente.",
+      },
     };
   }
 };
@@ -156,13 +179,14 @@ export const getAsignacionById = async (id: string | number) => {
 export const getAsignacionesByCobrador = async (cobradorId: number) => {
   try {
     const token = getAdminToken();
-    
+
     if (!token) {
       return {
         success: false,
         errors: {
-          general: 'No se encontró token de administrador. Por favor, inicie sesión.'
-        }
+          general:
+            "No se encontró token de administrador. Por favor, inicie sesión.",
+        },
       };
     }
 
@@ -170,24 +194,24 @@ export const getAsignacionesByCobrador = async (cobradorId: number) => {
 
     return {
       success: true,
-      data: response.data
+      data: response.data,
     };
-
   } catch (error: any) {
-    console.error('Error en getAsignacionesByCobrador:', error);
-    
+    console.error("Error en getAsignacionesByCobrador:", error);
+
     if (error.response && error.response.data) {
       return {
         success: false,
-        errors: error.response.data
+        errors: error.response.data,
       };
     }
-    
+
     return {
       success: false,
       errors: {
-        general: 'Error al obtener las asignaciones. Por favor, intente nuevamente.'
-      }
+        general:
+          "Error al obtener las asignaciones. Por favor, intente nuevamente.",
+      },
     };
   }
 };
@@ -200,13 +224,14 @@ export const getAsignacionesByCobrador = async (cobradorId: number) => {
 export const getAsignacionesBySector = async (sectorId: number) => {
   try {
     const token = getAdminToken();
-    
+
     if (!token) {
       return {
         success: false,
         errors: {
-          general: 'No se encontró token de administrador. Por favor, inicie sesión.'
-        }
+          general:
+            "No se encontró token de administrador. Por favor, inicie sesión.",
+        },
       };
     }
 
@@ -214,24 +239,116 @@ export const getAsignacionesBySector = async (sectorId: number) => {
 
     return {
       success: true,
-      data: response.data
+      data: response.data,
     };
-
   } catch (error: any) {
-    console.error('Error en getAsignacionesBySector:', error);
-    
+    console.error("Error en getAsignacionesBySector:", error);
+
     if (error.response && error.response.data) {
       return {
         success: false,
-        errors: error.response.data
+        errors: error.response.data,
       };
     }
-    
+
     return {
       success: false,
       errors: {
-        general: 'Error al obtener las asignaciones. Por favor, intente nuevamente.'
-      }
+        general:
+          "Error al obtener las asignaciones. Por favor, intente nuevamente.",
+      },
+    };
+  }
+};
+export const updateAsignacion = async (
+  id: number,
+  asignacionData: {
+    cobrador: number;
+    sector: number;
+    fecha_asignacion: string;
+  }
+) => {
+  try {
+    const token = getAdminToken();
+
+    if (!token) {
+      return {
+        success: false,
+        errors: {
+          general:
+            "No se encontró token de administrador. Por favor, inicie sesión.",
+        },
+      };
+    }
+
+    const response = await api.put(`${API_URL}${id}/`, asignacionData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error: any) {
+    console.error("Error en updateAsignacion:", error);
+
+    if (error.response && error.response.data) {
+      return {
+        success: false,
+        errors: error.response.data,
+      };
+    }
+
+    return {
+      success: false,
+      errors: {
+        general:
+          "Error al actualizar la asignación. Por favor, intente nuevamente.",
+      },
+    };
+  }
+};
+
+export const deleteAsignacion = async (id: number) => {
+  try {
+    const token = getAdminToken();
+
+    if (!token) {
+      return {
+        success: false,
+        errors: {
+          general: "No se encontró token. Por favor, inicie sesión.",
+        },
+      };
+    }
+
+    const response = await api.delete(`/asignaciones/${id}/`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error: any) {
+    console.error("Error en deleteAsignacion:", error);
+
+    if (error.response && error.response.data) {
+      return {
+        success: false,
+        errors: error.response.data,
+      };
+    }
+
+    return {
+      success: false,
+      errors: {
+        general: "Error al eliminar la asignación.",
+      },
     };
   }
 };
