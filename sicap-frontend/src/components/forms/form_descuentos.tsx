@@ -16,7 +16,7 @@ import { isAuthenticated, logout } from "../../services/auth.service";
 interface FormularioDescuentosProps {
   descuentoToEdit: DescuentoResponse | null;
   onSuccess: () => void;
-  onCancel: () => void; // ← OBLIGATORIO
+  onCancel: () => void;
 }
 
 const FormularioDescuentos: React.FC<FormularioDescuentosProps> = ({
@@ -26,18 +26,75 @@ const FormularioDescuentos: React.FC<FormularioDescuentosProps> = ({
 }) => {
   const isEditMode = !!descuentoToEdit;
 
+  // Validaciones mejoradas
   const validateMonto = (value: any): string | null => {
-    const num = parseFloat(value);
-    if (isNaN(num) || num < 0) return "Debe ser un monto mayor o igual a 0";
+    const strValue = String(value).trim();
+    
+    if (!strValue) return "El monto es requerido";
+    
+    const num = parseFloat(strValue);
+    
+    if (isNaN(num)) return "Debe ser un número válido";
+    if (num <= 0) return "El monto debe ser mayor a 0";
     if (num > 999999.99) return "El monto no puede exceder $999,999.99";
+    
+    // Validar máximo 2 decimales
+    if (!/^\d+(\.\d{1,2})?$/.test(strValue)) {
+      return "Máximo 2 decimales permitidos";
+    }
+    
     return null;
   };
 
   const validateNombre = (value: any): string | null => {
-    if (!value || value.trim().length === 0) return "El nombre es requerido";
-    if (value.trim().length > 30)
-      return "El nombre no puede exceder 30 caracteres";
+    const strValue = String(value).trim();
+    
+    if (!strValue) return "El nombre es requerido";
+    if (strValue.length < 3) return "El nombre debe tener al menos 3 caracteres";
+    if (strValue.length > 50) return "El nombre no puede exceder 50 caracteres";
+    
+    // Validar que no sea solo espacios
+    if (!/\S/.test(value)) return "El nombre no puede contener solo espacios";
+    
+    // Validar caracteres especiales excesivos
+    if (/[<>{}[\]\\]/.test(strValue)) {
+      return "El nombre contiene caracteres no permitidos";
+    }
+    
     return null;
+  };
+
+  // Función auxiliar para manejar errores de autenticación
+  const handleAuthError = () => {
+    Swal.fire({
+      icon: "error",
+      title: "Sesión expirada",
+      text: "Por favor, inicia sesión nuevamente.",
+      confirmButtonColor: "#ef4444",
+    }).then(() => {
+      logout();
+    });
+  };
+
+  // Función para mostrar confirmación antes de guardar (opcional pero recomendado)
+  const confirmSave = async (data: any): Promise<boolean> => {
+    const result = await Swal.fire({
+      title: isEditMode ? "¿Actualizar descuento?" : "¿Registrar descuento?",
+      html: `
+        <div style="text-align: left; margin-top: 1rem;">
+          <p><strong>Nombre:</strong> ${data.nombre}</p>
+          <p><strong>Monto:</strong> $${parseFloat(data.monto).toFixed(2)}</p>
+        </div>
+      `,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: isEditMode ? "Sí, actualizar" : "Sí, registrar",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#10b981",
+      cancelButtonColor: "#6b7280",
+    });
+
+    return result.isConfirmed;
   };
 
   const formConfig: FormConfig = {
@@ -62,34 +119,41 @@ const FormularioDescuentos: React.FC<FormularioDescuentosProps> = ({
         icon: DollarSign,
         required: true,
         validation: validateMonto,
-        defaultValue: descuentoToEdit?.porcentaje?.toString() || "0",
+        defaultValue: descuentoToEdit?.porcentaje?.toString() || "",
       },
     ],
 
     onSubmit: async (data) => {
       try {
+        // Verificar autenticación
         if (!isAuthenticated()) {
-          Swal.fire({
-            icon: "error",
-            title: "Sesión expirada",
-            text: "Por favor, inicia sesión nuevamente.",
-          });
-          logout();
+          handleAuthError();
           return;
         }
 
+        // Confirmación opcional (comenta si no la quieres)
+        const confirmed = await confirmSave(data);
+        if (!confirmed) return;
+
+        // Mostrar loading
         Swal.fire({
           title: isEditMode ? "Actualizando..." : "Registrando...",
+          text: "Por favor espera",
           allowOutsideClick: false,
+          allowEscapeKey: false,
           didOpen: () => Swal.showLoading(),
         });
 
+        // Preparar payload
         const payload: DescuentoCreate = {
           nombre_descuento: data.nombre.trim(),
           porcentaje: parseFloat(data.monto).toFixed(2),
           activo: isEditMode ? descuentoToEdit!.activo : true,
         };
 
+        console.log("Enviando payload:", payload);
+
+        // Ejecutar operación
         let result: DescuentoResponse;
 
         if (isEditMode) {
@@ -97,23 +161,61 @@ const FormularioDescuentos: React.FC<FormularioDescuentosProps> = ({
             descuentoToEdit!.id_descuento,
             payload
           );
+          console.log("Descuento actualizado:", result);
         } else {
           result = await createDescuento(payload);
+          console.log("Descuento creado:", result);
         }
 
-        Swal.fire({
+        // Mostrar éxito
+        await Swal.fire({
           icon: "success",
           title: isEditMode
             ? "¡Descuento actualizado!"
             : "¡Descuento registrado!",
+          text: `"${result.nombre_descuento}" se guardó correctamente`,
+          confirmButtonColor: "#10b981",
+          timer: 2500,
+          timerProgressBar: true,
         });
 
+        // Llamar callback de éxito
         onSuccess();
       } catch (error: any) {
+        console.error("Error en formulario de descuentos:", error);
+
+        // Manejar errores específicos
+        let errorMessage = "Ocurrió un error inesperado";
+
+        if (error.response) {
+          switch (error.response.status) {
+            case 401:
+            case 403:
+              handleAuthError();
+              return;
+            case 400:
+              errorMessage = error.response.data?.detail || 
+                           error.response.data?.message ||
+                           "Datos inválidos. Verifica la información.";
+              break;
+            case 409:
+              errorMessage = "Ya existe un descuento con ese nombre";
+              break;
+            case 500:
+              errorMessage = "Error en el servidor. Intenta más tarde.";
+              break;
+            default:
+              errorMessage = error.message || errorMessage;
+          }
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+
         Swal.fire({
           icon: "error",
           title: "Error",
-          text: error.message || "Ocurrió un error inesperado",
+          text: errorMessage,
+          confirmButtonColor: "#ef4444",
         });
       }
     },
@@ -124,7 +226,21 @@ const FormularioDescuentos: React.FC<FormularioDescuentosProps> = ({
 
     onReset: () => {
       if (isEditMode) {
-        onCancel();
+        // Confirmación antes de cancelar edición
+        Swal.fire({
+          title: "¿Cancelar edición?",
+          text: "Los cambios no guardados se perderán",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Sí, cancelar",
+          cancelButtonText: "No, continuar editando",
+          confirmButtonColor: "#ef4444",
+          cancelButtonColor: "#6b7280",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            onCancel();
+          }
+        });
       }
     },
   };

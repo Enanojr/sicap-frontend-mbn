@@ -2732,6 +2732,16 @@ input[type="number"]::-webkit-inner-spin-button {
     padding: 0 0.5rem;
   }
 }
+/* Ajustar tabla al estilo del formulario */
+.form-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  background: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
 
 /* ============================================
    ESTILOS PARA SEARCH-SELECT
@@ -2873,4 +2883,110 @@ input[type="number"]::-webkit-inner-spin-button {
 .chip-status:hover {
   filter: brightness(1.15);
   transform: translateY(-1px);
+}
+/*--------------------------------------------Dashboard Stats--------------------------------------------*/
+/* Dashboard Stats Styles */
+.dashboard-stats-container {
+  margin-top: 3rem;
+  padding: 0 1rem;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.stats-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* Top 5 Section */
+.top5-section {
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.top5-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.top5-item {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.top5-item:hover {
+  background: rgba(167, 6, 6, 0.075);
+  transform: translateX(5px);
+}
+
+.rank-badge {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: white;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.deudor-info {
+  flex: 1;
+}
+
+.deudor-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+  margin-bottom: 0.25rem;
+}
+
+.deudor-colonia {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+.deudor-amount {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #4ecdc4;
+  margin-left: 1rem;
+}
+
+/* Chart Section */
+.chart-section {
+  background: linear-gradient(135deg, #2c3e5069 0%, #34495e 100%);
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
 }
