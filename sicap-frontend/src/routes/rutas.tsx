@@ -16,6 +16,8 @@ import CobradoresPage from "../pages/Principal_Form_Table/cobradorespage";
 import ColoniasPage from "../pages/Principal_Form_Table/coloniaspage";
 import AsignacionesPage from "../pages/Principal_Form_Table/asignacionespage";
 import SectoresPage from "../pages/Principal_Form_Table/sectorespage";
+import ProgresoTable from "../pages/Users/Users";
+
 const Rutas = [
   // Ruta #1: Login (pública)
   {
@@ -25,6 +27,10 @@ const Rutas = [
   {
     path: "/Login",
     element: <Login />,
+  },
+  {
+    path: "/users",
+    element: <ProgresoTable />,
   },
 
   // Ruta #2: Rutas protegidas con Layout y Navbar
@@ -86,7 +92,7 @@ const Rutas = [
           {
             path: "/servicios",
             element: <ServiciosPage />,
-          },
+          }
         ],
       },
     ],

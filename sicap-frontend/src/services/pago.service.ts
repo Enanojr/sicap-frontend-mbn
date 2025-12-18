@@ -67,9 +67,37 @@ export const createPago = async (data: PagoCreate): Promise<PagoResponse> => {
 export const getAllPagos = async (): Promise<PagoResponse[]> => {
   try {
     console.log("Obteniendo todos los pagos...");
-    const response = await api.get(PAGOS_URL);
-    console.log(response.data.length + " pagos obtenidos");
-    return response.data.map(normalizePago);
+    let todosPagos: PagoResponse[] = [];
+    let url = PAGOS_URL;
+    let pagina = 1;
+
+    while (url) {
+      console.log(`Obteniendo página ${pagina}...`);
+      const response = await api.get(url);
+      
+      // La respuesta probablemente tiene esta estructura:
+      // { results: [...], next: "url_siguiente", count: total }
+      
+      const pagosData = Array.isArray(response.data) 
+        ? response.data 
+        : (response.data.results || []);
+      
+      todosPagos = [...todosPagos, ...pagosData];
+      
+      // Verificar si hay más páginas
+      url = response.data.next || null;
+      pagina++;
+      
+      // Seguridad: evitar loops infinitos
+      if (pagina > 100) {
+        console.warn("Se alcanzó el límite de páginas");
+        break;
+      }
+    }
+
+    console.log(`Total de pagos obtenidos: ${todosPagos.length}`);
+    return todosPagos.map(normalizePago);
+    
   } catch (error: any) {
     console.error("Error en getAllPagos:", error);
     throw error;

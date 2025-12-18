@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { WaterServiceCard } from "../../components/cards/card";
+import { DashboardStats } from "../../components/dashboard/DashboardStats";
 import "../../styles/styles.css";
 import { Users, Search, CreditCard } from "lucide-react";
 
@@ -78,6 +79,9 @@ function Main_Card() {
           />
         ))}
       </div>
+
+      {/* Sección de Estadísticas */}
+      <DashboardStats />
     </div>
   );
 }
