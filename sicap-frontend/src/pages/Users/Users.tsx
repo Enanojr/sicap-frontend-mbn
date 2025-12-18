@@ -127,6 +127,13 @@ const ProgresoTable: React.FC = () => {
     return "status-pending-light";
   };
 
+  // Limpiar localStorage al montar el componente
+  useEffect(() => {
+    console.log("Limpiando localStorage...");
+    localStorage.clear();
+    console.log("localStorage limpiado exitosamente");
+  }, []);
+
   // Detectar cambios en el tamaño de ventana
   useEffect(() => {
     const handleResize = () => {
@@ -723,7 +730,7 @@ const ProgresoTable: React.FC = () => {
                           borderBottom: "2px solid #e5e7eb",
                         }}
                       >
-                        Saldo
+                        Adeudo
                       </th>
                       <th
                         style={{
