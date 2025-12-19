@@ -2990,3 +2990,107 @@ input[type="number"]::-webkit-inner-spin-button {
     grid-template-columns: 1fr;
   }
 }
+
+/* ===============================
+   FOOTER DEL EXPORT (bonito)
+   =============================== */
+.table-download-footer__actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  margin-top: 14px;
+  padding-top: 14px;
+
+  /* separador sutil para que no se vea “pegado” */
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Contenedor general */
+.table-with-action {
+  width: 100%;
+}
+
+/* Footer del botón (se ve parte del card) */
+.table-with-action__footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  margin-top: 14px;
+  padding-top: 14px;
+  padding-bottom: 6px;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Botón exportar: mismo lenguaje visual que tu UI */
+.cuenta-download-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  width: fit-content;
+  min-width: 240px;
+  max-width: 520px;
+
+  padding: 0.75rem 1.1rem;
+  border-radius: 12px;
+
+  background: rgba(43, 46, 53, 0.9); /* igual que tus inputs */
+  border: 1px solid rgba(88, 178, 238, 0.35); /* azul #58b2ee */
+
+  color: #eaf6ff;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+
+  transition: all 0.2s ease;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+.cuenta-download-btn svg {
+  opacity: 0.95;
+}
+
+/* Hover elegante */
+.cuenta-download-btn:hover {
+  background: rgba(47, 59, 126, 0.35); /* azul oscuro */
+  border-color: rgba(88, 178, 238, 0.65);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+}
+
+.cuenta-download-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.cuenta-download-btn:focus-visible {
+  outline: 3px solid rgba(88, 178, 238, 0.25);
+  outline-offset: 2px;
+}
+
+.cuenta-download-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Responsive: en móvil ancho completo */
+@media (max-width: 768px) {
+  .table-with-action__footer {
+    padding-top: 12px;
+  }
+
+  .cuenta-download-btn {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+}

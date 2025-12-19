@@ -1,18 +1,14 @@
 import React, { useEffect, useState } from "react";
+import { Download } from "lucide-react";
 import { ReusableTable, type Column } from "./registros_general";
 
 import {
   getCuentahabientes,
-  // deleteCuentahabiente,
   type CuentahabienteResponse,
 } from "../../services/Rcuentahabientes.service";
 
 import { getColonias } from "../../services/Rcolonias.service";
 import { getAllServicios } from "../../services/servicios.service";
-
-//import Swal from "sweetalert2";
-
-//Los elementos comentados pertenecen a la acción de eliminación, si se requiere en el futuro, solo descomentarlos. Atte: Kirby :)
 
 interface CuentahabienteRow {
   id_cuentahabiente: number;
@@ -41,7 +37,6 @@ const TablaCuentahabientes: React.FC<{
 
     while (url) {
       const resp = await getCuentahabientes(url);
-
       if (!resp.success || !resp.data) break;
 
       const pageItems = resp.data.results ?? resp.data;
@@ -62,7 +57,6 @@ const TablaCuentahabientes: React.FC<{
       }));
 
       allResults = [...allResults, ...rows];
-
       url = resp.data.next;
     }
 
@@ -99,30 +93,26 @@ const TablaCuentahabientes: React.FC<{
 
   const columns: Column<CuentahabienteRow>[] = [
     { key: "numero_contrato", label: "Número de Contrato" },
-
     {
       key: "nombres",
       label: "Nombre Completo",
       render: (_, row) =>
         `${row.nombres} ${row.ap ?? ""} ${row.am ?? ""}`.trim(),
     },
-
     {
       key: "calle",
       label: "Domicilio",
       render: (_, row) => `${row.calle} #${row.numero}`,
     },
-
     {
       key: "colonia",
       label: "Colonia",
       render: (value) => coloniaMap[value] ?? `ID: ${value}`,
     },
-
     {
       key: "telefono",
       label: "Teléfono",
-      render: (value) => servicioMap[value] ?? ` ${value}`,
+      render: (value) => String(value ?? ""),
     },
   ];
 
@@ -130,44 +120,84 @@ const TablaCuentahabientes: React.FC<{
     return await fetchAllCuentahabientes();
   };
 
-  {
-    /*const handleDelete = async (row: CuentahabienteRow): Promise<boolean> => {
-    const confirm = await Swal.fire({
-      title: "¿Eliminar cuentahabiente?",
-      text: `Contrato: ${row.numero_contrato}`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Eliminar",
+  const handleDownloadAll = async () => {
+    const rows = await fetchAllCuentahabientes();
+
+    const headers = [
+      "id_cuentahabiente",
+      "numero_contrato",
+      "nombres",
+      "ap",
+      "am",
+      "calle",
+      "numero",
+      "telefono",
+      "colonia",
+      "servicio",
+      "deuda",
+      "saldo_pendiente",
+    ];
+
+    const escape = (v: any) => `"${String(v ?? "").replaceAll(`"`, `""`)}"`;
+
+    const lines = [
+      headers.join(","),
+      ...rows.map((r) =>
+        [
+          r.id_cuentahabiente,
+          r.numero_contrato,
+          r.nombres,
+          r.ap ?? "",
+          r.am ?? "",
+          r.calle,
+          r.numero,
+          r.telefono,
+          coloniaMap[r.colonia] ?? r.colonia,
+          servicioMap[r.servicio] ?? r.servicio,
+          r.deuda ?? "",
+          r.saldo_pendiente ?? 0,
+        ]
+          .map(escape)
+          .join(",")
+      ),
+    ];
+    const BOM = "\uFEFF";
+
+    const blob = new Blob([BOM + lines.join("\n") + "\n"], {
+      type: "text/csv;charset=utf-8;",
     });
 
-    
-    if (!confirm.isConfirmed) return false;
-
-    const resp = await deleteCuentahabiente(row.id_cuentahabiente);
-
-    if (resp.success) {
-      Swal.fire("Eliminado", "El cuentahabiente fue eliminado", "success");
-      return true;
-    } else {
-      Swal.fire("Error", "No se pudo eliminar", "error");
-      return false;
-    }
-  }; */
-  }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `cuentahabientes_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
-    <ReusableTable<CuentahabienteRow>
-      columns={columns}
-      fetchData={fetchData}
-      searchableFields={["nombres", "ap", "am", "numero_contrato"]}
-      itemsPerPage={10}
-      title="Cuentahabientes Registrados"
-      showActions={true}
-      onEdit={onEdit}
-      //onDelete={handleDelete}
-    />
+    <div className="table-with-action">
+      <ReusableTable<CuentahabienteRow>
+        columns={columns}
+        fetchData={fetchData}
+        searchableFields={["nombres", "ap", "am", "numero_contrato"]}
+        itemsPerPage={10}
+        title="Cuentahabientes Registrados"
+        showActions={true}
+        onEdit={onEdit}
+      />
+
+      <div className="table-with-action__footer">
+        <button
+          type="button"
+          className="cuenta-download-btn"
+          onClick={handleDownloadAll}
+        >
+          <Download size={18} />
+          Exportar Excel
+        </button>
+      </div>
+    </div>
   );
 };
 
