@@ -17,7 +17,7 @@ const STATUS_LABELS: { [key: string]: string } = {
   'corriente': 'Corriente'
 };
 
-const COLORS = ['#4ecd69ff', '#c545f8ff', '#f31212ff', '#ca781bff'];
+const COLORS = ['#4ecd69ff', '#ff0000eb', '#f6ff00e0', '#ca781bff'];
 
 export const DashboardStats = () => {
   const [statusData, setStatusData] = useState<StatusData[]>([]);
