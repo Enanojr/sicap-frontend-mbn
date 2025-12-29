@@ -3177,3 +3177,95 @@ input[type="number"]::-webkit-inner-spin-button {
     min-width: 0;
   }
 }
+
+/*Estado de cuenta barra de busqueda */
+.estado-bar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 16px;
+  margin: 14px 0 6px 0;
+
+  background: #1e2028;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+}
+
+.estado-input-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  background: #252831;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.estado-icon {
+  color: #58b2ee;
+}
+
+.estado-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #e0e0e0;
+  font-size: 0.95rem;
+}
+
+.estado-input::placeholder {
+  color: #9aa4b2;
+}
+
+.estado-clear {
+  background: transparent;
+  border: none;
+  color: #9aa4b2;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.estado-clear:hover {
+  color: #ffffff;
+  background: #2b2e35;
+}
+
+.estado-download-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  background: #58b2ee;
+  color: white;
+  border: none;
+  padding: 11px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.estado-download-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.estado-hint {
+  color: #999;
+  font-size: 0.85rem;
+  margin-top: 8px;
+}
+
+@media (max-width: 720px) {
+  .estado-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .estado-download-btn {
+    justify-content: center;
+  }
+}
