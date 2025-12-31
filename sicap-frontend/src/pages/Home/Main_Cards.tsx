@@ -31,8 +31,8 @@ function Main_Card() {
 
   const cards = [
     {
-      title: "Consultas",
-      description: "Consulta los pagos de los cuentahabientes.",
+      title: "Consulta de Pagos Realizados",
+      description: "Consulta los pagos que ha realizado el cuentahabiente.",
       icon: Search,
       ctaText: "Consultar",
       gradientColors: ["#4ecdc4", "#2c9fb9"] as [string, string],
@@ -49,8 +49,9 @@ function Main_Card() {
       onClick: handlePayment,
     },
     {
-      title: "Registro de Cuentahabientes",
-      description: "Registra nuevos cuentahabientes",
+      title: "Registra o Consulta Cuentahabientes",
+      description:
+        "Registra nuevos cuentahabientes o consulta los ya existentes",
       icon: Users,
       ctaText: "Registrar",
       gradientColors: ["#9c27b0", "#7b1fa2"] as [string, string],
