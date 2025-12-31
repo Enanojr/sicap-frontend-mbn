@@ -6,7 +6,6 @@ import {
   Eye,
   ChevronLeft,
   ChevronRight,
-  Download,
 } from "lucide-react";
 import Swal from "sweetalert2";
 import type { ContractSummary } from "../../services/views.service";
@@ -729,15 +728,6 @@ const ContractTable: React.FC = () => {
                     </div>
                   )}
                 </div>
-              </div>
-
-              {/* Botón estado de cuenta  */}
-
-              <div className="boton_estado_de_cuenta">
-                <button type="button" className="estado_de_cuenta-download-btn">
-                  <Download size={18} />
-                  Descargar Estado de Cuenta
-                </button>
               </div>
             </div>
           </div>
