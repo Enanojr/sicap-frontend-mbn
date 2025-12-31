@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { WaterServiceCard } from "../../components/cards/card";
 import { DashboardStats } from "../../components/dashboard/DashboardStats";
 import "../../styles/styles.css";
-import { Users, Search, CreditCard } from "lucide-react";
+import { Users, Search, CreditCard, Newspaper } from "lucide-react";
 
 // Componente para el header de la página principal
 const MainHeader = () => (
@@ -27,11 +27,12 @@ function Main_Card() {
 
   const handleCuentahabientes = () => navigate("/Rcuentahabiente");
 
-  // Array de configuración de cards
+  const handleEstadoCuenta = () => navigate("/estadocuenta");
+
   const cards = [
     {
-      title: "Consultas",
-      description: "Consulta los pagos de los cuentahabientes.",
+      title: "Consulta de Pagos Realizados",
+      description: "Consulta los pagos que ha realizado el cuentahabiente.",
       icon: Search,
       ctaText: "Consultar",
       gradientColors: ["#4ecdc4", "#2c9fb9"] as [string, string],
@@ -48,13 +49,23 @@ function Main_Card() {
       onClick: handlePayment,
     },
     {
-      title: "Registro de Cuentahabientes",
-      description: "Registra nuevos cuentahabientes",
+      title: "Registra o Consulta Cuentahabientes",
+      description:
+        "Registra nuevos cuentahabientes o consulta los ya existentes",
       icon: Users,
-      ctaText: "Registrar Cuentahabiente",
+      ctaText: "Registrar",
       gradientColors: ["#9c27b0", "#7b1fa2"] as [string, string],
       waterDropColor: "rgba(156, 39, 176, 0.6)",
       onClick: handleCuentahabientes,
+    },
+    {
+      title: "Estado de Cuenta",
+      description: "Crea o consulta el estado de cuenta de los cuentahabiente",
+      icon: Newspaper,
+      ctaText: "Crear",
+      gradientColors: ["#5e35b1", "#4527a0"] as [string, string],
+      waterDropColor: "rgba(94, 53, 177, 0.6)",
+      onClick: handleEstadoCuenta,
     },
   ];
 
@@ -80,7 +91,6 @@ function Main_Card() {
         ))}
       </div>
 
-      {/* Sección de Estadísticas */}
       <DashboardStats />
     </div>
   );

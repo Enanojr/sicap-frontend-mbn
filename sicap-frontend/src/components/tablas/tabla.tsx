@@ -26,9 +26,6 @@ const filterOptions: FilterOption[] = [
   { id: "last-year", label: "Último año", value: "year" },
 ];
 
-/* -------------------------------------------------------
-   ✔ NUEVO FILTRO POR ESTADO (solo 3 valores)
--------------------------------------------------------- */
 const statusOptions: FilterOption[] = [
   { id: "all-status", label: "Todos los estados", value: "all" },
   { id: "pagado", label: "Pagado", value: "pagado" },
@@ -69,9 +66,6 @@ const ContractTable: React.FC = () => {
   const [selectedContract, setSelectedContract] =
     useState<ContractSummary | null>(null);
 
-  /* -------------------------------------------------------
-     ✔ Colores según los 3 estados reales
-  -------------------------------------------------------- */
   const getStatusClass = (estatus: string) => {
     const value = estatus.trim().toLowerCase();
 
@@ -128,9 +122,6 @@ const ContractTable: React.FC = () => {
     }
   };
 
-  /* -------------------------------------------------------
-     ✔ Filtro por fecha
-  -------------------------------------------------------- */
   const filterByDateRange = (contract: ContractSummary): boolean => {
     if (selectedFilter === "all") return true;
     if (!contract.ultimo_pago) return false;
@@ -246,7 +237,9 @@ const ContractTable: React.FC = () => {
     <div className="contracts-page-container">
       <div className="contracts-card">
         <h2 className="contracts-title">
-          <span className="contracts-title-gradient">Consultas</span>
+          <span className="contracts-title-gradient">
+            Consulta de Pagos Realizados
+          </span>
         </h2>
         <div className="contracts-divider"></div>
 

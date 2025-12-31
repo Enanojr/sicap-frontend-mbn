@@ -17,6 +17,7 @@ import ColoniasPage from "../pages/Principal_Form_Table/coloniaspage";
 import AsignacionesPage from "../pages/Principal_Form_Table/asignacionespage";
 import SectoresPage from "../pages/Principal_Form_Table/sectorespage";
 import ProgresoTable from "../pages/Users/Users";
+import EstadoCuentaPage from "../pages/Estado_Cuenta/estado_cuenta";
 
 const Rutas = [
   // Ruta #1: Login (pública)
@@ -92,7 +93,11 @@ const Rutas = [
           {
             path: "/servicios",
             element: <ServiciosPage />,
-          }
+          },
+          {
+            path: "/estadocuenta",
+            element: <EstadoCuentaPage />,
+          },
         ],
       },
     ],
