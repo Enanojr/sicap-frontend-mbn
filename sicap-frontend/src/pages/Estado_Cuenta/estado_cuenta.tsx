@@ -4,7 +4,7 @@ import Swal from "sweetalert2";
 import { pdf } from "@react-pdf/renderer";
 
 import "../../styles/styles.css";
-import { getEstadosById } from "../../services/estado_cuenta.service";
+import { getEstadosById } from "../../services/Estado_cuenta.service";
 import EstadoCuentaPDF from "../../pages/Estado_Cuenta/EstadoCuentaPDF";
 
 export default function EstadoCuentaPage() {
