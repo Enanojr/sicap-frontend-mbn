@@ -46,6 +46,20 @@ const statusColor = (estatus: string) => {
   return "#64748b";
 };
 
+const getPdfTitle = (
+  estatus: string,
+  historico: EstadoCuentaPDFData["historico"]
+) => {
+  const v = (estatus || "").trim().toLowerCase();
+
+  if (v === "pagado" && historico?.length) {
+    const last = historico[historico.length - 1];
+    return `Recibo de Pago ${last.anio}`;
+  }
+
+  return "Estado de Cuenta";
+};
+
 const styles = StyleSheet.create({
   page: {
     padding: 28,
@@ -193,7 +207,9 @@ export default function EstadoCuentaPDF({
           </View>
 
           <View style={styles.infoBox}>
-            <Text style={styles.title}>Estado de Cuenta</Text>
+            <Text style={styles.title}>
+              {getPdfTitle(data.estatus, data.historico)}
+            </Text>
 
             <View style={styles.infoRow}>
               <Text style={styles.label}>Contrato</Text>
