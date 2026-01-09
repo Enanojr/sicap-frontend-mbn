@@ -1,32 +1,57 @@
 import { useState } from "react";
-import { UserSearch, Download, X } from "lucide-react";
+import { Download } from "lucide-react";
 import Swal from "sweetalert2";
 import { pdf } from "@react-pdf/renderer";
 
 import "../../styles/styles.css";
+
+import {
+  ReusableTable,
+  type Column,
+} from "../../components/tablas/registros_general"; // ajusta la ruta si aplica
+import { getCuentahabientes } from "../../services/Rcuentahabientes.service";
 import { getEstadosById } from "../../services/Estado_cuenta.service";
 import EstadoCuentaPDF from "../../pages/Estado_Cuenta/EstadoCuentaPDF";
 
+type Row = {
+  id_cuentahabiente: number;
+  numero_contrato: number;
+  nombres: string;
+  ap: string;
+  am: string;
+};
+
 export default function EstadoCuentaPage() {
-  const [input, setInput] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
+  const [downloadingId, setDownloadingId] = useState<number | null>(null);
 
-  const handleClear = () => setInput("");
+  const fetchAllCuentahabientes = async (): Promise<Row[]> => {
+    let url: string | null = "/cuentahabientes/";
+    let all: Row[] = [];
 
-  const handleDownload = async () => {
-    const id = Number(input);
+    while (url) {
+      const resp = await getCuentahabientes(url);
+      if (!resp?.success || !resp?.data) break;
 
-    if (!input.trim() || Number.isNaN(id) || id <= 0) {
-      Swal.fire({
-        icon: "warning",
-        title: "Dato inválido",
-        text: "Ingresa un ID numérico válido del cuentahabiente.",
-      });
-      return;
+      const pageItems = resp.data.results ?? resp.data;
+
+      const rows: Row[] = (pageItems || []).map((r: any) => ({
+        id_cuentahabiente: r.id_cuentahabiente,
+        numero_contrato: r.numero_contrato,
+        nombres: r.nombres,
+        ap: r.ap ?? "",
+        am: r.am ?? "",
+      }));
+
+      all = [...all, ...rows];
+      url = resp.data.next;
     }
 
+    return all;
+  };
+
+  const handleDownloadPDF = async (id_cuentahabiente: number) => {
     try {
-      setLoading(true);
+      setDownloadingId(id_cuentahabiente);
 
       Swal.fire({
         title: "Generando Estado de Cuenta...",
@@ -35,13 +60,13 @@ export default function EstadoCuentaPage() {
         didOpen: () => Swal.showLoading(),
       });
 
-      const rows = await getEstadosById(id);
+      const rows = await getEstadosById(id_cuentahabiente);
 
       if (!rows || rows.length === 0) {
         Swal.fire({
           icon: "info",
           title: "Sin resultados",
-          text: "No se encontró historial para ese cuentahabiente.",
+          text: "No se encontró historial para este cuentahabiente.",
         });
         return;
       }
@@ -55,7 +80,7 @@ export default function EstadoCuentaPage() {
         telefono: first.telefono,
         estatus: first.deuda,
         saldo_pendiente: first.saldo_pendiente,
-        historico: rows.map((r) => ({
+        historico: rows.map((r: any) => ({
           fecha_pago: r.fecha_pago,
           monto_recibido: Number(r.monto_recibido || 0),
           anio: r.anio,
@@ -82,57 +107,54 @@ export default function EstadoCuentaPage() {
         text: error?.message || "No fue posible generar el estado de cuenta.",
       });
     } finally {
-      setLoading(false);
+      setDownloadingId(null);
     }
   };
 
+  const columns: Column<Row>[] = [
+    {
+      key: "nombres",
+      label: "Cuentahabiente",
+      render: (_, row) =>
+        `${row.nombres} ${row.ap ?? ""} ${row.am ?? ""}`.trim(),
+    },
+    {
+      key: "numero_contrato",
+      label: "Contrato",
+    },
+
+    // 👇 Columna extra para el botón (sin tocar tu ReusableTable)
+    {
+      key: "id_cuentahabiente" as any,
+      label: "Estado de cuenta",
+      render: (_, row) => (
+        <button
+          type="button"
+          className="estado-download-btn"
+          onClick={() => handleDownloadPDF(row.id_cuentahabiente)}
+          disabled={downloadingId === row.id_cuentahabiente}
+          title="Descargar estado de cuenta"
+          style={{ whiteSpace: "nowrap" }}
+        >
+          <Download size={16} />
+          {downloadingId === row.id_cuentahabiente
+            ? "Generando..."
+            : "Descargar PDF"}
+        </button>
+      ),
+    },
+  ];
+
   return (
-    <div className="contracts-page-container">
-      <div className="contracts-card">
-        <h2 className="contracts-title">
-          <span className="contracts-title-gradient">Estado de Cuenta</span>
-        </h2>
-        <div className="contracts-divider"></div>
-
-        <div className="estado-bar">
-          <div className="estado-input-wrap">
-            <UserSearch className="estado-icon" />
-            <input
-              className="estado-input"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ingresa ID del cuentahabiente..."
-              inputMode="numeric"
-            />
-
-            {input && (
-              <button
-                type="button"
-                className="estado-clear"
-                onClick={handleClear}
-                aria-label="Limpiar"
-              >
-                <X size={16} />
-              </button>
-            )}
-          </div>
-
-          <button
-            type="button"
-            className="estado-download-btn"
-            onClick={handleDownload}
-            disabled={loading}
-          >
-            <Download size={18} />
-            {loading ? "Generando..." : "Descargar PDF"}
-          </button>
-        </div>
-
-        <div className="estado-hint">
-          * Genera el Estado de Cuenta consultando el histórico del
-          cuentahabiente por ID.
-        </div>
-      </div>
+    <div className="table-with-action">
+      <ReusableTable<Row>
+        columns={columns}
+        fetchData={fetchAllCuentahabientes}
+        searchableFields={["nombres", "ap", "am", "numero_contrato"]}
+        itemsPerPage={10}
+        title="Estado de Cuenta"
+        showActions={false} // ya no usamos Editar/acciones default
+      />
     </div>
   );
 }
