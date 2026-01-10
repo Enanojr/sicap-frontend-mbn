@@ -8,7 +8,7 @@ import "../../styles/styles.css";
 import {
   ReusableTable,
   type Column,
-} from "../../components/tablas/registros_general"; // ajusta la ruta si aplica
+} from "../../components/tablas/registros_general";
 import { getCuentahabientes } from "../../services/Rcuentahabientes.service";
 import { getEstadosById } from "../../services/Estado_cuenta.service";
 import EstadoCuentaPDF from "../../pages/Estado_Cuenta/EstadoCuentaPDF";
@@ -123,7 +123,6 @@ export default function EstadoCuentaPage() {
       label: "Contrato",
     },
 
-    // 👇 Columna extra para el botón (sin tocar tu ReusableTable)
     {
       key: "id_cuentahabiente" as any,
       label: "Estado de cuenta",
@@ -153,7 +152,7 @@ export default function EstadoCuentaPage() {
         searchableFields={["nombres", "ap", "am", "numero_contrato"]}
         itemsPerPage={10}
         title="Estado de Cuenta"
-        showActions={false} // ya no usamos Editar/acciones default
+        showActions={false}
       />
     </div>
   );
