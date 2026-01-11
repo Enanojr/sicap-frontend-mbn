@@ -1,122 +1,67 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Download } from "lucide-react";
 import { ReusableTable, type Column } from "./registros_general";
 
 import {
-  getCuentahabientes,
+  getRCuentahabientes,
+  type RCuentahabienteViewRow,
+} from "../../services/cuentahabientestabla.service";
+
+import {
+  getCuentahabienteById,
   type CuentahabienteResponse,
 } from "../../services/Rcuentahabientes.service";
 
-import { getColonias } from "../../services/Rcolonias.service";
-import { getAllServicios } from "../../services/servicios.service";
+const getStatusClass = (estatus: string) => {
+  const value = String(estatus ?? "")
+    .trim()
+    .toLowerCase();
 
-interface CuentahabienteRow {
-  id_cuentahabiente: number;
-  numero_contrato: number;
-  nombres: string;
-  ap: string;
-  am: string;
-  calle: string;
-  numero: number;
-  telefono: string;
-  colonia: number;
-  servicio: number;
-  deuda?: string;
-  saldo_pendiente?: number;
-}
+  if (value === "pagado") return "status-complete";
+  if (value === "rezagado") return "status-warning";
+  if (value === "adeudo") return "status-danger";
+
+  return "status-pending";
+};
 
 const TablaCuentahabientes: React.FC<{
   onEdit?: (c: CuentahabienteResponse) => void;
 }> = ({ onEdit }) => {
-  const [coloniaMap, setColoniaMap] = useState<Record<number, string>>({});
-  const [servicioMap, setServicioMap] = useState<Record<number, string>>({});
-
-  const fetchAllCuentahabientes = async (): Promise<CuentahabienteRow[]> => {
-    let url: string | null = "/cuentahabientes/";
-    let allResults: CuentahabienteRow[] = [];
+  const fetchAllCuentahabientes = async (): Promise<
+    RCuentahabienteViewRow[]
+  > => {
+    let url: string | null = "/api/r-cuentahabientes/";
+    let allResults: RCuentahabienteViewRow[] = [];
 
     while (url) {
-      const resp = await getCuentahabientes(url);
+      const resp = await getRCuentahabientes(url);
       if (!resp.success || !resp.data) break;
 
-      const pageItems = resp.data.results ?? resp.data;
+      const data: any = resp.data;
+      const pageItems: RCuentahabienteViewRow[] = data.results ?? data;
 
-      const rows = pageItems.map((r: any) => ({
-        id_cuentahabiente: r.id_cuentahabiente,
-        numero_contrato: r.numero_contrato,
-        nombres: r.nombres,
-        ap: r.ap,
-        am: r.am,
-        calle: r.calle,
-        numero: r.numero,
-        telefono: r.telefono,
-        colonia: r.colonia,
-        servicio: r.servicio,
-        deuda: r.deuda ?? "",
-        saldo_pendiente: r.saldo_pendiente ?? 0,
-      }));
-
-      allResults = [...allResults, ...rows];
-      url = resp.data.next;
+      allResults = [...allResults, ...pageItems];
+      url = data.next ?? null;
     }
 
     return allResults;
   };
 
-  useEffect(() => {
-    const loadCatalogs = async () => {
-      try {
-        const [coloniasResp, serviciosResp] = await Promise.all([
-          getColonias(),
-          getAllServicios(),
-        ]);
-
-        const colonias = coloniasResp.data.results ?? coloniasResp.data;
-        const cMap: Record<number, string> = {};
-        colonias.forEach((c: any) => {
-          cMap[c.id_colonia] = `${c.nombre_colonia} (CP: ${c.codigo_postal})`;
-        });
-        setColoniaMap(cMap);
-
-        const sMap: Record<number, string> = {};
-        serviciosResp.forEach((s: any) => {
-          sMap[s.id_tipo_servicio] = s.nombre;
-        });
-        setServicioMap(sMap);
-      } catch (error) {
-        console.error("Error cargando catálogos:", error);
-      }
-    };
-
-    loadCatalogs();
-  }, []);
-
-  const columns: Column<CuentahabienteRow>[] = [
-    { key: "numero_contrato", label: "Número de Contrato" },
+  const columns: Column<RCuentahabienteViewRow>[] = [
+    { key: "numero_contrato", label: "N° Contrato" },
+    { key: "nombre", label: "Nombre" },
+    { key: "calle", label: "Calle" },
+    { key: "telefono", label: "Teléfono" },
+    { key: "total_pagado", label: "Total pagado" },
+    { key: "saldo_pendiente", label: "Total pendiente" },
     {
-      key: "nombres",
-      label: "Nombre Completo",
-      render: (_, row) =>
-        `${row.nombres} ${row.ap ?? ""} ${row.am ?? ""}`.trim(),
-    },
-    {
-      key: "calle",
-      label: "Calle",
-      render: (_, row) => `${row.calle} #${row.numero}`,
-    },
-    {
-      key: "colonia",
-      label: "Colonia",
-      render: (value) => coloniaMap[value] ?? `ID: ${value}`,
-    },
-    {
-      key: "telefono",
-      label: "Teléfono",
-      render: (value) => String(value ?? ""),
-    },
-    {
-      key: "saldo_pendiente",
-      label: "Saldo pendiente",
+      key: "estatus",
+      label: "Estatus",
+      render: (value) => (
+        <span className={`status-badge ${getStatusClass(String(value ?? ""))}`}>
+          {String(value ?? "—")}
+        </span>
+      ),
     },
   ];
 
@@ -130,16 +75,13 @@ const TablaCuentahabientes: React.FC<{
     const headers = [
       "id_cuentahabiente",
       "numero_contrato",
-      "nombres",
-      "ap",
-      "am",
+      "nombre",
       "calle",
-      "numero",
+      "nombre_colonia",
       "telefono",
-      "colonia",
-      "servicio",
-      "deuda",
       "saldo_pendiente",
+      "total_pagado",
+      "estatus",
     ];
 
     const escape = (v: any) => `"${String(v ?? "").replaceAll(`"`, `""`)}"`;
@@ -150,23 +92,20 @@ const TablaCuentahabientes: React.FC<{
         [
           r.id_cuentahabiente,
           r.numero_contrato,
-          r.nombres,
-          r.ap ?? "",
-          r.am ?? "",
+          r.nombre,
           r.calle,
-          r.numero,
+          r.nombre_colonia,
           r.telefono,
-          coloniaMap[r.colonia] ?? r.colonia,
-          servicioMap[r.servicio] ?? r.servicio,
-          r.deuda ?? "",
-          r.saldo_pendiente ?? 0,
+          r.saldo_pendiente,
+          r.total_pagado,
+          r.estatus,
         ]
           .map(escape)
           .join(",")
       ),
     ];
-    const BOM = "\uFEFF";
 
+    const BOM = "\uFEFF";
     const blob = new Blob([BOM + lines.join("\n") + "\n"], {
       type: "text/csv;charset=utf-8;",
     });
@@ -174,21 +113,30 @@ const TablaCuentahabientes: React.FC<{
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `cuentahabientes_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `Registro_Cuentahabientes_${new Date()
+      .toISOString()
+      .slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
   return (
     <div className="table-with-action">
-      <ReusableTable<CuentahabienteRow>
+      <ReusableTable<RCuentahabienteViewRow>
         columns={columns}
         fetchData={fetchData}
-        searchableFields={["nombres", "ap", "am", "numero_contrato"]}
+        searchableFields={["nombre", "numero_contrato", "calle"]}
         itemsPerPage={10}
         title="Cuentahabientes Registrados"
         showActions={true}
-        onEdit={onEdit}
+        onEdit={async (row) => {
+          const resp = await getCuentahabienteById(row.id_cuentahabiente);
+          if (!resp.success || !resp.data) {
+            console.error("No se pudo obtener el cuentahabiente para editar");
+            return;
+          }
+          onEdit?.(resp.data);
+        }}
       />
 
       <div className="table-with-action__footer">

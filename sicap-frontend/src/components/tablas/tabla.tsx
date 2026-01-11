@@ -33,7 +33,6 @@ const statusOptions: FilterOption[] = [
   { id: "adeudo", label: "Adeudo", value: "adeudo" },
 ];
 
-// Formatea fecha sin modificar zona horaria
 const formatFechaLocal = (fechaString: string): string => {
   if (!fechaString) return "—";
   const fechaLimpia = fechaString.includes("T")
@@ -48,17 +47,39 @@ const formatFechaLocal = (fechaString: string): string => {
   });
 };
 
+const normalizeStreet = (value: string): string => {
+  if (!value) return "";
+
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") //Quita los acentos
+    .replace(/[.,]/g, "") //Quita pontos y comas
+    .replace(/\s+/g, " ") // Quita espacios
+    .replace(/\bav\b|\bavenida\b/g, "avenida")
+    .replace(/\bcalle\b|\bc\b/g, "calle")
+    .replace(/\bblvd\b|\bboulevard\b/g, "boulevard")
+    .trim();
+};
+
+const prettyStreet = (value: string) =>
+  value.replace(/\b\w/g, (l) => l.toUpperCase());
+
 const ContractTable: React.FC = () => {
   const [contracts, setContracts] = useState<ContractSummary[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [streetTerm, setStreetTerm] = useState<string>("");
+  const [selectedStreetKey, setSelectedStreetKey] = useState<string>("");
+  const [isStreetDropdownOpen, setIsStreetDropdownOpen] =
+    useState<boolean>(false);
 
   // Filtros existentes
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
 
-  // ✔ Filtro por estado (nuevo)
+  //  Filtro por estado
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] =
     useState<boolean>(false);
@@ -87,7 +108,13 @@ const ContractTable: React.FC = () => {
   // Resetear página cuando filtros cambian
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, selectedFilter, selectedStatus]);
+  }, [
+    searchTerm,
+    selectedFilter,
+    selectedStatus,
+    streetTerm,
+    selectedStreetKey,
+  ]);
 
   const loadData = async () => {
     try {
@@ -171,7 +198,7 @@ const ContractTable: React.FC = () => {
   };
 
   /* -------------------------------------------------------
-     ✔ Filtro principal (texto + fecha + estatus)
+      Filtro principal (texto + fecha + estatus calle )
   -------------------------------------------------------- */
   const filteredContracts = contracts.filter((contract) => {
     const matchesSearch =
@@ -181,8 +208,19 @@ const ContractTable: React.FC = () => {
         .includes(searchTerm.toLowerCase()) ||
       contract.nombre_completo.toLowerCase().includes(searchTerm.toLowerCase());
 
+    const matchesStreet = selectedStreetKey
+      ? normalizeStreet(contract.calle || "") === selectedStreetKey
+      : streetTerm.trim() === ""
+      ? true
+      : normalizeStreet(contract.calle || "").includes(
+          normalizeStreet(streetTerm)
+        );
+
     return (
-      matchesSearch && filterByDateRange(contract) && filterByStatus(contract)
+      matchesSearch &&
+      matchesStreet &&
+      filterByDateRange(contract) &&
+      filterByStatus(contract)
     );
   });
 
@@ -232,6 +270,63 @@ const ContractTable: React.FC = () => {
 
     return pages;
   };
+
+  type StreetGroup = {
+    key: string;
+    label: string;
+    count: number;
+    variants: string[];
+  };
+
+  const streetGroups: StreetGroup[] = React.useMemo(() => {
+    const map = new Map<
+      string,
+      { count: number; rawCount: Map<string, number> }
+    >();
+
+    for (const c of contracts) {
+      const raw = (c.calle || "").trim();
+      const key = normalizeStreet(raw);
+      if (!key) continue;
+
+      if (!map.has(key)) map.set(key, { count: 0, rawCount: new Map() });
+      const entry = map.get(key)!;
+
+      entry.count += 1;
+      entry.rawCount.set(raw, (entry.rawCount.get(raw) || 0) + 1);
+    }
+
+    const groups: StreetGroup[] = [];
+
+    for (const [key, entry] of map.entries()) {
+      const sortedVariants = Array.from(entry.rawCount.entries()).sort(
+        (a, b) => b[1] - a[1]
+      );
+
+      const labelRaw = sortedVariants[0]?.[0] || key;
+      const label = prettyStreet(normalizeStreet(labelRaw));
+
+      const variants = sortedVariants
+        .map(([v]) => v)
+        .filter((v) => normalizeStreet(v) !== normalizeStreet(labelRaw))
+        .slice(0, 3);
+
+      groups.push({ key, label, count: entry.count, variants });
+    }
+
+    return groups.sort(
+      (a, b) => b.count - a.count || a.label.localeCompare(b.label)
+    );
+  }, [contracts]);
+
+  const streetSuggestions = React.useMemo(() => {
+    const q = normalizeStreet(streetTerm);
+    if (!q) return streetGroups.slice(0, 10);
+
+    return streetGroups
+      .filter((g) => g.key.includes(q) || normalizeStreet(g.label).includes(q))
+      .slice(0, 10);
+  }, [streetTerm, streetGroups]);
 
   return (
     <div className="contracts-page-container">
@@ -325,6 +420,106 @@ const ContractTable: React.FC = () => {
             )}
           </div>
 
+          {/*  FILTRO POR CALLE  */}
+          <div className="contracts-street-filter">
+            <div style={{ position: "relative", width: "100%" }}>
+              <input
+                type="text"
+                value={streetTerm}
+                onChange={(e) => {
+                  setStreetTerm(e.target.value);
+                  setSelectedStreetKey("");
+                  setIsStreetDropdownOpen(true);
+                }}
+                onFocus={() => setIsStreetDropdownOpen(true)}
+                onBlur={() =>
+                  setTimeout(() => setIsStreetDropdownOpen(false), 150)
+                }
+                className="contracts-search-input"
+                placeholder="Filtrar por calle"
+              />
+
+              {isStreetDropdownOpen && (
+                <div
+                  className="contracts-dropdown"
+                  style={{
+                    position: "absolute",
+                    top: "calc(100% + 6px)",
+                    left: 0,
+                    right: 0,
+                    zIndex: 20,
+                  }}
+                >
+                  <ul className="contracts-dropdown-list">
+                    {streetSuggestions.length > 0 ? (
+                      streetSuggestions.map((g) => (
+                        <li key={g.key}>
+                          <div
+                            className="contracts-dropdown-item"
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => {
+                              setStreetTerm(g.label);
+                              setSelectedStreetKey(g.key);
+                              setIsStreetDropdownOpen(false);
+                            }}
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: "0.25rem",
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                              }}
+                            >
+                              <span style={{ fontWeight: 600 }}>{g.label}</span>
+                              <span
+                                style={{ fontSize: "0.50rem", color: "#999" }}
+                              >
+                                {/* {g.count} registrados */}
+                              </span>
+                            </div>
+
+                            {g.variants.length > 0 && (
+                              <div
+                                style={{ fontSize: "0.75rem", color: "#aaa" }}
+                              >
+                                También aparece como: {g.variants.join(" · ")}
+                              </div>
+                            )}
+                          </div>
+                        </li>
+                      ))
+                    ) : (
+                      <li>
+                        <div className="contracts-dropdown-item">
+                          No hay coincidencias
+                        </div>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            {(streetTerm.trim() !== "" || selectedStreetKey) && (
+              <button
+                type="button"
+                className="contracts-filter-button"
+                style={{ padding: "0.55rem 0.8rem" }}
+                onClick={() => {
+                  setStreetTerm("");
+                  setSelectedStreetKey("");
+                }}
+              >
+                Limpiar
+              </button>
+            )}
+          </div>
+
           {/* BUSCADOR */}
           <div className="contracts-search-container">
             <Search className="search-icon" />
@@ -381,10 +576,11 @@ const ContractTable: React.FC = () => {
               <table className="contracts-table">
                 <thead className="contracts-thead">
                   <tr>
-                    <th className="th">N° Folio</th>
+                    <th className="th">N° Contrato</th>
                     <th className="th">Nombre</th>
-                    <th className="th">Servicio</th>
+                    <th className="th">Calle</th>
                     <th className="th">Total pagado</th>
+                    <th className="th">Total restante</th>
                     <th className="th">Estatus</th>
                     <th className="th">Detalles</th>
                   </tr>
@@ -395,12 +591,13 @@ const ContractTable: React.FC = () => {
                     <tr key={contract.id}>
                       <td className="td">{contract.numero_contrato}</td>
                       <td className="td-name">{contract.nombre_completo}</td>
-                      <td className="td">{contract.nombre_servicio}</td>
+                      <td className="td">{contract.calle}</td>
+                      <td className="td">
+                        ${Number(contract.pagos_totales || 0).toLocaleString()}
+                      </td>
                       <td className="td">
                         $
-                        {Number(
-                          contract.monto_total_recibido || 0
-                        ).toLocaleString()}
+                        {Number(contract.saldo_pendiente || 0).toLocaleString()}
                       </td>
                       <td className="td">
                         <span
@@ -528,7 +725,7 @@ const ContractTable: React.FC = () => {
                 <h4 className="section-title">Información General</h4>
                 <div className="detail-grid">
                   <div className="detail-item">
-                    <div className="detail-label">Número de Folio</div>
+                    <div className="detail-label">Número de Contrato</div>
                     <div className="detail-value">
                       {selectedContract.numero_contrato}
                     </div>
