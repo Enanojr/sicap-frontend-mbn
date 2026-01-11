@@ -317,7 +317,7 @@ const FormularioPagos: React.FC = () => {
         },
         {
           name: "monto_recibido",
-          label: "Monto Recibido",
+          label: "Cantidad por Pagar",
           type: "number" as const,
           placeholder: "0.00",
           icon: DollarSign,
