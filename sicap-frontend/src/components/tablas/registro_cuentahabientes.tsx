@@ -12,6 +12,18 @@ import {
   type CuentahabienteResponse,
 } from "../../services/Rcuentahabientes.service";
 
+const getStatusClass = (estatus: string) => {
+  const value = String(estatus ?? "")
+    .trim()
+    .toLowerCase();
+
+  if (value === "pagado") return "status-complete";
+  if (value === "rezagado") return "status-warning";
+  if (value === "adeudo") return "status-danger";
+
+  return "status-pending";
+};
+
 const TablaCuentahabientes: React.FC<{
   onEdit?: (c: CuentahabienteResponse) => void;
 }> = ({ onEdit }) => {
@@ -42,7 +54,15 @@ const TablaCuentahabientes: React.FC<{
     { key: "telefono", label: "Teléfono" },
     { key: "total_pagado", label: "Total pagado" },
     { key: "saldo_pendiente", label: "Total pendiente" },
-    { key: "estatus", label: "Estatus" },
+    {
+      key: "estatus",
+      label: "Estatus",
+      render: (value) => (
+        <span className={`status-badge ${getStatusClass(String(value ?? ""))}`}>
+          {String(value ?? "—")}
+        </span>
+      ),
+    },
   ];
 
   const fetchData = async () => {
@@ -93,7 +113,7 @@ const TablaCuentahabientes: React.FC<{
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `Registro_Cuentahabientes${new Date()
+    a.download = `Registro_Cuentahabientes_${new Date()
       .toISOString()
       .slice(0, 10)}.csv`;
     a.click();
@@ -105,7 +125,7 @@ const TablaCuentahabientes: React.FC<{
       <ReusableTable<RCuentahabienteViewRow>
         columns={columns}
         fetchData={fetchData}
-        searchableFields={["nombre", "numero_contrato"]}
+        searchableFields={["nombre", "numero_contrato", "calle"]}
         itemsPerPage={10}
         title="Cuentahabientes Registrados"
         showActions={true}

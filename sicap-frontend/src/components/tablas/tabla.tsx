@@ -33,7 +33,6 @@ const statusOptions: FilterOption[] = [
   { id: "adeudo", label: "Adeudo", value: "adeudo" },
 ];
 
-// Formatea fecha sin modificar zona horaria
 const formatFechaLocal = (fechaString: string): string => {
   if (!fechaString) return "—";
   const fechaLimpia = fechaString.includes("T")
@@ -80,7 +79,7 @@ const ContractTable: React.FC = () => {
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
 
-  // ✔ Filtro por estado (nuevo)
+  //  Filtro por estado
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] =
     useState<boolean>(false);
@@ -199,7 +198,7 @@ const ContractTable: React.FC = () => {
   };
 
   /* -------------------------------------------------------
-     ✔ Filtro principal (texto + fecha + estatus calle )
+      Filtro principal (texto + fecha + estatus calle )
   -------------------------------------------------------- */
   const filteredContracts = contracts.filter((contract) => {
     const matchesSearch =
