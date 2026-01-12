@@ -54,7 +54,7 @@ const normalizeStreet = (value: string): string => {
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "") //Quita los acentos
-    .replace(/[.,]/g, "") //Quita pontos y comas
+    .replace(/[.,]/g, "") //Quita puntos y comas
     .replace(/\s+/g, " ") // Quita espacios
     .replace(/\bav\b|\bavenida\b/g, "avenida")
     .replace(/\bcalle\b|\bc\b/g, "calle")
