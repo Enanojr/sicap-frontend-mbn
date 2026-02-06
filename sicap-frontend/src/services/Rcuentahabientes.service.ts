@@ -213,12 +213,37 @@ export const getCuentahabientes = async (
   }
 };
 
-export const getCuentahabientesList = async (): Promise<
-  CuentahabienteResponse[]
-> => {
-  const resp = await getCuentahabientes();
-  if (!resp.success || !resp.data) return [];
-  return resp.data.results ?? resp.data;
+export const getCuentahabientesList = async (): Promise<CuentahabienteResponse[]> => {
+  let allResults: CuentahabienteResponse[] = [];
+  let nextUrl: string | null = API_URL; // Empezamos por la primera página
+
+  try {
+    while (nextUrl) {
+      // Usamos getCuentahabientes pero le pasamos la URL específica (nextUrl)
+      // Nota: getCuentahabientes ya maneja la lógica de token y errores
+      const response = await getCuentahabientes(nextUrl);
+
+      if (!response.success || !response.data) {
+        break; // Si falla algo, nos detenemos y devolvemos lo que tengamos
+      }
+
+      // Agregamos los resultados de esta página al array acumulador
+      const pageResults = response.data.results;
+      allResults = [...allResults, ...pageResults];
+
+      // Actualizamos nextUrl. Si es null, el while termina.
+      // IMPORTANTE: A veces Django devuelve la URL absoluta (http://...) y axios
+      // suele preferir relativas si tienes baseURL configurada.
+      // Si tu API devuelve la URL completa, esto funcionará bien.
+      nextUrl = response.data.next;
+    }
+
+    return allResults;
+
+  } catch (error) {
+    console.error("Error obteniendo lista completa:", error);
+    return []; // En caso de error fatal, devolvemos array vacío
+  }
 };
 
 export const getCuentahabienteById = async (

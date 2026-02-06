@@ -18,6 +18,10 @@ import AsignacionesPage from "../pages/Principal_Form_Table/asignacionespage";
 import SectoresPage from "../pages/Principal_Form_Table/sectorespage";
 import ProgresoTable from "../pages/Users/Users";
 import EstadoCuentaPage from "../pages/Estado_Cuenta/estado_cuenta";
+import CierreAnual from "../pages/cierre_anual/cierreanual";
+import CargosManager from "../pages/cargos/cargos";
+import CargosPage from "../pages/Principal_Form_Table/cargospage";
+
 
 const Rutas = [
   // Ruta #1: Login (pública)
@@ -98,6 +102,20 @@ const Rutas = [
             path: "/estadocuenta",
             element: <EstadoCuentaPage />,
           },
+          {
+            path: "/cierreanual",
+            element: <CierreAnual />,
+          },
+          {
+            path: "/cargos",
+            element: <CargosManager />,
+          },
+          {
+            path: "/tcargos",
+            element: (
+              <CargosPage/>
+            ),
+          }
         ],
       },
     ],
