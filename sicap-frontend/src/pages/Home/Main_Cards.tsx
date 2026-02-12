@@ -29,6 +29,7 @@ function Main_Card() {
 
   const handleEstadoCuenta = () => navigate("/estadocuenta");
   const handleCargos = () => navigate("/cargos");
+  const handleCorteCaja = () => navigate("/corte-caja");
 
   const cards = [
     {
@@ -77,6 +78,15 @@ function Main_Card() {
       waterDropColor: "rgba(241, 167, 7, 0.6)",
       onClick: handleCargos,
     },
+    {
+      title: "Corte de Caja",
+      description: "Genera el corte de caja para un rango de fechas específico",
+      icon: CreditCard,
+      ctaText: "Generar",
+      gradientColors: ["#00c853", "#009624"] as [string, string],
+      waterDropColor: "rgba(0, 200, 83, 0.6)",
+      onClick: handleCorteCaja,
+    }
   ];
 
   return (

@@ -21,6 +21,7 @@ import EstadoCuentaPage from "../pages/Estado_Cuenta/estado_cuenta";
 import CierreAnual from "../pages/cierre_anual/cierreanual";
 import CargosManager from "../pages/cargos/cargos";
 import CargosPage from "../pages/Principal_Form_Table/cargospage";
+import CorteCaja from "../pages/CorteCaja/CorteCaja";
 
 
 const Rutas = [
@@ -115,6 +116,10 @@ const Rutas = [
             element: (
               <CargosPage/>
             ),
+          },
+          {
+            path: "/corte-caja",
+            element: <CorteCaja />,
           }
         ],
       },
