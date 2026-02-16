@@ -3267,3 +3267,711 @@ input[type="number"]::-webkit-inner-spin-button {
     justify-content: center;
   }
 }
+
+/*-----------------------------Cierre anual-----------------------------------------------------*/
+
+/* --- ESTILOS ESPECÍFICOS PARA CIERRE ANUAL (cm-) --- */
+
+/* Contenedor de la tarjeta (Antes .cierre-container) */
+.cm-cierre-card {
+  max-width: 480px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #1a1d23; /* Tu color de fondo original */
+  border-radius: 16px;
+  font-family: Arial, sans-serif;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.cm-cierre-card h2, 
+.cm-cierre-card h3 {
+  text-align: center;
+  margin-top: 0;
+  color: #58b2ee; /* Tu azul original */
+}
+
+/* Formularios */
+.cm-form-group {
+  margin-bottom: 1.5rem;
+}
+
+.cm-form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #ffffff;
+  font-size: 0.9rem;
+}
+
+.cm-form-group input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+  /* Agregamos fondo oscuro para los inputs para que combinen con la tarjeta */
+  background-color: #2d2d2d; 
+  color: #fff;
+}
+
+.cm-form-group input:focus {
+  outline: none;
+  border-color: #3182ce;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+}
+
+/* Manejo de Errores */
+.cm-input-error {
+  border-color: #fc8181 !important;
+  background-color: rgba(255, 245, 245, 0.1) !important; /* Transparente para modo oscuro */
+}
+
+.cm-error-msg {
+  color: #e53e3e;
+  font-size: 0.85rem;
+  margin-top: 0.4rem;
+  display: block;
+}
+
+/* El banner de error usa la clase global .cm-feedback, 
+   pero si quieres personalizarlo aquí: */
+.cm-feedback.error {
+  background-color: #fed7d7;
+  color: #c53030;
+  border: 1px solid #feb2b2;
+}
+
+/* Confirmación */
+.cm-confirmacion-box {
+  text-align: center;
+  animation: slideUp 0.3s ease-out;
+}
+
+.cm-icon-warning {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.cm-confirmacion-box p {
+  color: #bebebe;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+/* Botones */
+.cm-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Estilos base para botones dentro de la tarjeta */
+.cm-cierre-card button {
+  width: 100%;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cm-btn-primary {
+  background-color: #3182ce;
+  color: white;
+}
+.cm-btn-primary:hover { background-color: #2b6cb0; }
+
+.cm-btn-secondary {
+  background-color: #edf2f7;
+  color: #4a5568;
+}
+.cm-btn-secondary:hover { background-color: #e2e8f0; }
+
+.cm-btn-danger {
+  background-color: #e53e3e;
+  color: white;
+}
+.cm-btn-danger:hover { background-color: #c53030; }
+
+.cm-cierre-card button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Estado de éxito */
+.cm-success-mode {
+  text-align: center;
+  border-top: 4px solid #48bb78;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/*--------------------------------------------Cargos--------------------------------------------*/
+.cm-container {
+  padding: 40px;
+  min-height: 100vh;
+  /* background-color: #121212; <--- Descomenta si necesitas forzar fondo oscuro */
+  color: #e0e0e0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.cm-page-title {
+  text-align: center;
+  margin-top: 0;
+  color: #58b2ee;
+}
+
+/* --- FEEDBACK --- */
+.cm-feedback {
+  padding: 10px 15px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.cm-feedback.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.cm-feedback.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+/* --- TARJETAS SUPERIORES --- */
+.cm-top-section {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 60px;
+  flex-wrap: wrap;
+}
+
+.cm-card {
+  background-color: #1e1e1e;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  border: 1px solid #333;
+}
+
+.cm-form-card {
+  flex: 1;
+  min-width: 350px;
+  max-width: 600px;
+}
+
+.cm-form-card h3 {
+  margin-top: 0;
+  margin-bottom: 25px;
+  color: #fff;
+  border-bottom: 1px solid #444;
+  padding-bottom: 15px;
+}
+
+/* --- INPUTS Y FORMS --- */
+.cm-form-group { margin-bottom: 20px; }
+.cm-form-row { display: flex; gap: 20px; }
+.cm-form-row .cm-form-group { flex: 1; }
+
+.cm-container label {
+  display: block;
+  margin-bottom: 8px;
+  color: #bbb;
+  font-weight: 500;
+}
+
+/* Aplicamos estilo solo a los inputs dentro de nuestro contenedor */
+.cm-container input, 
+.cm-input-select {
+  width: 100%;
+  padding: 12px 15px;
+  background-color: #2d2d2d;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+}
+
+.cm-container input:focus, 
+.cm-input-select:focus {
+  outline: none;
+  border-color: #3498db;
+  background-color: #333;
+}
+
+.cm-input-money { font-size: 1.2rem; font-weight: bold; }
+
+.cm-pay-mode { border-top: 4px solid #27ae60; }
+.cm-charge-mode {
+  border-top: 4px solid #3498db; /* Azul */
+}
+
+.cm-info-box {
+  background-color: rgba(39, 174, 96, 0.15);
+  color: #2ecc71;
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+}
+
+.cm-error-msg { color: #e74c3c; font-size: 0.8rem; margin-top: 5px; display: block; }
+
+/* Estilo para el select de Tipo de Cargo */
+.cm-select-custom {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background-color: #2d2d2d;
+  font-size: 1rem;
+  color: #fff;
+  appearance: none; /* Elimina la flecha por defecto en algunos navegadores */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 18px;
+  cursor: pointer;
+}
+
+.cm-select-custom:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+/* Estilo para el monto deshabilitado */
+.cm-input-readonly {
+  background-color: #2d2d2d !important;
+  color: #666 !important;
+  cursor: not-allowed;
+  font-weight: bold;
+}
+
+/* --- BOTONES PROPIOS --- */
+.cm-btn {
+  width: 100%;
+  padding: 14px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+.cm-btn-primary { background-color: #3498db; color: white; }
+.cm-btn-primary:hover { background-color: #2980b9; }
+
+.cm-btn-success { background-color: #27ae60; color: white; }
+.cm-btn-success:hover { background-color: #219150; }
+
+.cm-btn:disabled { opacity: 0.6; cursor: wait; }
+
+/* --- SEARCHABLE SELECT (Componente Flotante) --- */
+.cm-search-wrapper { position: relative; width: 100%; }
+.cm-search-input { padding-right: 30px; cursor: text; }
+.cm-search-arrow {
+  position: absolute; right: 12px; top: 50%;
+  transform: translateY(-50%); color: #666; pointer-events: none;
+}
+.cm-search-options {
+  position: absolute; top: 100%; left: 0; width: 100%;
+  max-height: 250px; overflow-y: auto;
+  background-color: #2d2d2d; border: 1px solid #444;
+  border-radius: 0 0 6px 6px; z-index: 100;
+  list-style: none; padding: 0; margin: 0;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+.cm-search-options li {
+  padding: 12px 15px; cursor: pointer; color: #ccc;
+  border-bottom: 1px solid #3a3a3a;
+}
+.cm-search-options li:hover { background-color: #3498db; color: #fff; }
+.cm-search-options li.cm-selected { background-color: #1a5c8a; color: #fff; font-weight: bold; }
+.cm-search-options .cm-no-results { padding: 15px; color: #777; text-align: center; }
+
+/* --- TABLA --- */
+.cm-bottom-section { max-width: 1300px; margin: 0 auto; }
+
+.cm-table-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px;
+}
+.cm-table-header h3 { margin: 0; color: #fff; }
+
+.cm-search-box input {
+  width: 200px; padding: 8px 12px; border-radius: 20px;
+  transition: width 0.3s;
+}
+.cm-search-box input:focus { width: 250px; }
+
+.cm-table-responsive { overflow-x: auto; border: 1px solid #333; border-radius: 8px; }
+.cm-table-responsive table { width: 100%; border-collapse: collapse; background-color: #1e1e1e; color: #ddd; }
+.cm-table-responsive th { background-color: #252525; color: #fff; padding: 15px; text-align: left; border-bottom: 2px solid #333; }
+.cm-table-responsive td { padding: 14px 15px; border-bottom: 1px solid #333; }
+.cm-table-responsive tr:hover { background-color: #2a2a2a; }
+
+.cm-badge {
+  background-color: #34495e; padding: 4px 8px;
+  border-radius: 12px; font-size: 0.8rem; border: 1px solid #455a64;
+}
+
+/* --- PAGINACIÓN --- */
+.cm-pagination {
+  display: flex; justify-content: flex-end; align-items: center;
+  gap: 10px; margin-top: 15px; padding-top: 15px; border-top: 1px solid #333;
+}
+.cm-btn-pag {
+  background-color: #2d2d2d; color: #ccc; border: 1px solid #444;
+  padding: 6px 12px; font-size: 0.85rem; border-radius: 4px;
+  cursor: pointer; min-width: 90px;
+}
+.cm-btn-pag:hover:not(:disabled) { background-color: #3498db; color: #fff; border-color: #3498db; }
+.cm-btn-pag:disabled { opacity: 0.4; cursor: not-allowed; background-color: #1a1a1a; }
+.cm-pag-info { font-size: 0.8rem; color: #666; font-style: italic; margin-right: 10px; }
+
+/*--------------------------------------------Corte de caja--------------------------------------------*/
+
+/* --- CONTENEDOR PRINCIPAL --- */
+.corte-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+ 
+  min-height: 100vh;
+}
+
+/* --- TARJETA DEL GENERADOR --- */
+.corte-card {
+  background-color: #2d2d2d;
+  width: 100%;
+  max-width: 800px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); /* Sombra elegante */
+  overflow: visible;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.corte-header {
+  background: linear-gradient(135deg, #0f4c81 0%, #1e6bb8 100%); /* Azul corporativo */
+  padding: 25px;
+  text-align: center;
+  color: #fff;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+}
+
+.corte-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.corte-header p {
+  margin: 5px 0 0;
+  opacity: 0.9;
+  font-size: 0.9rem;
+}
+
+.corte-body {
+  padding: 30px;
+}
+
+/* --- INPUT TIPO VUELO (SELECTOR) --- */
+.corte-selector-group {
+  position: relative; /* Necesario para que el calendario flote respecto a esto */
+  margin-bottom: 25px;
+}
+
+.corte-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6c757d;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.corte-date-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+  background-color: #fff;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.corte-date-btn:hover {
+  border-color: #1e6bb8;
+  background-color: #f8fbff;
+}
+
+.corte-date-btn.active {
+  border-color: #1e6bb8;
+  box-shadow: 0 0 0 4px rgba(30, 107, 184, 0.1);
+}
+
+.corte-date-text {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.corte-icon {
+  width: 20px;
+  height: 20px;
+  color: #1e6bb8;
+}
+
+.corte-arrow {
+  color: #adb5bd;
+}
+
+/* --- CALENDARIO FLOTANTE --- */
+.corte-calendar-popover {
+  position: absolute;
+  top: 110%; /* Justo debajo del botón */
+  left: 0;
+  z-index: 9999; /* Para que flote sobre todo */
+  background: #2d2d2d;
+  border-radius: 12px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+  border-color: #444;
+  border: 1px solid #2d2d2d;
+  padding: 10px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  animation: fadeInDown 0.3s ease-out;
+}
+/* 2. Fondo de los componentes internos del calendario */
+.rdrCalendarWrapper, 
+.rdrDateDisplayWrapper, 
+.rdrMonthAndYearWrapper {
+  background-color: #2d2d2d !important;
+}
+
+/* 3. Texto de los días (Números) a Blanco */
+.rdrDayNumber span {
+  color: #ffffff !important;
+}
+
+/* 4. Texto de los días de la semana (L, M, M...) a Gris Claro */
+.rdrWeekDay {
+  color: #cccccc !important;
+}
+
+/* 5. Selectores de Mes y Año (Dropdowns) */
+.rdrMonthAndYearPickers select {
+  color: #ffffff !important;
+  background-color: #2d2d2d !important; /* Fondo oscuro para el dropdown */
+}
+.rdrMonthAndYearPickers select:hover {
+  background-color: #3d3d3d !important;
+}
+
+/* 6. Botones de navegación (Flechas izquierda/derecha) */
+.rdrNextPrevButton {
+  background: #ffffff !important; /* Un gris un poco más claro para el botón */
+}
+.rdrNextPrevButton:hover {
+  background: #ffffff!important;
+}
+
+/* 7. Días "Pasivos" (del mes anterior o siguiente) */
+.rdrDayPassive .rdrDayNumber span {
+  color: #555555 !important; /* Gris oscuro para que se noten menos */
+}
+
+/* 8. Ajustar el Input de fecha seleccionado (Arriba del calendario) */
+.rdrDateDisplayItem {
+  background-color: #2d2d2d !important;
+  border: 1px solid #555 !important;
+  box-shadow: none !important;
+}
+.rdrDateDisplayItem input {
+  color: #fff !important;
+}
+.rdrDateDisplayItemActive {
+  border-color: #1e6bb8 !important; /* Borde azul cuando está activo */
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- BOTÓN DE ACCIÓN --- */
+.corte-btn-generate {
+  width: 100%;
+  padding: 16px;
+  background-color: #1e6bb8;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.corte-btn-generate:hover {
+  background-color: #155a9b;
+}
+
+.corte-btn-generate:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* --- RESULTADOS (TICKET) --- */
+.corte-result-card {
+  background: #2d2d2d;
+  width: 100%;
+  max-width: 750px;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+  padding: 25px;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.corte-result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+  color: #fff;
+}
+
+.corte-folio {
+  color: #28a745;
+  font-weight: 800;
+}
+
+.corte-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 columnas iguales */
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.corte-stat-box {
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.corte-stat-box.blue { background-color: #e3f2fd; color: #0d47a1; }
+.corte-stat-box.red { background-color: #ffebee; color: #b71c1c; }
+.corte-stat-box.green { background-color: #e8f5e9; color: #1b5e20; border: 2px solid #c8e6c9; }
+
+.corte-stat-title { font-size: 0.8rem; text-transform: uppercase; font-weight: 700; margin-bottom: 5px; }
+.corte-stat-value { font-size: 1.5rem; font-weight: 800; }
+
+/* TABLA */
+.corte-table-wrapper {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  color: #333;
+}
+
+.corte-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.corte-table th {
+  background-color: #f8f9fa;
+  text-align: left;
+  padding: 12px 15px;
+  color: #495057;
+  position: sticky;
+  top: 0;
+}
+
+.corte-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #f1f1f1;
+  color: #fff;
+}
+
+.corte-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.corte-badge.pago { background-color: #e8f5e9; color: #2e7d32; }
+.corte-badge.cargo { background-color: #ffebee; color: #c62828; }
+
+/* --- BOTÓN DE DESCARGA PDF --- */
+.corte-actions {
+  margin-top: 25px;
+  display: flex;
+  justify-content: flex-end; /* Alineado a la derecha */
+  border-top: 1px solid #eee;
+  padding-top: 20px;
+}
+
+.corte-btn-pdf {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #dc3545; /* Rojo PDF estándar */
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  box-shadow: 0 4px 6px rgba(220, 53, 69, 0.2);
+}
+
+.corte-btn-pdf:hover {
+  background-color: #c82333; /* Rojo más oscuro al pasar mouse */
+  transform: translateY(-2px);
+}
+
+.corte-btn-pdf:active {
+  transform: translateY(0);
+}
+
+.corte-btn-pdf svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 600px) {
+  .corte-summary-grid {
+    grid-template-columns: 1fr; /* 1 columna en móvil */
+  }
+  .corte-date-text {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+}

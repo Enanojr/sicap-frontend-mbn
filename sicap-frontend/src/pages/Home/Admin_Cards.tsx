@@ -49,6 +49,8 @@ function Admin_Cards() {
   const handleAsignacion = () => navigate("/Rasignacion");
   const handleDescuento = () => navigate("/Descuento");
   const handleServicios = () => navigate("/Servicios");
+  const handleCierreAnual = () => navigate("/cierreanual");
+  const handleCargos = () => navigate("/tcargos");
 
   // Array de configuración de cards
   const cards = [
@@ -114,6 +116,24 @@ function Admin_Cards() {
       gradientColors: ["#795548", "#5d4037"] as [string, string],
       waterDropColor: "rgba(121, 85, 72, 0.6)",
       onClick: handleServicios,
+    },
+    {
+      title: "Registro de cargos",
+      description: "Registra nuevos cargos en el sistema.",
+      icon: Clipboard,
+      ctaText: "Registrar Cargo",
+      gradientColors: ["#51bbbb", "#51bbbb"] as [string, string],
+      waterDropColor: "rgba(129, 118, 56, 0.6)",
+      onClick: handleCargos,
+    },
+    {
+      title: "Cierre anual",
+      description: "Seccion de cierre de cuentas anual.",
+      icon: Wrench,
+      ctaText: "Cerrar Cuenta",
+      gradientColors: ["#a7a546", "#979639"] as [string, string],
+      waterDropColor: "rgba(129, 118, 56, 0.6)",
+      onClick: handleCierreAnual,
     },
   ];
 

@@ -28,6 +28,8 @@ function Main_Card() {
   const handleCuentahabientes = () => navigate("/Rcuentahabiente");
 
   const handleEstadoCuenta = () => navigate("/estadocuenta");
+  const handleCargos = () => navigate("/cargos");
+  const handleCorteCaja = () => navigate("/corte-caja");
 
   const cards = [
     {
@@ -67,6 +69,24 @@ function Main_Card() {
       waterDropColor: "rgba(94, 53, 177, 0.6)",
       onClick: handleEstadoCuenta,
     },
+    {
+      title: "Cargos a Cuentahabientes",
+      description: "Crea o consulta los cargos de los cuentahabientes",
+      icon: CreditCard,
+      ctaText: "Pagar",
+      gradientColors: ["#f1a707", "#f1a707"] as [string, string],
+      waterDropColor: "rgba(241, 167, 7, 0.6)",
+      onClick: handleCargos,
+    },
+    {
+      title: "Corte de Caja",
+      description: "Genera el corte de caja para un rango de fechas específico",
+      icon: CreditCard,
+      ctaText: "Generar",
+      gradientColors: ["#00c853", "#009624"] as [string, string],
+      waterDropColor: "rgba(0, 200, 83, 0.6)",
+      onClick: handleCorteCaja,
+    }
   ];
 
   return (
