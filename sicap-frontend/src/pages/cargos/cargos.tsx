@@ -18,7 +18,7 @@ import {
 
 import TicketPago, { type TicketData as TicketPagoData } from "./TicketCargo";
 import SearchableSelect from "../../components/searchselect/searchselect";
-import LogoApp from "../../assets/logo.png"; 
+import LogoApp from "../../assets/Logo.png"; 
 import Swal from "sweetalert2";
 import "../../styles/styles.css";
 
