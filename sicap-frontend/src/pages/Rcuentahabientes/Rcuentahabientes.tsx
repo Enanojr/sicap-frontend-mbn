@@ -7,7 +7,6 @@ import type { FormConfig } from "../../components/forms/form";
 import {
   createCuentahabiente,
   updateCuentahabiente,
-  type CuentahabienteBase,
   type CuentahabienteResponse,
 } from "../../services/Rcuentahabientes.service";
 
@@ -111,7 +110,6 @@ const FormularioCuentahabientes: React.FC<Props> = ({
     return "Debe ser un número de 10 dígitos o 'S/N'";
   };
 
-  // Detecta “duplicado” si el backend manda un mensaje típico de UNIQUE
   const isDuplicateContratoError = (errors: any) => {
     const raw = JSON.stringify(errors ?? {}).toLowerCase();
     return (
@@ -217,7 +215,7 @@ const FormularioCuentahabientes: React.FC<Props> = ({
     ],
 
     onSubmit: async (data) => {
-      const payload: CuentahabienteBase = {
+      const payload: any = {
         numero_contrato: Number(data.numero_contrato),
         nombres: String(data.nombres ?? ""),
         ap: String(data.ap ?? ""),
@@ -263,31 +261,36 @@ const FormularioCuentahabientes: React.FC<Props> = ({
         return;
       }
 
-      // ─────────────── CREATE ───────────────
-      // Confirmación de toma nueva ANTES del POST
-      const confirm = await Swal.fire({
-        icon: "warning",
-        title: "Nuevo registro",
+      // ─────────────── CREATE ──────────────
+      const toma = await Swal.fire({
+        icon: "question",
+        title: "Nueva toma",
         html: `
           <div style="text-align:left; line-height:1.35">
             <p style="margin:0 0 .6rem 0">
-              Al registrar, se aplicará el cargo por <b>Toma de agua nueva</b> por <b>$1,500.00</b>.
+              ¿Este registro corresponde a una <b>nueva toma</b>?
             </p>
-            <p style="margin:0">¿Desea continuar?</p>
+            <p style="margin:0;color:#9ca3af">
+              Si selecciona <b>Sí</b>, se aplicará el cargo de <b>$1,500.00</b>.
+              Si selecciona <b>No</b>, el usuario se registrará sin ese cargo.
+            </p>
           </div>
         `,
+        showDenyButton: true,
         showCancelButton: true,
-        confirmButtonText: "Sí, registrar",
+        confirmButtonText: "Sí, es nueva toma",
+        denyButtonText: "No, registrar sin cargo",
         cancelButtonText: "Cancelar",
         confirmButtonColor: "#58b2ee",
+        denyButtonColor: "#0ea5e9",
         cancelButtonColor: "#374151",
         reverseButtons: true,
         focusCancel: true,
       });
 
-      if (!confirm.isConfirmed) return;
+      if (toma.isDismissed) return;
 
-      payload.es_toma_nueva = true;
+      payload.es_toma_nueva = toma.isConfirmed ? true : false;
 
       Swal.fire({
         title: "Registrando...",
@@ -332,7 +335,9 @@ const FormularioCuentahabientes: React.FC<Props> = ({
       Swal.fire({
         icon: "success",
         title: "Listo",
-        text: "El cuentahabiente se registró correctamente.",
+        text: payload.es_toma_nueva
+          ? "El cuentahabiente se registró y se marcó como nueva toma."
+          : "El cuentahabiente se registró correctamente.",
         confirmButtonColor: "#58b2ee",
       });
 
