@@ -8,6 +8,7 @@ import {
 } from "@react-pdf/renderer";
 
 import Logo from "../../assets/Logo.png";
+import WatermarkLogo from "../../assets/Logo.png";
 
 export type EstadoCuentaPDFData = {
   numero_contrato: number | string;
@@ -24,7 +25,7 @@ export type EstadoCuentaPDFData = {
 };
 
 const money = (n: number) =>
-  `$${Number(n || 0).toLocaleString("es-MX", { minimumFractionDigits: 2 })}`;
+  `$${Number(n || 0).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 const formatFechaLocal = (fecha: string) => {
   if (!fecha) return "—";
@@ -48,7 +49,7 @@ const statusColor = (estatus: string) => {
 
 const getPdfTitle = (
   estatus: string,
-  historico: EstadoCuentaPDFData["historico"]
+  historico: EstadoCuentaPDFData["historico"],
 ) => {
   const v = (estatus || "").trim().toLowerCase();
 
@@ -56,88 +57,127 @@ const getPdfTitle = (
     const last = historico[historico.length - 1];
     return `Recibo de Pago ${last.anio}`;
   }
-
   return "Estado de Cuenta";
 };
 
 const styles = StyleSheet.create({
   page: {
-    padding: 28,
+    paddingTop: 22,
+    paddingHorizontal: 22,
+    paddingBottom: 18,
     fontFamily: "Helvetica",
     fontSize: 10,
     color: "#0f172a",
     backgroundColor: "#ffffff",
   },
 
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 14,
-  },
-
-  logosBox: {
-    width: "38%",
-    flexDirection: "row",
+  watermark: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 120,
     alignItems: "center",
-    gap: 10,
+    justifyContent: "center",
+    opacity: 0.1,
   },
-
-  logo: {
-    width: 110,
-    height: 42,
+  watermarkImg: {
+    width: 360,
+    height: 360,
     objectFit: "contain",
   },
 
-  infoBox: {
-    width: "60%",
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    borderRadius: 10,
-    padding: 10,
-    backgroundColor: "#f8fafc",
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 12,
+    marginBottom: 14,
   },
 
-  title: {
+  leftBrand: {
+    width: "34%",
+    alignItems: "flex-start",
+    justifyContent: "flex-start",
+    paddingTop: 4,
+  },
+  logo: {
+    width: 78,
+    height: 78,
+    objectFit: "contain",
+  },
+  brandText: {
+    marginTop: 6,
+    fontSize: 7,
+    color: "#0f172a",
+    lineHeight: 1.2,
+  },
+
+  infoCard: {
+    width: "66%",
+    borderWidth: 1,
+    borderColor: "#d6dbe3",
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    backgroundColor: "#f8fafc",
+  },
+  infoTitleRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 10,
+    marginBottom: 8,
+  },
+  infoTitle: {
     fontSize: 14,
     fontWeight: 700,
     color: "#0b3a66",
-    marginBottom: 6,
   },
 
+  infoTitleRight: {
+    fontSize: 9,
+    color: "#0b3a66",
+    fontWeight: 700,
+    marginTop: 3,
+  },
+
+  infoGrid: {
+    flexDirection: "column",
+    gap: 4,
+  },
   infoRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 3,
     gap: 10,
   },
-
-  label: { color: "#475569" },
-  value: { fontWeight: 700, color: "#0f172a" },
+  label: { color: "#475569", fontSize: 9 },
+  value: {
+    color: "#0f172a",
+    fontSize: 9,
+    fontWeight: 700,
+    maxWidth: "62%",
+    textAlign: "right",
+  },
 
   cardsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     gap: 10,
-    marginBottom: 14,
+    marginBottom: 12,
   },
-
   card: {
     flex: 1,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: "#dbe4f0",
     borderRadius: 10,
-    padding: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
     backgroundColor: "#ffffff",
   },
-
-  cardTitle: { color: "#475569", marginBottom: 5 },
+  cardTitle: { color: "#475569", marginBottom: 6, fontSize: 9 },
   cardBig: { fontSize: 12, fontWeight: 700, color: "#0f172a" },
-
   statusPill: {
-    marginTop: 4,
     alignSelf: "flex-start",
     paddingVertical: 4,
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
     borderRadius: 999,
     color: "#ffffff",
     fontSize: 9,
@@ -153,18 +193,17 @@ const styles = StyleSheet.create({
 
   table: {
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: "#dbe4f0",
     borderRadius: 10,
     overflow: "hidden",
+    backgroundColor: "#ffffff",
   },
-
   thead: {
     flexDirection: "row",
-    backgroundColor: "#0b3a66",
-    paddingVertical: 8,
+    backgroundColor: "#003057",
+    paddingVertical: 9,
     paddingHorizontal: 10,
   },
-
   th: { color: "#ffffff", fontWeight: 700, fontSize: 9 },
 
   tr: {
@@ -172,24 +211,60 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 10,
     borderTopWidth: 1,
-    borderTopColor: "#e2e8f0",
+    borderTopColor: "#e6edf7",
   },
-
   td: { fontSize: 9, color: "#0f172a" },
 
-  colFecha: { width: "45%" },
-  colMonto: { width: "35%", textAlign: "right" },
+  colFecha: { width: "55%" },
+  colMonto: { width: "25%", textAlign: "right" },
   colAnio: { width: "20%", textAlign: "right" },
+
+  totalBox: {
+    marginTop: 10,
+    flexDirection: "row",
+    justifyContent: "flex-end",
+  },
+  totalText: {
+    fontSize: 10,
+    fontWeight: 700,
+    color: "#0f172a",
+  },
+
+  signatureWrap: {
+    marginTop: 18,
+    alignItems: "center",
+  },
+  signatureLabel: {
+    fontSize: 9,
+    fontWeight: 700,
+    color: "#0f172a",
+    marginBottom: 6,
+  },
+  signatureLine: {
+    width: 220,
+    borderBottomWidth: 1,
+    borderBottomColor: "#0b3a66",
+    marginBottom: 8,
+  },
+  signatureName: {
+    fontSize: 10,
+    fontWeight: 700,
+    color: "#0f172a",
+  },
 
   footer: {
     position: "absolute",
-    left: 28,
-    right: 28,
-    bottom: 18,
+    left: 22,
+    right: 22,
+    bottom: 10,
     flexDirection: "row",
     justifyContent: "space-between",
     color: "#64748b",
-    fontSize: 8,
+    fontSize: 7,
+  },
+  footerCenter: {
+    textAlign: "center",
+    flexGrow: 1,
   },
 });
 
@@ -198,41 +273,65 @@ export default function EstadoCuentaPDF({
 }: {
   data: EstadoCuentaPDFData;
 }) {
+  const totalHistorico = (data.historico || []).reduce(
+    (sum, p) => sum + Number(p.monto_recibido || 0),
+    0,
+  );
+
+  const today = new Date();
+  const footerDate = today.toLocaleDateString("es-MX", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+
   return (
     <Document>
       <Page size="LETTER" style={styles.page}>
-        <View style={styles.header}>
-          <View style={styles.logosBox}>
+        <View style={styles.watermark} fixed>
+          <Image src={WatermarkLogo} style={styles.watermarkImg} />
+        </View>
+
+        <View style={styles.headerRow}>
+          <View style={styles.leftBrand}>
             <Image src={Logo} style={styles.logo} />
+            <Text style={styles.brandText}>
+              GUADALUPE HIDALGO,{"\n"}ACUAMANALA. 2026
+            </Text>
           </View>
 
-          <View style={styles.infoBox}>
-            <Text style={styles.title}>
-              {getPdfTitle(data.estatus, data.historico)}
-            </Text>
-
-            <View style={styles.infoRow}>
-              <Text style={styles.label}>Contrato</Text>
-              <Text style={styles.value}>{data.numero_contrato}</Text>
+          <View style={styles.infoCard}>
+            <View style={styles.infoTitleRow}>
+              <Text style={styles.infoTitle}>
+                {getPdfTitle(data.estatus, data.historico)}
+              </Text>
             </View>
 
-            <View style={styles.infoRow}>
-              <Text style={styles.label}>Nombre</Text>
-              <Text style={styles.value}>{data.nombre}</Text>
-            </View>
+            <View style={styles.infoGrid}>
+              <View style={styles.infoRow}>
+                <Text style={styles.label}>Contrato</Text>
+                <Text style={styles.value}>{data.numero_contrato}</Text>
+              </View>
 
-            <View style={styles.infoRow}>
-              <Text style={styles.label}>Dirección</Text>
-              <Text style={styles.value}>{data.direccion}</Text>
-            </View>
+              <View style={styles.infoRow}>
+                <Text style={styles.label}>Nombre</Text>
+                <Text style={styles.value}>{data.nombre}</Text>
+              </View>
 
-            <View style={styles.infoRow}>
-              <Text style={styles.label}>Teléfono</Text>
-              <Text style={styles.value}>{data.telefono}</Text>
+              <View style={styles.infoRow}>
+                <Text style={styles.label}>Dirección</Text>
+                <Text style={styles.value}>{data.direccion}</Text>
+              </View>
+
+              <View style={styles.infoRow}>
+                <Text style={styles.label}>Teléfono</Text>
+                <Text style={styles.value}>{data.telefono}</Text>
+              </View>
             </View>
           </View>
         </View>
 
+        {/* Cards */}
         <View style={styles.cardsRow}>
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Estatus</Text>
@@ -280,10 +379,18 @@ export default function EstadoCuentaPDF({
           )}
         </View>
 
-        {/* FOOTER */}
-        <View style={styles.footer}>
+        <View style={styles.totalBox}>
+          <Text style={styles.totalText}>
+            Total recaudado: {money(totalHistorico)}
+          </Text>
+        </View>
+
+        <View style={styles.footer} fixed>
           <Text>Documento generado automáticamente</Text>
-          <Text>{new Date().toLocaleDateString("es-MX")}</Text>
+          <Text style={styles.footerCenter}>
+            Guadalupe Hidalgo Acuamanala, C.P. 90860
+          </Text>
+          <Text>{footerDate}</Text>
         </View>
       </Page>
     </Document>
