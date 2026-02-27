@@ -70,7 +70,7 @@ const FormularioPagos: React.FC = () => {
   >(new Map());
 
   const [descuentosMap, setDescuentosMap] = useState<Map<number, Descuento>>(
-    new Map()
+    new Map(),
   );
 
   useEffect(() => {
@@ -108,7 +108,7 @@ const FormularioPagos: React.FC = () => {
         Swal.fire(
           "Error",
           "No se pudieron cargar los cuentahabientes",
-          "error"
+          "error",
         );
       } finally {
         setLoading(false);
@@ -140,7 +140,7 @@ const FormularioPagos: React.FC = () => {
           activos.map((d) => ({
             value: d.id_descuento.toString(),
             label: d.nombre_descuento,
-          }))
+          })),
         );
       } catch (error) {
         Swal.fire("Error", "No se pudieron cargar los descuentos", "error");
@@ -178,7 +178,7 @@ const FormularioPagos: React.FC = () => {
 
       setFilteredOptions(filtered);
     },
-    [allCuentahabientes]
+    [allCuentahabientes],
   );
 
   const validatePositiveNumber = useCallback(
@@ -187,7 +187,7 @@ const FormularioPagos: React.FC = () => {
       if (isNaN(num) || num <= 0) return "Debe ser un número mayor a 0";
       return null;
     },
-    []
+    [],
   );
 
   const validateYear = useCallback((value: string | number): string | null => {
@@ -214,7 +214,7 @@ const FormularioPagos: React.FC = () => {
         "Noviembre",
         "Diciembre",
       ].map((m) => ({ value: m, label: m })),
-    []
+    [],
   );
 
   const handleSubmit = useCallback(
@@ -279,15 +279,55 @@ const FormularioPagos: React.FC = () => {
             nombre_descuento: descuento?.nombre_descuento || "Sin descuento",
             porcentaje_descuento: cantidadDescuento,
             comentarios: data.comentarios || "",
+            periodo_mes: String(data.mes),
+            periodo_anio: Number(data.anio),
           });
 
           setShowTicket(true);
         }
-      } catch (error) {
-        Swal.fire("Error", "No se pudo registrar el pago", "error");
+      } catch (error: any) {
+        Swal.close();
+
+        const status = error?.response?.status;
+        const backendDetail =
+          error?.response?.data?.detail || error?.response?.data?.message || "";
+
+        if (status === 400) {
+          await Swal.fire({
+            icon: "warning",
+            title: "Pago no permitido",
+            html: `
+        <div style="text-align:left; line-height:1.35">
+          <p style="margin:0 0 .6rem 0">
+            No es posible registrar el pago en este momento.
+          </p>
+          <p style="margin:0">
+            El cuentahabiente debe <b>completar sus cargos pendientes</b> antes de poder realizar un pago.
+          </p>
+          ${
+            backendDetail
+              ? `<p style="margin:.75rem 0 0 0; color:#9ca3af; font-size:.85rem">
+                   Detalle: ${backendDetail}
+                 </p>`
+              : ""
+          }
+        </div>
+      `,
+            confirmButtonText: "Entendido",
+            confirmButtonColor: "#58b2ee",
+          });
+          return;
+        }
+
+        await Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "No se pudo registrar el pago. Intente nuevamente.",
+          confirmButtonColor: "#ef4444",
+        });
       }
     },
-    [cuentahabientesMap, descuentosMap]
+    [cuentahabientesMap, descuentosMap],
   );
 
   //  FormConfig con useMemo
@@ -372,7 +412,7 @@ const FormularioPagos: React.FC = () => {
       validateYear,
       meses,
       handleSubmit,
-    ]
+    ],
   );
 
   if (loading) {
