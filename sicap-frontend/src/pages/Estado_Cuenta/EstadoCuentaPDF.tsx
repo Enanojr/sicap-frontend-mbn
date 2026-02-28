@@ -308,12 +308,10 @@ export default function EstadoCuentaPDF({
 
             <View style={styles.infoRow}>
               <Text style={styles.label}>Dirección</Text>
-              <Text style={styles.value}>{data.direccion}</Text>
-            </View>
-
-            <View style={styles.infoRow}>
-              <Text style={styles.label}>Teléfono</Text>
-              <Text style={styles.value}>{data.telefono}</Text>
+              <Text style={styles.value}>
+                {data.direccion}, Guadalupe Hidalgo, Acuamanala, Tlax. C.P.
+                90861
+              </Text>
             </View>
           </View>
         </View>
