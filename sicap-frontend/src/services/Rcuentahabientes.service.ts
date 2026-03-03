@@ -12,6 +12,7 @@ export interface CuentahabienteBase {
   telefono: string;
   colonia: number;
   servicio: number;
+  es_toma_nueva?: boolean;
 }
 
 export interface CuentahabienteResponse extends CuentahabienteBase {
@@ -31,7 +32,7 @@ const getAdminToken = (): string | null => {
 };
 
 export const registerCuentahabiente = async (
-  userData: CuentahabienteBase
+  userData: CuentahabienteBase,
 ): Promise<ApiResult<CuentahabienteResponse>> => {
   try {
     const token = getAdminToken();
@@ -76,7 +77,7 @@ export const createCuentahabiente = registerCuentahabiente;
 
 export const updateCuentahabiente = async (
   id: number,
-  userData: CuentahabienteBase
+  userData: CuentahabienteBase,
 ): Promise<ApiResult<CuentahabienteResponse>> => {
   try {
     const token = getAdminToken();
@@ -93,7 +94,7 @@ export const updateCuentahabiente = async (
 
     const response = await api.put<CuentahabienteResponse>(
       `${API_URL}${id}/`,
-      userData
+      userData,
     );
 
     return {
@@ -121,7 +122,7 @@ export const updateCuentahabiente = async (
 };
 
 export const deleteCuentahabiente = async (
-  id: number
+  id: number,
 ): Promise<ApiResult<null>> => {
   try {
     const token = getAdminToken();
@@ -163,7 +164,7 @@ export const deleteCuentahabiente = async (
 };
 
 export const getCuentahabientes = async (
-  url?: string
+  url?: string,
 ): Promise<
   ApiResult<{
     count: number;
@@ -213,7 +214,9 @@ export const getCuentahabientes = async (
   }
 };
 
-export const getCuentahabientesList = async (): Promise<CuentahabienteResponse[]> => {
+export const getCuentahabientesList = async (): Promise<
+  CuentahabienteResponse[]
+> => {
   let allResults: CuentahabienteResponse[] = [];
   let nextUrl: string | null = API_URL; // Empezamos por la primera página
 
@@ -239,7 +242,6 @@ export const getCuentahabientesList = async (): Promise<CuentahabienteResponse[]
     }
 
     return allResults;
-
   } catch (error) {
     console.error("Error obteniendo lista completa:", error);
     return []; // En caso de error fatal, devolvemos array vacío
@@ -247,7 +249,7 @@ export const getCuentahabientesList = async (): Promise<CuentahabienteResponse[]
 };
 
 export const getCuentahabienteById = async (
-  id: string | number
+  id: string | number,
 ): Promise<ApiResult<CuentahabienteResponse>> => {
   try {
     const token = getAdminToken();
@@ -289,7 +291,7 @@ export const getCuentahabienteById = async (
 };
 
 export const getCuentahabienteByContrato = async (
-  numeroContrato: number
+  numeroContrato: number,
 ): Promise<ApiResult<CuentahabienteResponse[]>> => {
   try {
     const token = getAdminToken();
@@ -305,7 +307,7 @@ export const getCuentahabienteByContrato = async (
     }
 
     const response = await api.get(
-      `${API_URL}?numero_contrato=${numeroContrato}`
+      `${API_URL}?numero_contrato=${numeroContrato}`,
     );
 
     return {

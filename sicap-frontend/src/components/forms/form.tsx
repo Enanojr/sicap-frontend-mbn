@@ -22,7 +22,7 @@ export interface FormField {
   required?: boolean;
   validation?: (
     value: string | number,
-    allData?: Record<string, any>
+    allData?: Record<string, any>,
   ) => string | null;
   options?: { value: string; label: string }[];
   rows?: number;
@@ -78,8 +78,8 @@ const FormularioReutilizable: React.FC<Props> = ({ config, isEditMode }) => {
   const [formData, setFormData] = useState<Record<string, string | number>>(
     config.fields.reduce(
       (acc, f) => ({ ...acc, [f.name]: f.defaultValue ?? "" }),
-      {} as Record<string, string | number>
-    )
+      {} as Record<string, string | number>,
+    ),
   );
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -87,7 +87,7 @@ const FormularioReutilizable: React.FC<Props> = ({ config, isEditMode }) => {
 
   const [searchInputs, setSearchInputs] = useState<Record<string, string>>({});
   const [showDropdowns, setShowDropdowns] = useState<Record<string, boolean>>(
-    {}
+    {},
   );
 
   const [passwordVisibility, setPasswordVisibility] = useState<
@@ -100,7 +100,7 @@ const FormularioReutilizable: React.FC<Props> = ({ config, isEditMode }) => {
     setFields(config.fields);
     const newForm = config.fields.reduce(
       (acc, f) => ({ ...acc, [f.name]: f.defaultValue ?? "" }),
-      {} as Record<string, string | number>
+      {} as Record<string, string | number>,
     );
     setFormData(newForm);
     setErrors({});
@@ -123,7 +123,7 @@ const FormularioReutilizable: React.FC<Props> = ({ config, isEditMode }) => {
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) => {
     const { name, value } = e.target;
 
@@ -148,7 +148,7 @@ const FormularioReutilizable: React.FC<Props> = ({ config, isEditMode }) => {
       const field = fields.find((f) => f.name === name);
       if (field?.onSearch) field.onSearch(value);
     },
-    [fields]
+    [fields],
   );
 
   // ✅ Usar useCallback para evitar recrear la función
@@ -164,7 +164,7 @@ const FormularioReutilizable: React.FC<Props> = ({ config, isEditMode }) => {
         return copy;
       });
     },
-    []
+    [],
   );
 
   const togglePasswordVisibility = (name: string) => {
@@ -236,8 +236,8 @@ const FormularioReutilizable: React.FC<Props> = ({ config, isEditMode }) => {
     setFormData(
       fields.reduce(
         (acc, f) => ({ ...acc, [f.name]: f.defaultValue ?? "" }),
-        {} as Record<string, string | number>
-      )
+        {} as Record<string, string | number>,
+      ),
     );
     setErrors({});
     setSearchInputs({});

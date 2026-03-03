@@ -11,6 +11,8 @@ export interface TicketData {
   nombre_descuento: string;
   porcentaje_descuento?: number;
   comentarios: string;
+  periodo_mes: string;
+  periodo_anio: number;
 }
 
 export interface TicketPagoProps {
@@ -307,6 +309,21 @@ const TicketPago: React.FC<TicketPagoProps> = ({
                 </div>
                 <div style={{ fontSize: "1rem", color: "#e0e0e0" }}>
                   {formatFechaLarga(ticketData.fecha_pago)}
+                </div>
+              </div>
+
+              <div>
+                <div
+                  style={{
+                    fontSize: "0.75rem",
+                    color: "#999",
+                    marginBottom: "0.25rem",
+                  }}
+                >
+                  Periodo pagado
+                </div>
+                <div style={{ fontSize: "1rem", color: "#e0e0e0" }}>
+                  {ticketData.periodo_mes} {ticketData.periodo_anio}
                 </div>
               </div>
 

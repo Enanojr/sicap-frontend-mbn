@@ -47,28 +47,8 @@ const normalizePago = (pago: any): PagoResponse => {
 };
 
 export const createPago = async (data: PagoCreate): Promise<PagoResponse> => {
-  try {
-    console.log("Enviando pago:", data);
-    const response = await api.post(PAGOS_URL, data);
-    console.log("Pago creado exitosamente:", response.data);
-    return normalizePago(response.data);
-  } catch (error: any) {
-    console.error("Error en createPago:", error);
-    if (error.response) {
-      const message =
-        error.response.data?.detail ||
-        error.response.data?.message ||
-        "Error al crear el pago";
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: message,
-        confirmButtonColor: "#ef4444",
-      });
-      throw new Error(message);
-    }
-    throw error;
-  }
+  const response = await api.post(PAGOS_URL, data);
+  return normalizePago(response.data);
 };
 
 export const getAllPagos = async (): Promise<PagoResponse[]> => {
@@ -80,22 +60,24 @@ export const getAllPagos = async (): Promise<PagoResponse[]> => {
 
     while (nextUrl) {
       console.log(`Obteniendo página ${pagina}...`);
-      const response: { data: PaginatedResponse | PagoResponse[] } = await api.get<PaginatedResponse | PagoResponse[]>(nextUrl);
-      
+      const response: { data: PaginatedResponse | PagoResponse[] } =
+        await api.get<PaginatedResponse | PagoResponse[]>(nextUrl);
+
       // Verificar si la respuesta es un array directo o tiene paginación
-      const pagosData = Array.isArray(response.data) 
-        ? response.data 
-        : (response.data.results || []);
-      
+      const pagosData = Array.isArray(response.data)
+        ? response.data
+        : response.data.results || [];
+
       todosPagos = [...todosPagos, ...pagosData.map(normalizePago)];
-      
+
       // Verificar si hay más páginas (solo si es respuesta paginada)
-      nextUrl = !Array.isArray(response.data) && response.data.next 
-        ? response.data.next 
-        : null;
-      
+      nextUrl =
+        !Array.isArray(response.data) && response.data.next
+          ? response.data.next
+          : null;
+
       pagina++;
-      
+
       // Seguridad: evitar loops infinitos
       if (pagina > 100) {
         console.warn("Se alcanzó el límite de páginas (100)");
@@ -105,15 +87,15 @@ export const getAllPagos = async (): Promise<PagoResponse[]> => {
 
     console.log(`Total de pagos obtenidos: ${todosPagos.length}`);
     return todosPagos;
-    
   } catch (error: any) {
     console.error("Error en getAllPagos:", error);
-    
+
     // Manejo de error más robusto
     if (error.response) {
-      const message = error.response.data?.detail || 
-                     error.response.data?.message || 
-                     "Error al obtener los pagos";
+      const message =
+        error.response.data?.detail ||
+        error.response.data?.message ||
+        "Error al obtener los pagos";
       Swal.fire({
         icon: "error",
         title: "Error",
@@ -121,7 +103,7 @@ export const getAllPagos = async (): Promise<PagoResponse[]> => {
         confirmButtonColor: "#ef4444",
       });
     }
-    
+
     throw error;
   }
 };
@@ -133,12 +115,13 @@ export const getPagoById = async (id: number): Promise<PagoResponse> => {
     return normalizePago(response.data);
   } catch (error: any) {
     console.error("Error en getPagoById:", error);
-    
+
     if (error.response) {
-      const message = error.response.status === 404
-        ? "Pago no encontrado"
-        : error.response.data?.detail || "Error al obtener el pago";
-      
+      const message =
+        error.response.status === 404
+          ? "Pago no encontrado"
+          : error.response.data?.detail || "Error al obtener el pago";
+
       Swal.fire({
         icon: "error",
         title: "Error",
@@ -146,20 +129,20 @@ export const getPagoById = async (id: number): Promise<PagoResponse> => {
         confirmButtonColor: "#ef4444",
       });
     }
-    
+
     throw error;
   }
 };
 
 export const updatePago = async (
   id: number,
-  data: Partial<PagoCreate>
+  data: Partial<PagoCreate>,
 ): Promise<PagoResponse> => {
   try {
     console.log(`Actualizando pago ${id}:`, data);
     const response = await api.put<PagoResponse>(`${PAGOS_URL}${id}/`, data);
     console.log("Pago actualizado exitosamente:", response.data);
-    
+
     Swal.fire({
       icon: "success",
       title: "Éxito",
@@ -167,16 +150,17 @@ export const updatePago = async (
       confirmButtonColor: "#10b981",
       timer: 2000,
     });
-    
+
     return normalizePago(response.data);
   } catch (error: any) {
     console.error("Error en updatePago:", error);
-    
+
     if (error.response) {
-      const message = error.response.data?.detail || 
-                     error.response.data?.message || 
-                     "Error al actualizar el pago";
-      
+      const message =
+        error.response.data?.detail ||
+        error.response.data?.message ||
+        "Error al actualizar el pago";
+
       Swal.fire({
         icon: "error",
         title: "Error",
@@ -184,7 +168,7 @@ export const updatePago = async (
         confirmButtonColor: "#ef4444",
       });
     }
-    
+
     throw error;
   }
 };
@@ -193,7 +177,7 @@ export const deletePago = async (id: number): Promise<void> => {
   try {
     console.log(`Eliminando pago con ID: ${id}`);
     await api.delete(`${PAGOS_URL}${id}/`);
-    
+
     Swal.fire({
       icon: "success",
       title: "Eliminado",
@@ -203,12 +187,13 @@ export const deletePago = async (id: number): Promise<void> => {
     });
   } catch (error: any) {
     console.error("Error en deletePago:", error);
-    
+
     if (error.response) {
-      const message = error.response.status === 404
-        ? "Pago no encontrado"
-        : error.response.data?.detail || "Error al eliminar el pago";
-      
+      const message =
+        error.response.status === 404
+          ? "Pago no encontrado"
+          : error.response.data?.detail || "Error al eliminar el pago";
+
       Swal.fire({
         icon: "error",
         title: "Error",
@@ -216,7 +201,7 @@ export const deletePago = async (id: number): Promise<void> => {
         confirmButtonColor: "#ef4444",
       });
     }
-    
+
     throw error;
   }
 };
