@@ -309,8 +309,8 @@ export default function EstadoCuentaPDF({
             <View style={styles.infoRow}>
               <Text style={styles.label}>Dirección</Text>
               <Text style={styles.value}>
-                {data.direccion}, Guadalupe Hidalgo, Acuamanala, Tlax. C.P.
-                90861
+                {data.direccion}, Guadalupe Hidalgo, {"\n"} Acuamanala, Tlax.
+                C.P. 90860
               </Text>
             </View>
           </View>
