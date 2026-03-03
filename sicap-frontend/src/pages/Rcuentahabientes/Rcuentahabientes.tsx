@@ -134,9 +134,11 @@ const FormularioCuentahabientes: React.FC<Props> = ({
         label: "Número de Contrato",
         type: "number",
         icon: FileText,
-        required: true,
+        required: isEditMode,
         defaultValue: cuentahabienteToEdit?.numero_contrato ?? "",
-        validation: validateNumber,
+        validation: isEditMode ? validateNumber : undefined,
+        disabled: !isEditMode,
+        placeholder: !isEditMode ? "Asignado automáticamente" : undefined,
       },
       {
         name: "nombres",
