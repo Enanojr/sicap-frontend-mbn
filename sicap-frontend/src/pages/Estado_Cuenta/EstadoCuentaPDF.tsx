@@ -8,6 +8,7 @@ import {
 } from "@react-pdf/renderer";
 
 import Logo from "../../assets/Logo.png";
+import WatermarkLogo from "../../assets/Logo.png";
 
 export type EstadoCuentaPDFData = {
   numero_contrato: number | string;
@@ -24,7 +25,10 @@ export type EstadoCuentaPDFData = {
 };
 
 const money = (n: number) =>
-  `$${Number(n || 0).toLocaleString("es-MX", { minimumFractionDigits: 2 })}`;
+  `$${Number(n || 0).toLocaleString("es-MX", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 
 const formatFechaLocal = (fecha: string) => {
   if (!fecha) return "—";
@@ -43,12 +47,13 @@ const statusColor = (estatus: string) => {
   if (v === "pagado") return "#16a34a";
   if (v === "rezagado") return "#f59e0b";
   if (v === "adeudo") return "#ef4444";
+  if (v === "corriente") return "#16a34a";
   return "#64748b";
 };
 
 const getPdfTitle = (
   estatus: string,
-  historico: EstadoCuentaPDFData["historico"]
+  historico: EstadoCuentaPDFData["historico"],
 ) => {
   const v = (estatus || "").trim().toLowerCase();
 
@@ -56,92 +61,137 @@ const getPdfTitle = (
     const last = historico[historico.length - 1];
     return `Recibo de Pago ${last.anio}`;
   }
-
   return "Estado de Cuenta";
+};
+
+const getBrandYear = (data: EstadoCuentaPDFData) => {
+  const v = (data.estatus || "").trim().toLowerCase();
+
+  if (v === "pagado" && data.historico?.length) {
+    const last = data.historico[data.historico.length - 1];
+    return last.anio;
+  }
+
+  return new Date().getFullYear();
 };
 
 const styles = StyleSheet.create({
   page: {
-    padding: 28,
+    paddingTop: 22,
+    paddingHorizontal: 22,
+    paddingBottom: 18,
     fontFamily: "Helvetica",
     fontSize: 10,
     color: "#0f172a",
     backgroundColor: "#ffffff",
   },
 
-  header: {
+  watermark: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 260,
+    alignItems: "center",
+    justifyContent: "center",
+    opacity: 0.18,
+  },
+  watermarkImg: {
+    width: 400,
+    height: 400,
+    objectFit: "contain",
+  },
+
+  headerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 14,
   },
 
-  logosBox: {
-    width: "38%",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
+  leftBrand: {
+    width: "34%",
+  },
+
+  logoWrap: {
+    padding: 4,
+    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.6)",
   },
 
   logo: {
-    width: 110,
-    height: 42,
+    width: 78,
+    height: 78,
     objectFit: "contain",
   },
 
-  infoBox: {
-    width: "60%",
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    borderRadius: 10,
-    padding: 10,
-    backgroundColor: "#f8fafc",
+  brandText: {
+    marginTop: 6,
+    fontSize: 7,
+    color: "#0f172a",
+    lineHeight: 1.2,
   },
 
-  title: {
+  infoCard: {
+    width: "66%",
+    borderWidth: 1,
+    borderColor: "#d6dbe3",
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    backgroundColor: "transparent",
+  },
+
+  infoTitle: {
     fontSize: 14,
     fontWeight: 700,
     color: "#0b3a66",
-    marginBottom: 6,
+    marginBottom: 8,
   },
 
   infoRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 3,
-    gap: 10,
+    marginBottom: 4,
   },
 
-  label: { color: "#475569" },
-  value: { fontWeight: 700, color: "#0f172a" },
+  label: { color: "#475569", fontSize: 9 },
+
+  value: {
+    color: "#0f172a",
+    fontSize: 9,
+    fontWeight: 700,
+    maxWidth: "62%",
+    textAlign: "right",
+  },
 
   cardsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: 10,
-    marginBottom: 14,
+    marginBottom: 12,
   },
 
   card: {
     flex: 1,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: "#dbe4f0",
     borderRadius: 10,
     padding: 10,
-    backgroundColor: "#ffffff",
+    backgroundColor: "transparent",
+    marginRight: 8,
   },
 
-  cardTitle: { color: "#475569", marginBottom: 5 },
+  cardTitle: { color: "#475569", marginBottom: 6, fontSize: 9 },
+
   cardBig: { fontSize: 12, fontWeight: 700, color: "#0f172a" },
 
   statusPill: {
-    marginTop: 4,
-    alignSelf: "flex-start",
     paddingVertical: 4,
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
     borderRadius: 999,
     color: "#ffffff",
     fontSize: 9,
     fontWeight: 700,
+    alignSelf: "flex-start",
+    opacity: 1,
   },
 
   sectionTitle: {
@@ -153,15 +203,16 @@ const styles = StyleSheet.create({
 
   table: {
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: "#000000",
     borderRadius: 10,
     overflow: "hidden",
+    backgroundColor: "transparent",
   },
 
   thead: {
     flexDirection: "row",
     backgroundColor: "#0b3a66",
-    paddingVertical: 8,
+    paddingVertical: 9,
     paddingHorizontal: 10,
   },
 
@@ -172,24 +223,41 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 10,
     borderTopWidth: 1,
-    borderTopColor: "#e2e8f0",
+    borderTopColor: "#000000",
   },
 
   td: { fontSize: 9, color: "#0f172a" },
 
-  colFecha: { width: "45%" },
-  colMonto: { width: "35%", textAlign: "right" },
+  colFecha: { width: "55%" },
+  colMonto: { width: "25%", textAlign: "right" },
   colAnio: { width: "20%", textAlign: "right" },
+
+  totalBox: {
+    marginTop: 10,
+    flexDirection: "row",
+    justifyContent: "flex-end",
+  },
+
+  totalText: {
+    fontSize: 10,
+    fontWeight: 700,
+    color: "#0f172a",
+  },
 
   footer: {
     position: "absolute",
-    left: 28,
-    right: 28,
-    bottom: 18,
+    left: 22,
+    right: 22,
+    bottom: 10,
     flexDirection: "row",
     justifyContent: "space-between",
+    fontSize: 7,
     color: "#64748b",
-    fontSize: 8,
+  },
+
+  footerCenter: {
+    textAlign: "center",
+    flexGrow: 1,
   },
 });
 
@@ -198,16 +266,33 @@ export default function EstadoCuentaPDF({
 }: {
   data: EstadoCuentaPDFData;
 }) {
+  const totalHistorico = (data.historico || []).reduce(
+    (sum, p) => sum + Number(p.monto_recibido || 0),
+    0,
+  );
+
+  const footerDate = new Date().toLocaleDateString("es-MX");
+  const brandYear = getBrandYear(data);
+
   return (
     <Document>
       <Page size="LETTER" style={styles.page}>
-        <View style={styles.header}>
-          <View style={styles.logosBox}>
-            <Image src={Logo} style={styles.logo} />
+        <View style={styles.watermark} fixed>
+          <Image src={WatermarkLogo} style={styles.watermarkImg} />
+        </View>
+
+        <View style={styles.headerRow}>
+          <View style={styles.leftBrand}>
+            <View style={styles.logoWrap}>
+              <Image src={Logo} style={styles.logo} />
+            </View>
+            <Text style={styles.brandText}>
+              GUADALUPE HIDALGO,{"\n"}ACUAMANALA. {brandYear}
+            </Text>
           </View>
 
-          <View style={styles.infoBox}>
-            <Text style={styles.title}>
+          <View style={styles.infoCard}>
+            <Text style={styles.infoTitle}>
               {getPdfTitle(data.estatus, data.historico)}
             </Text>
 
@@ -223,12 +308,10 @@ export default function EstadoCuentaPDF({
 
             <View style={styles.infoRow}>
               <Text style={styles.label}>Dirección</Text>
-              <Text style={styles.value}>{data.direccion}</Text>
-            </View>
-
-            <View style={styles.infoRow}>
-              <Text style={styles.label}>Teléfono</Text>
-              <Text style={styles.value}>{data.telefono}</Text>
+              <Text style={styles.value}>
+                {data.direccion}, Guadalupe Hidalgo, Acuamanala, Tlax. C.P.
+                90861
+              </Text>
             </View>
           </View>
         </View>
@@ -261,7 +344,7 @@ export default function EstadoCuentaPDF({
             <Text style={[styles.th, styles.colAnio]}>Año</Text>
           </View>
 
-          {data.historico && data.historico.length > 0 ? (
+          {data.historico?.length ? (
             data.historico.map((p, idx) => (
               <View key={idx} style={styles.tr}>
                 <Text style={[styles.td, styles.colFecha]}>
@@ -280,10 +363,17 @@ export default function EstadoCuentaPDF({
           )}
         </View>
 
-        {/* FOOTER */}
-        <View style={styles.footer}>
-          <Text>Documento generado automáticamente</Text>
-          <Text>{new Date().toLocaleDateString("es-MX")}</Text>
+        <View style={styles.totalBox}>
+          <Text style={styles.totalText}>
+            Total recaudado: {money(totalHistorico)}
+          </Text>
+        </View>
+
+        <View style={styles.footer} fixed>
+          <Text style={styles.footerCenter}>
+            Guadalupe Hidalgo Acuamanala, C.P. 90860
+          </Text>
+          <Text>{footerDate}</Text>
         </View>
       </Page>
     </Document>

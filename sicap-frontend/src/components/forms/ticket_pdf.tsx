@@ -50,7 +50,6 @@ const styles = StyleSheet.create({
   logo: {
     maxWidth: 60,
     height: "auto",
-
     marginLeft: "auto",
     marginRight: "auto",
     display: "flex",
@@ -120,7 +119,6 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     gap: 6,
   },
-  detailItem: {},
   detailLabel: {
     fontSize: 7,
     color: "#666",
@@ -131,6 +129,8 @@ const styles = StyleSheet.create({
     color: "#333333",
     fontWeight: "medium",
   },
+
+  // ✅ Comentarios “a prueba de biblias”: contenedor fijo + texto recortado
   commentBox: {
     backgroundColor: "#EEEEEE",
     padding: 5,
@@ -141,7 +141,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#DDDDDD",
     marginTop: 2,
+
+    // Mantén el alto bajo control para que SIEMPRE sea 1 hoja.
+    // (A6 es pequeño; si dejan 2 párrafos enteros, no hay milagros)
+    maxHeight: 55,
+    overflow: "hidden",
   },
+
   footer: {
     marginTop: 10,
     paddingTop: 8,
@@ -154,11 +160,6 @@ const styles = StyleSheet.create({
     color: "#3B82F6",
     fontWeight: "bold",
     marginBottom: 2,
-  },
-  systemInfo: {
-    fontSize: 8,
-    color: "#666",
-    marginBottom: 1,
   },
   emittedDate: {
     fontSize: 7,
@@ -178,6 +179,13 @@ const formatFechaLarga = (fechaString: string): string => {
     month: "long",
     year: "numeric",
   });
+};
+
+// ✅ Opcional: recorte por caracteres para evitar comentarios absurdos
+const truncate = (text: string, max = 220) => {
+  const t = (text ?? "").trim();
+  if (t.length <= max) return t;
+  return t.slice(0, max).trimEnd() + "…";
 };
 
 interface TicketPDFProps {
@@ -203,9 +211,18 @@ export const TicketPDF: React.FC<TicketPDFProps> = ({
     color: tieneDescuento ? "#10B981" : "#3B82F6",
   };
 
+  // ✅ Periodo pagado (sin romper tu TicketData: lo lees “si existe”)
+  const periodoMes = (ticketData as any).periodo_mes as string | undefined;
+  const periodoAnio = (ticketData as any).periodo_anio as number | undefined;
+  const periodoPagado =
+    periodoMes && periodoAnio ? `${periodoMes} ${periodoAnio}` : "—";
+
+  const comentarios = ticketData.comentarios?.trim() ?? "";
+
   return (
     <Document>
-      <Page size="A6" style={styles.page}>
+      {/* ✅ wrap={false} = JAMÁS crea otra hoja */}
+      <Page size="A6" style={styles.page} wrap={false}>
         <View style={styles.container}>
           {/* Header */}
           <View style={styles.header}>
@@ -282,21 +299,27 @@ export const TicketPDF: React.FC<TicketPDFProps> = ({
             </View>
 
             <View style={styles.detailSection}>
-              <View style={styles.detailItem}>
+              <View>
                 <Text style={styles.detailLabel}>Cliente</Text>
                 <Text style={styles.detailValue}>
                   {ticketData.nombre_completo}
                 </Text>
               </View>
 
-              <View style={styles.detailItem}>
+              <View>
                 <Text style={styles.detailLabel}>Fecha de Pago</Text>
                 <Text style={styles.detailValue}>
                   {formatFechaLarga(ticketData.fecha_pago)}
                 </Text>
               </View>
 
-              <View style={styles.detailItem}>
+              {/* ✅ NUEVO: Periodo pagado */}
+              <View>
+                <Text style={styles.detailLabel}>Periodo pagado</Text>
+                <Text style={styles.detailValue}>{periodoPagado}</Text>
+              </View>
+
+              <View>
                 <Text style={styles.detailLabel}>Descuento Aplicado</Text>
                 <Text
                   style={{
@@ -309,15 +332,18 @@ export const TicketPDF: React.FC<TicketPDFProps> = ({
                 </Text>
               </View>
 
-              {ticketData.comentarios &&
-                ticketData.comentarios.trim() !== "" && (
-                  <View style={styles.detailItem}>
-                    <Text style={styles.detailLabel}>Comentarios</Text>
-                    <Text style={styles.commentBox}>
-                      {ticketData.comentarios}
-                    </Text>
-                  </View>
-                )}
+              {comentarios !== "" && (
+                <View>
+                  <Text style={styles.detailLabel}>Comentarios</Text>
+
+                  {/* ✅ 2 capas de protección:
+                      - truncate por caracteres
+                      - maxLines para cortar por renglones */}
+                  <Text style={styles.commentBox}>
+                    {truncate(comentarios, 220)}
+                  </Text>
+                </View>
+              )}
             </View>
 
             <View style={styles.footer}>
