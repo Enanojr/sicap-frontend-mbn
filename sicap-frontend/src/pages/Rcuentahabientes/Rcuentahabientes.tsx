@@ -218,16 +218,19 @@ const FormularioCuentahabientes: React.FC<Props> = ({
 
     onSubmit: async (data) => {
       const payload: any = {
-        numero_contrato: Number(data.numero_contrato),
         nombres: String(data.nombres ?? ""),
         ap: String(data.ap ?? ""),
         am: String(data.am ?? ""),
         calle: String(data.calle ?? ""),
-        numero: Number(data.numero),
+        numero: data.numero ? Number(data.numero) : null,
         telefono: String(data.telefono ?? ""),
-        colonia: Number(data.colonia),
-        servicio: Number(data.servicio),
+        colonia: data.colonia ? Number(data.colonia) : null,
+        servicio: data.servicio ? Number(data.servicio) : null,
       };
+
+      if (isEditMode) {
+        payload.numero_contrato = Number(data.numero_contrato);
+      }
 
       // ─────────────── EDIT ───────────────
       if (isEditMode) {
@@ -246,7 +249,7 @@ const FormularioCuentahabientes: React.FC<Props> = ({
           Swal.fire({
             icon: "error",
             title: "No se pudo completar",
-            text: "Ocurrió un problema al procesar la solicitud. Intente nuevamente.",
+            text: "Ocurrió un problema al procesar la solicitud.",
             confirmButtonColor: "#58b2ee",
           });
           return;
@@ -287,12 +290,11 @@ const FormularioCuentahabientes: React.FC<Props> = ({
         denyButtonColor: "#0ea5e9",
         cancelButtonColor: "#374151",
         reverseButtons: true,
-        focusCancel: true,
       });
 
       if (toma.isDismissed) return;
 
-      payload.es_toma_nueva = toma.isConfirmed ? true : false;
+      payload.es_toma_nueva = toma.isConfirmed;
 
       Swal.fire({
         title: "Registrando...",
@@ -310,16 +312,12 @@ const FormularioCuentahabientes: React.FC<Props> = ({
             icon: "info",
             title: "Contrato ya registrado",
             html: `
-              <div style="text-align:left; line-height:1.35">
-                <p style="margin:0 0 .5rem 0">
-                  El contrato <b>#${payload.numero_contrato}</b> ya se encuentra registrado.
-                </p>
-                <p style="margin:0;color:#9ca3af">
-                  No se realizó ningún cambio.
+              <div style="text-align:left">
+                <p>
+                  El contrato ya se encuentra registrado.
                 </p>
               </div>
             `,
-            confirmButtonText: "Entendido",
             confirmButtonColor: "#58b2ee",
           });
           return;
@@ -328,7 +326,7 @@ const FormularioCuentahabientes: React.FC<Props> = ({
         await Swal.fire({
           icon: "error",
           title: "No se pudo completar",
-          text: "Ocurrió un problema al registrar. Revise los datos e intente nuevamente.",
+          text: "Ocurrió un problema al registrar.",
           confirmButtonColor: "#58b2ee",
         });
         return;
