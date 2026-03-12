@@ -259,7 +259,7 @@ const FormularioPagos: React.FC = () => {
         await createPago({
           cuentahabiente: parseInt(data.cuentahabiente),
           fecha_pago: data.fecha_pago,
-          monto_recibido: montoFinal,
+          monto_recibido: montoOriginal,
           mes: data.mes,
           anio: parseInt(data.anio),
           comentarios: data.comentarios || "",
