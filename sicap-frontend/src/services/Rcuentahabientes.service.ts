@@ -214,37 +214,44 @@ export const getCuentahabientes = async (
   }
 };
 
-export const getCuentahabientesList = async (): Promise<
-  CuentahabienteResponse[]
+export const getCuentahabientesList = async (
+  page: number = 1
+): Promise<
+  ApiResult<{
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: CuentahabienteResponse[];
+  }>
 > => {
-  let allResults: CuentahabienteResponse[] = [];
-  let nextUrl: string | null = API_URL; // Empezamos por la primera página
-
   try {
-    while (nextUrl) {
-      // Usamos getCuentahabientes pero le pasamos la URL específica (nextUrl)
-      // Nota: getCuentahabientes ya maneja la lógica de token y errores
-      const response = await getCuentahabientes(nextUrl);
+    // Construir la URL con el parámetro de paginación
+    const paginatedUrl = `${API_URL}?page=${page}`;
+    
+    // Reutilizar la función getCuentahabientes que ya tienes arriba
+    // la cual ya maneja los tokens y los errores correctamente.
+    const response = await getCuentahabientes(paginatedUrl);
 
-      if (!response.success || !response.data) {
-        break; // Si falla algo, nos detenemos y devolvemos lo que tengamos
-      }
-
-      // Agregamos los resultados de esta página al array acumulador
-      const pageResults = response.data.results;
-      allResults = [...allResults, ...pageResults];
-
-      // Actualizamos nextUrl. Si es null, el while termina.
-      // IMPORTANTE: A veces Django devuelve la URL absoluta (http://...) y axios
-      // suele preferir relativas si tienes baseURL configurada.
-      // Si tu API devuelve la URL completa, esto funcionará bien.
-      nextUrl = response.data.next;
+    if (!response.success || !response.data) {
+       return {
+         success: false,
+         errors: response.errors || { general: "Error al cargar la página." }
+       };
     }
 
-    return allResults;
+    // Retornar la estructura completa (incluyendo next y previous)
+    // para poder armar la paginación en el frontend
+    return {
+      success: true,
+      data: response.data,
+    };
+
   } catch (error) {
-    console.error("Error obteniendo lista completa:", error);
-    return []; // En caso de error fatal, devolvemos array vacío
+    console.error("Error obteniendo la página de cuentahabientes:", error);
+    return {
+      success: false,
+      errors: { general: "Error fatal al solicitar los datos paginados." }
+    };
   }
 };
 
