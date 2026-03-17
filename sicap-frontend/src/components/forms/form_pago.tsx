@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import type { FormConfig } from "../forms/form";
 import FormularioReutilizable from "../forms/form";
@@ -49,10 +49,6 @@ interface PaginatedDescuentosResponse {
 const FormularioPagos: React.FC = () => {
   const navigate = useNavigate();
 
-  const [allCuentahabientes, setAllCuentahabientes] = useState<
-    Cuentahabiente[]
-  >([]);
-
   const [filteredOptions, setFilteredOptions] = useState<
     Array<{ value: string; label: string }>
   >([]);
@@ -73,32 +69,24 @@ const FormularioPagos: React.FC = () => {
     new Map(),
   );
 
+  // Referencia para manejar el temporizador del debounce
+  const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
     const fetchCuentahabientes = async () => {
       try {
         setLoading(true);
 
-        const all: Cuentahabiente[] = [];
-        let nextUrl: string | null = "/cuentahabientes/";
+        // Cargar únicamente la primera página para mostrar opciones iniciales
+        const response = await api.get<PaginatedResponse>("/cuentahabientes/");
+        const data = response.data.results;
 
-        while (nextUrl) {
-          const response = await api.get<PaginatedResponse>(nextUrl);
-          const data: PaginatedResponse = response.data;
-
-          all.push(...data.results);
-
-          nextUrl = data.next
-            ? data.next.replace("https://sicap-backend.onrender.com", "")
-            : null;
-        }
-
-        setAllCuentahabientes(all);
-
+        // Guardar en el mapa para tener los datos completos al crear el ticket
         const map = new Map<number, Cuentahabiente>();
-        all.forEach((c) => map.set(c.id_cuentahabiente, c));
+        data.forEach((c) => map.set(c.id_cuentahabiente, c));
         setCuentahabientesMap(map);
 
-        const initial = all.slice(0, 10).map((c) => ({
+        const initial = data.map((c) => ({
           value: c.id_cuentahabiente.toString(),
           label: `#${c.numero_contrato} - ${c.nombres} ${c.ap} ${c.am}`.trim(),
         }));
@@ -107,7 +95,7 @@ const FormularioPagos: React.FC = () => {
       } catch (error) {
         Swal.fire(
           "Error",
-          "No se pudieron cargar los cuentahabientes",
+          "No se pudieron cargar los cuentahabientes iniciales",
           "error",
         );
       } finally {
@@ -120,6 +108,8 @@ const FormularioPagos: React.FC = () => {
         const all: Descuento[] = [];
         let nextUrl: string | null = "/descuentos/";
 
+        // Para catálogos pequeños como descuentos, el while es aceptable.
+        // Si crece mucho, aplicar la misma técnica asíncrona que en cuentahabientes.
         while (nextUrl) {
           const response = await api.get<PaginatedDescuentosResponse>(nextUrl);
           const data: PaginatedDescuentosResponse = response.data;
@@ -151,35 +141,45 @@ const FormularioPagos: React.FC = () => {
     fetchDescuentos();
   }, []);
 
-  const handleSearchCuentahabiente = useCallback(
-    (searchTerm: string) => {
-      if (!searchTerm.trim()) {
-        const initial = allCuentahabientes.slice(0, 10).map((c) => ({
+  const handleSearchCuentahabiente = useCallback((searchTerm: string) => {
+    // Limpiar el temporizador anterior si el usuario sigue tecleando
+    if (searchTimeout.current) {
+      clearTimeout(searchTimeout.current);
+    }
+
+    if (!searchTerm.trim()) {
+      return;
+    }
+
+    // Configurar un nuevo temporizador (Debounce de 500ms)
+    searchTimeout.current = setTimeout(async () => {
+      try {
+        // Enviar la búsqueda al backend
+        // Nota: Asegurar que Django esté configurado para aceptar '?search='
+        const response = await api.get<PaginatedResponse>(
+          `/cuentahabientes/?search=${encodeURIComponent(searchTerm)}`
+        );
+        
+        const resultados = response.data.results;
+
+        // Actualizar el mapa con los nuevos resultados para no perder su información
+        setCuentahabientesMap((prevMap) => {
+          const nuevoMapa = new Map(prevMap);
+          resultados.forEach((c) => nuevoMapa.set(c.id_cuentahabiente, c));
+          return nuevoMapa;
+        });
+
+        const opcionesFiltradas = resultados.map((c) => ({
           value: c.id_cuentahabiente.toString(),
           label: `#${c.numero_contrato} - ${c.nombres} ${c.ap} ${c.am}`.trim(),
         }));
-        setFilteredOptions(initial);
-        return;
+
+        setFilteredOptions(opcionesFiltradas);
+      } catch (error) {
+        console.error("Error al buscar en el servidor:", error);
       }
-
-      const term = searchTerm.toLowerCase();
-      const filtered = allCuentahabientes
-        .filter((c) => {
-          const fullName = `${c.nombres} ${c.ap} ${c.am}`.toLowerCase();
-          const contrato = c.numero_contrato.toString();
-
-          return fullName.includes(term) || contrato.includes(term);
-        })
-        .slice(0, 10)
-        .map((c) => ({
-          value: c.id_cuentahabiente.toString(),
-          label: `#${c.numero_contrato} - ${c.nombres} ${c.ap} ${c.am}`.trim(),
-        }));
-
-      setFilteredOptions(filtered);
-    },
-    [allCuentahabientes],
-  );
+    }, 500); // Esperar medio segundo antes de disparar la petición
+  }, []);
 
   const validatePositiveNumber = useCallback(
     (value: string | number): string | null => {
@@ -259,7 +259,7 @@ const FormularioPagos: React.FC = () => {
         await createPago({
           cuentahabiente: parseInt(data.cuentahabiente),
           fecha_pago: data.fecha_pago,
-          monto_recibido: montoFinal,
+          monto_recibido: montoOriginal,
           mes: data.mes,
           anio: parseInt(data.anio),
           comentarios: data.comentarios || "",
@@ -269,6 +269,7 @@ const FormularioPagos: React.FC = () => {
 
         Swal.close();
 
+        // Recuperar los datos del mapa para imprimir el ticket
         const c = cuentahabientesMap.get(parseInt(data.cuentahabiente));
         if (c) {
           setTicketData({
@@ -330,7 +331,6 @@ const FormularioPagos: React.FC = () => {
     [cuentahabientesMap, descuentosMap],
   );
 
-  //  FormConfig con useMemo
   const formConfig: FormConfig = useMemo(
     () => ({
       title: "Registro de Pagos",

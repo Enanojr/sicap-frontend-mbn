@@ -287,7 +287,8 @@ export default function EstadoCuentaPDF({
               <Image src={Logo} style={styles.logo} />
             </View>
             <Text style={styles.brandText}>
-              GUADALUPE HIDALGO,{"\n"}ACUAMANALA. {brandYear}
+              COMISIÓN DE AGUA{"\n"}GUADALUPE HIDALGO,{"\n"}ACUAMANALA, TLAX.{" "}
+              {brandYear}
             </Text>
           </View>
 
