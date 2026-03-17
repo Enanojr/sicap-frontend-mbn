@@ -92,7 +92,7 @@ export default function EstadoCuentaPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `EstadoCuenta_${data.numero_contrato}.pdf`;
+      a.download = `EstadoCuenta_${data.numero_contrato} ${data.nombre}.pdf`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
