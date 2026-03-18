@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   getCargos,
   registrarCargo,
   pagarCargo,
+  getCargosByUser,
 } from "../../services/cargos.service";
 import type {
   CargoResponse,
   CargoData,
   PagoData,
 } from "../../services/cargos.service";
-import { getCuentahabientesList } from "../../services/Rcuentahabientes.service";
-import type { CuentahabienteResponse } from "../../services/Rcuentahabientes.service";
+import { getCuentahabientes } from "../../services/Rcuentahabientes.service";
 import {
   getAllCargos,
   type CargoResponse as TipoCargoOp,
@@ -18,27 +18,145 @@ import {
 
 import TicketPago, { type TicketData as TicketPagoData } from "./TicketCargo";
 import SearchableSelect from "../../components/searchselect/searchselect";
-import LogoApp from "../../assets/Logo.png"; 
+import LogoApp from "../../assets/Logo.png";
 import Swal from "sweetalert2";
 import "../../styles/styles.css";
 
+// ────────────────────────────────────────────────────────────
+// Hook: búsqueda lazy de cuentahabientes (Registrar Cargo)
+// Solo llama al backend cuando el usuario escribe, 1 página.
+// ────────────────────────────────────────────────────────────
+const useCuentahabientesSearch = () => {
+  const [opciones, setOpciones] = useState<
+    { value: string | number; label: string; keywords: string }[]
+  >([]);
+  const [buscando, setBuscando] = useState(false);
+  const [seleccionado, setSeleccionado] = useState<{
+    value: string | number;
+    label: string;
+    keywords: string;
+  } | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const buscar = useCallback((termino: string) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      if (!termino.trim()) {
+        setOpciones([]);
+        return;
+      }
+      setBuscando(true);
+      const res = await getCuentahabientes(
+        `/cuentahabientes/?search=${encodeURIComponent(termino)}`
+      );
+      if (res.success && res.data) {
+        setOpciones(
+          res.data.results.map((u) => ({
+            value: u.id_cuentahabiente,
+            label: `#${u.numero_contrato} - ${u.nombres} ${u.ap} ${u.am}`,
+            keywords: String(u.numero_contrato),
+          }))
+        );
+      }
+      setBuscando(false);
+    }, 400);
+  }, []);
+
+  const marcarSeleccionado = (value: string | number) => {
+    const encontrado = opciones.find((o) => String(o.value) === String(value));
+    if (encontrado) setSeleccionado(encontrado);
+  };
+
+  // Siempre incluye el seleccionado actual para que no pierda el label
+  const opcionesFinales = seleccionado
+    ? [
+        seleccionado,
+        ...opciones.filter(
+          (o) => String(o.value) !== String(seleccionado.value)
+        ),
+      ]
+    : opciones;
+
+  return { opcionesFinales, buscando, buscar, marcarSeleccionado, setSeleccionado };
+};
+
+// ────────────────────────────────────────────────────────────
+// Hook: usuarios únicos con cargos activos (Realizar Pago)
+// Construye el label directo desde cargos — 0 llamadas extra.
+// ────────────────────────────────────────────────────────────
+const useUsuariosConCargosActivos = () => {
+  const [opciones, setOpciones] = useState<
+    { value: string | number; label: string; keywords: string }[]
+  >([]);
+  const [cargando, setCargando] = useState(false);
+
+  const cargar = async () => {
+    setCargando(true);
+    const res = await getCargos(undefined, undefined);
+    if (res.success && res.data) {
+      const lista: CargoResponse[] = res.data.results || res.data;
+
+      // Deduplicar por cuentahabiente, solo activos con saldo > 0
+      const mapa = new Map<
+        number,
+        { value: number; label: string; keywords: string }
+      >();
+      lista
+        .filter((c) => c.activo && parseFloat(c.saldo_restante_cargo) > 0)
+        .forEach((c) => {
+          if (!mapa.has(c.cuentahabiente)) {
+            mapa.set(c.cuentahabiente, {
+              value: c.cuentahabiente,
+              // Usamos cuentahabiente_nombre que ya viene en el cargo — sin peticiones extra
+              label: c.cuentahabiente_nombre,
+              keywords: String(c.cuentahabiente),
+            });
+          }
+        });
+
+      setOpciones(Array.from(mapa.values()));
+    }
+    setCargando(false);
+  };
+
+  useEffect(() => { cargar(); }, []);
+
+  return { opciones, cargando, refrescar: cargar };
+};
+
+// ────────────────────────────────────────────────────────────
+// Componente principal
+// ────────────────────────────────────────────────────────────
 const CargosManager = () => {
   const [listaCargos, setListaCargos] = useState<CargoResponse[]>([]);
-  const [listaUsuarios, setListaUsuarios] = useState<CuentahabienteResponse[]>([]);
   const [tiposDeCargo, setTiposDeCargo] = useState<TipoCargoOp[]>([]);
 
-  // Paginación (Restaurada)
   const [nextPage, setNextPage] = useState<string | null>(null);
   const [prevPage, setPrevPage] = useState<string | null>(null);
   const [totalCargos, setTotalCargos] = useState<number>(0);
-  
+
   const [loading, setLoading] = useState(false);
   const [busquedaTabla, setBusquedaTabla] = useState("");
 
-  // Ticket y Feedback
   const [showTicket, setShowTicket] = useState(false);
   const [ticketData, setTicketData] = useState<TicketPagoData | null>(null);
 
+  const [cargosActivosUsuario, setCargosActivosUsuario] = useState<CargoResponse[]>([]);
+  const [loadingCargosUsuario, setLoadingCargosUsuario] = useState(false);
+
+  const {
+    opcionesFinales: opcionesCargo,
+    buscando: buscandoCargo,
+    buscar: buscarCargo,
+    marcarSeleccionado: marcarSeleccionadoCargo,
+    setSeleccionado: resetSeleccionadoCargo,
+  } = useCuentahabientesSearch();
+
+  const {
+    opciones: opcionesPago,
+    cargando: cargandoPago,
+    refrescar: refrescarOpcionesPago,
+  } = useUsuariosConCargosActivos();
 
   const [formCargo, setFormCargo] = useState<CargoData>({
     cuentahabiente: "",
@@ -52,35 +170,43 @@ const CargosManager = () => {
     monto: 0,
   });
 
-  // Errores (Restaurados)
   const [errorsCargo, setErrorsCargo] = useState<any>({});
   const [errorsPago, setErrorsPago] = useState<any>({});
 
   useEffect(() => {
-    const cargarDatos = async () => {
-      const [usuarios, tipos] = await Promise.all([
-        getCuentahabientesList(),
-        getAllCargos(),
-      ]);
-      setListaUsuarios(usuarios);
-      setTiposDeCargo(tipos);
-    };
-    cargarDatos();
+    getAllCargos().then(setTiposDeCargo);
+    cargarTablaCargos();
   }, []);
 
   useEffect(() => {
     if (formCargo.tipo_cargo) {
-      const seleccionado = tiposDeCargo.find(t => String(t.id) === String(formCargo.tipo_cargo));
-      if (seleccionado) setFormCargo(prev => ({ ...prev, monto_cargo: seleccionado.monto }));
+      const sel = tiposDeCargo.find(
+        (t) => String(t.id) === String(formCargo.tipo_cargo)
+      );
+      if (sel) setFormCargo((prev) => ({ ...prev, monto_cargo: sel.monto }));
     } else {
-      setFormCargo(prev => ({ ...prev, monto_cargo: 0 }));
+      setFormCargo((prev) => ({ ...prev, monto_cargo: 0 }));
     }
   }, [formCargo.tipo_cargo, tiposDeCargo]);
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => cargarTablaCargos(undefined, busquedaTabla), 500);
-    return () => clearTimeout(timeoutId);
+    const id = setTimeout(() => cargarTablaCargos(undefined, busquedaTabla), 500);
+    return () => clearTimeout(id);
   }, [busquedaTabla]);
+
+  useEffect(() => {
+    const cargar = async () => {
+      if (!formPago.cuentahabiente_id) {
+        setCargosActivosUsuario([]);
+        return;
+      }
+      setLoadingCargosUsuario(true);
+      const cargos = await getCargosByUser(formPago.cuentahabiente_id);
+      setCargosActivosUsuario(cargos);
+      setLoadingCargosUsuario(false);
+    };
+    cargar();
+  }, [formPago.cuentahabiente_id]);
 
   const cargarTablaCargos = async (url?: string, searchTerm?: string) => {
     const res = await getCargos(url, searchTerm);
@@ -100,26 +226,23 @@ const CargosManager = () => {
     e.preventDefault();
     setErrorsCargo({});
     setLoading(true);
-
     try {
       const res = await registrarCargo(formCargo);
       if (res.success) {
-        // Alerta de éxito con SweetAlert2
         Swal.fire({
           icon: "success",
           title: "Cargo registrado",
-          text: "El cargo se ha guardado correctamente en la base de datos.",
+          text: "El cargo se ha guardado correctamente.",
           timer: 2000,
           showConfirmButton: false,
           confirmButtonColor: "#3b82f6",
         });
-
-        setFormCargo({ ...formCargo, monto_cargo: 0, tipo_cargo: "" });
+        setFormCargo({ ...formCargo, monto_cargo: 0, tipo_cargo: "", cuentahabiente: "" });
+        resetSeleccionadoCargo(null);
         cargarTablaCargos();
+        refrescarOpcionesPago();
       } else {
         setErrorsCargo(res.errors || { general: "Error al registrar" });
-        
-        // Opcional: Alerta de error si no hay errores de campo específicos
         if (res.errors?.general) {
           Swal.fire({
             icon: "error",
@@ -129,7 +252,7 @@ const CargosManager = () => {
           });
         }
       }
-    } catch (error) {
+    } catch {
       Swal.fire({
         icon: "error",
         title: "Error inesperado",
@@ -147,17 +270,21 @@ const CargosManager = () => {
     setLoading(true);
     const res = await pagarCargo(formPago);
     if (res.success) {
-      const usuario = listaUsuarios.find(u => String(u.id_cuentahabiente) === String(formPago.cuentahabiente_id));
+      const usuarioPago = opcionesPago.find(
+        (u) => String(u.value) === String(formPago.cuentahabiente_id)
+      );
       setTicketData({
-        nombre_completo: usuario ? `${usuario.nombres} ${usuario.ap} ${usuario.am}` : "Cliente",
-        numero_contrato: usuario ? Number(usuario.numero_contrato) : 0,
-        fecha_pago: new Date().toISOString().split('T')[0],
+        nombre_completo: usuarioPago?.label || "Cliente",
+        numero_contrato: 0,
+        fecha_pago: new Date().toISOString().split("T")[0],
         monto_recibido: formPago.monto,
         nombre_descuento: "Sin descuento",
-        comentarios: "Abono aplicado correctamente."
+        comentarios: "Abono aplicado correctamente.",
       });
       setShowTicket(true);
-      setFormPago({ ...formPago, monto: 0 });
+      setFormPago({ cuentahabiente_id: "", monto: 0 });
+      setCargosActivosUsuario([]);
+      await refrescarOpcionesPago();
       cargarTablaCargos();
     } else {
       setErrorsPago(res.errors || { general: "Error en el pago" });
@@ -165,107 +292,220 @@ const CargosManager = () => {
     setLoading(false);
   };
 
-  const opcionesUsuarios = listaUsuarios.map((user) => ({
-    value: user.id_cuentahabiente,
-    label: `#${user.numero_contrato} - ${user.nombres} ${user.ap} ${user.am}`,
-    keywords: String(user.numero_contrato),
-  }));
+  const saldoTotalPendiente = cargosActivosUsuario.reduce(
+    (acc, c) => acc + parseFloat(c.saldo_restante_cargo),
+    0
+  );
 
   return (
     <div className="cm-container">
       <h2 className="cm-page-title">Gestión de Cargos y Pagos</h2>
 
       {showTicket && ticketData && (
-  <TicketPago 
-    ticketData={ticketData} 
-    onClose={() => setShowTicket(false)} 
-    logoUrl={LogoApp} // Enviamos la imagen importada
-  />
-)}
-
-      
+        <TicketPago
+          ticketData={ticketData}
+          onClose={() => setShowTicket(false)}
+          logoUrl={LogoApp}
+        />
+      )}
 
       <div className="cm-top-section">
+        {/* ── Registrar Cargo ── */}
         <div className="cm-card cm-form-card cm-charge-mode">
           <h3>📝 Registrar Cargo (Deuda)</h3>
           <form onSubmit={handleSubmitCargo}>
             <div className="cm-form-group">
               <label>Cuentahabiente</label>
               <SearchableSelect
-                options={opcionesUsuarios}
+                options={opcionesCargo}
                 value={formCargo.cuentahabiente}
-                onChange={(v) => setFormCargo({ ...formCargo, cuentahabiente: v })}
-                placeholder="Buscar..."
+                onChange={(v) => {
+                  marcarSeleccionadoCargo(v);
+                  setFormCargo({ ...formCargo, cuentahabiente: v });
+                }}
+                onSearch={buscarCargo}
+                placeholder={buscandoCargo ? "Buscando..." : "Escribe para buscar..."}
               />
-              {errorsCargo.cuentahabiente && <span className="cm-error-msg">{errorsCargo.cuentahabiente}</span>}
+              {errorsCargo.cuentahabiente && (
+                <span className="cm-error-msg">{errorsCargo.cuentahabiente}</span>
+              )}
             </div>
             <div className="cm-form-row">
               <div className="cm-form-group">
                 <label>Tipo</label>
-                <select className="cm-select-custom" value={formCargo.tipo_cargo} onChange={(e) => setFormCargo({ ...formCargo, tipo_cargo: e.target.value })} required>
+                <select
+                  className="cm-select-custom"
+                  value={formCargo.tipo_cargo}
+                  onChange={(e) =>
+                    setFormCargo({ ...formCargo, tipo_cargo: e.target.value })
+                  }
+                  required
+                >
                   <option value="">-- Seleccionar --</option>
-                  {tiposDeCargo.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
+                  {tiposDeCargo.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.nombre}
+                    </option>
+                  ))}
                 </select>
-                {errorsCargo.tipo_cargo && <span className="cm-error-msg">{errorsCargo.tipo_cargo}</span>}
+                {errorsCargo.tipo_cargo && (
+                  <span className="cm-error-msg">{errorsCargo.tipo_cargo}</span>
+                )}
               </div>
               <div className="cm-form-group">
                 <label>Fecha</label>
-                <input type="date" value={formCargo.fecha_cargo} onChange={(e) => setFormCargo({ ...formCargo, fecha_cargo: e.target.value })} />
+                <input
+                  type="date"
+                  value={formCargo.fecha_cargo}
+                  onChange={(e) =>
+                    setFormCargo({ ...formCargo, fecha_cargo: e.target.value })
+                  }
+                />
               </div>
             </div>
             <div className="cm-form-group">
               <label>Monto</label>
-              <input type="number" className="cm-input-money cm-input-readonly" value={formCargo.monto_cargo || ""} readOnly />
+              <input
+                type="number"
+                className="cm-input-money cm-input-readonly"
+                value={formCargo.monto_cargo || ""}
+                readOnly
+              />
             </div>
-            <button type="submit" className="cm-btn cm-btn-primary" disabled={loading}>{loading ? "..." : "Registrar Cargo"}</button>
+            <button type="submit" className="cm-btn cm-btn-primary" disabled={loading}>
+              {loading ? "..." : "Registrar Cargo"}
+            </button>
           </form>
         </div>
 
+        {/* ── Realizar Pago ── */}
         <div className="cm-card cm-form-card cm-pay-mode">
           <h3>💰 Realizar Pago (Abono)</h3>
           <form onSubmit={handleSubmitPago}>
             <div className="cm-form-group">
               <label>Cuentahabiente</label>
               <SearchableSelect
-                options={opcionesUsuarios}
+                options={opcionesPago}
                 value={formPago.cuentahabiente_id}
-                onChange={(v) => setFormPago({ ...formPago, cuentahabiente_id: v })}
-                placeholder="Buscar..."
+                onChange={(v) => {
+                  setFormPago({ ...formPago, cuentahabiente_id: v });
+                  setErrorsPago({});
+                }}
+                placeholder={cargandoPago ? "Cargando..." : "Buscar por nombre..."}
               />
-              {errorsPago.cuentahabiente_id && <span className="cm-error-msg">{errorsPago.cuentahabiente_id}</span>}
+              {errorsPago.cuentahabiente_id && (
+                <span className="cm-error-msg">{errorsPago.cuentahabiente_id}</span>
+              )}
             </div>
+
+            {/* Panel de cargos activos */}
+            {formPago.cuentahabiente_id && (
+              <div className="cm-cargos-activos-panel">
+                {loadingCargosUsuario ? (
+                  <p className="cm-cargos-loading">Cargando deudas...</p>
+                ) : cargosActivosUsuario.length === 0 ? (
+                  <div className="cm-cargos-sin-deuda">
+                    <span>✅</span> Sin cargos pendientes.
+                  </div>
+                ) : (
+                  <>
+                    <p className="cm-cargos-activos-titulo">
+                      Cargos pendientes
+                      <span className="cm-cargos-count">{cargosActivosUsuario.length}</span>
+                    </p>
+                    <ul className="cm-cargos-activos-lista">
+                      {cargosActivosUsuario.map((cargo) => (
+                        <li key={cargo.id_cargo} className="cm-cargo-activo-item">
+                          <div className="cm-cargo-activo-info">
+                            <span className="cm-badge">
+                              {cargo.tipo_cargo_detalle?.nombre || "N/A"}
+                            </span>
+                            <span className="cm-cargo-activo-fecha">
+                              {cargo.fecha_cargo}
+                            </span>
+                          </div>
+                          <span className="cm-cargo-activo-saldo">
+                            ${parseFloat(cargo.saldo_restante_cargo).toFixed(2)}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="cm-cargos-total">
+                      <span>Total pendiente</span>
+                      <span className="cm-cargos-total-monto">
+                        ${saldoTotalPendiente.toFixed(2)}
+                      </span>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
             <div className="cm-form-group">
               <label>Monto a Pagar</label>
-              <input type="number" className="cm-input-money" value={formPago.monto || ""} onChange={(e) => setFormPago({ ...formPago, monto: parseFloat(e.target.value) || 0 })} placeholder="0.00" />
-              {errorsPago.monto && <span className="cm-error-msg">{errorsPago.monto}</span>}
+              <input
+                type="number"
+                className="cm-input-money"
+                value={formPago.monto || ""}
+                onChange={(e) =>
+                  setFormPago({ ...formPago, monto: parseFloat(e.target.value) || 0 })
+                }
+                placeholder="0.00"
+              />
+              {errorsPago.monto && (
+                <span className="cm-error-msg">{errorsPago.monto}</span>
+              )}
             </div>
             <div className="cm-info-box">
               <p>Este pago se aplicará al saldo global.</p>
             </div>
-            <button type="submit" className="cm-btn cm-btn-success" disabled={loading}>{loading ? "..." : "Procesar Pago"}</button>
+            <button type="submit" className="cm-btn cm-btn-success" disabled={loading}>
+              {loading ? "..." : "Procesar Pago"}
+            </button>
           </form>
         </div>
       </div>
 
+      {/* ── Historial ── */}
       <div className="cm-card cm-bottom-section">
         <div className="cm-table-header">
           <h3>Historial ({totalCargos})</h3>
           <div className="cm-search-box">
-            <input type="text" placeholder="🔍 Buscar..." value={busquedaTabla} onChange={(e) => setBusquedaTabla(e.target.value)} />
+            <input
+              type="text"
+              placeholder="🔍 Buscar..."
+              value={busquedaTabla}
+              onChange={(e) => setBusquedaTabla(e.target.value)}
+            />
           </div>
         </div>
         <div className="cm-table-responsive">
           <table>
             <thead>
-              <tr><th>Cliente</th><th>Concepto</th><th>Fecha</th><th>Saldo</th><th>Estado</th></tr>
+              <tr>
+                <th>Cliente</th>
+                <th>Concepto</th>
+                <th>Fecha</th>
+                <th>Saldo</th>
+                <th>Estado</th>
+              </tr>
             </thead>
             <tbody>
               {listaCargos.map((item) => (
                 <tr key={item.id_cargo}>
                   <td>{item.cuentahabiente_nombre}</td>
-                  <td><span className="cm-badge">{item.tipo_cargo_detalle?.nombre || "N/A"}</span></td>
+                  <td>
+                    <span className="cm-badge">
+                      {item.tipo_cargo_detalle?.nombre || "N/A"}
+                    </span>
+                  </td>
                   <td>{item.fecha_cargo}</td>
-                  <td style={{ color: parseFloat(item.saldo_restante_cargo) > 0 ? "#e74c3c" : "#27ae60", fontWeight: "bold" }}>
+                  <td
+                    style={{
+                      color: parseFloat(item.saldo_restante_cargo) > 0 ? "#e74c3c" : "#27ae60",
+                      fontWeight: "bold",
+                    }}
+                  >
                     ${parseFloat(item.saldo_restante_cargo).toFixed(2)}
                   </td>
                   <td>{item.activo ? "Activo" : "Inactivo"}</td>
@@ -275,9 +515,15 @@ const CargosManager = () => {
           </table>
         </div>
         <div className="cm-pagination">
-          <button className="cm-btn-pag" onClick={handlePrev} disabled={!prevPage || loading}>⬅ Ant.</button>
-          <span className="cm-pag-info">Mostrando {listaCargos.length} de {totalCargos}</span>
-          <button className="cm-btn-pag" onClick={handleNext} disabled={!nextPage || loading}>Sig. ➡</button>
+          <button className="cm-btn-pag" onClick={handlePrev} disabled={!prevPage || loading}>
+            ⬅ Ant.
+          </button>
+          <span className="cm-pag-info">
+            Mostrando {listaCargos.length} de {totalCargos}
+          </span>
+          <button className="cm-btn-pag" onClick={handleNext} disabled={!nextPage || loading}>
+            Sig. ➡
+          </button>
         </div>
       </div>
     </div>
