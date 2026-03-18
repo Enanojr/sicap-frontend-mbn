@@ -3975,3 +3975,142 @@ input[type="number"]::-webkit-inner-spin-button {
     gap: 5px;
   }
 }
+
+/* ─────────────────────────────────────────────────
+   Panel de Cargos Activos (dentro del form de Pago)
+   Añade estas reglas a tu styles.css existente
+───────────────────────────────────────────────── */
+
+.cm-cargos-activos-panel {
+  margin: 0 0 12px 0;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  background: #fffbeb;
+  overflow: hidden;
+  animation: fadeInPanel 0.2s ease;
+}
+
+@keyframes fadeInPanel {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.cm-cargos-loading {
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  color: #92400e;
+  margin: 0;
+}
+
+.cm-cargos-sin-deuda {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  color: #065f46;
+  background: #ecfdf5;
+  border: 1px solid #6ee7b7;
+  border-radius: 8px;
+}
+
+/* Título del panel */
+.cm-cargos-activos-titulo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #92400e;
+  background: #fef3c7;
+  border-bottom: 1px solid #fde68a;
+}
+
+.cm-cargos-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: #f59e0b;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+/* Lista de cargos */
+.cm-cargos-activos-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.cm-cargos-activos-lista::-webkit-scrollbar {
+  width: 4px;
+}
+.cm-cargos-activos-lista::-webkit-scrollbar-thumb {
+  background: #fcd34d;
+  border-radius: 4px;
+}
+
+.cm-cargo-activo-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 14px;
+  border-bottom: 1px solid #fde68a;
+  font-size: 0.82rem;
+  transition: background 0.15s;
+}
+
+.cm-cargo-activo-item:last-child {
+  border-bottom: none;
+}
+
+.cm-cargo-activo-item:hover {
+  background: #fef9e7;
+}
+
+.cm-cargo-activo-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cm-cargo-activo-fecha {
+  color: #9ca3af;
+  font-size: 0.75rem;
+}
+
+.cm-cargo-activo-saldo {
+  font-weight: 700;
+  color: #dc2626;
+  font-size: 0.88rem;
+}
+
+/* Fila de total */
+.cm-cargos-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: #fef3c7;
+  border-top: 1px solid #fde68a;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #78350f;
+}
+
+.cm-cargos-total-monto {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #b91c1c;
+}

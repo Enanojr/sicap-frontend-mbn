@@ -9,16 +9,16 @@ const URL_PAGAR = '/pagar-cargo/';
 export interface TipoCargoDetalle {
   id: number;
   nombre: string;
-  monto: string; // Viene como string "400.00" según la imagen
+  monto: string;
 }
 
 export interface CargoResponse {
   id_cargo: number;
-  cuentahabiente: number; 
+  cuentahabiente: number;
   cuentahabiente_nombre: string;
-  tipo_cargo: number; // El ID que mencionaste
-  tipo_cargo_detalle: TipoCargoDetalle; // El nuevo objeto detallado
-  monto_cargo: number; // Monto original (si el back lo envía)
+  tipo_cargo: number;
+  tipo_cargo_detalle: TipoCargoDetalle;
+  monto_cargo: number;
   saldo_restante_cargo: string;
   fecha_cargo: string;
   activo: boolean;
@@ -26,7 +26,7 @@ export interface CargoResponse {
 
 export interface CargoData {
   cuentahabiente: number | string;
-  tipo_cargo: number | string; // Enviamos el ID
+  tipo_cargo: number | string;
   monto_cargo: number;
   fecha_cargo: string;
 }
@@ -38,36 +38,28 @@ export interface PagoData {
 
 // --- FUNCIONES ---
 
-/**
- * Obtiene los cargos paginados y normaliza los datos.
- */
 export const getCargos = async (url?: string, search?: string) => {
   try {
     let endpoint = URL_CARGOS;
 
     if (url) {
-        endpoint = url;
+      endpoint = url;
     } else if (search) {
-        endpoint = `${URL_CARGOS}?search=${encodeURIComponent(search)}`;
+      endpoint = `${URL_CARGOS}?search=${encodeURIComponent(search)}`;
     }
 
     const response = await api.get(endpoint);
-    
-    // Normalización de datos:
-    // Extraemos los resultados tanto si vienen en 'results' (paginado) como si es array directo.
+
     const rawData = response.data.results || response.data;
-    
+
     const normalizedData = Array.isArray(rawData) ? rawData.map((cargo: any) => ({
-        ...cargo,
-        // Usamos el nombre del detalle para que la tabla muestre "Carnitas" en vez de "6"
-        tipo_cargo_nombre: cargo.tipo_cargo_detalle?.nombre || 'N/A',
-        // Aseguramos que el monto sea numérico para cálculos o formato
-        monto_cargo: cargo.monto_cargo || parseFloat(cargo.tipo_cargo_detalle?.monto || '0'),
+      ...cargo,
+      tipo_cargo_nombre: cargo.tipo_cargo_detalle?.nombre || 'N/A',
+      monto_cargo: cargo.monto_cargo || parseFloat(cargo.tipo_cargo_detalle?.monto || '0'),
     })) : [];
 
-    // Reconstruimos la respuesta manteniendo la estructura de paginación si existe
-    return { 
-      success: true, 
+    return {
+      success: true,
       data: response.data.results ? { ...response.data, results: normalizedData } : normalizedData
     };
 
@@ -77,12 +69,37 @@ export const getCargos = async (url?: string, search?: string) => {
   }
 };
 
+/**
+ * Obtiene los cargos activos (con saldo pendiente) de un cuentahabiente específico.
+ * Se usa en el formulario de pago para mostrar las deudas del usuario seleccionado.
+ */
+export const getCargosByUser = async (cuentahabienteId: number | string): Promise<CargoResponse[]> => {
+  try {
+    // Filtramos por cuentahabiente y solo cargos activos directamente en el endpoint
+    const endpoint = `${URL_CARGOS}?cuentahabiente=${cuentahabienteId}&activo=true`;
+    const response = await api.get(endpoint);
+
+    const rawData = response.data.results || response.data;
+
+    if (!Array.isArray(rawData)) return [];
+
+    // Filtramos también del lado del cliente por si el backend no soporta el filtro "activo"
+    // y nos aseguramos de que tengan saldo pendiente mayor a 0
+    return rawData.filter((cargo: CargoResponse) =>
+      cargo.activo && parseFloat(cargo.saldo_restante_cargo) > 0
+    );
+
+  } catch (error: any) {
+    console.error("Error en getCargosByUser:", error);
+    return [];
+  }
+};
+
 export const registrarCargo = async (data: CargoData) => {
   try {
-    // Aseguramos que tipo_cargo se envíe como número si es necesario
     const payload = {
-        ...data,
-        tipo_cargo: Number(data.tipo_cargo)
+      ...data,
+      tipo_cargo: Number(data.tipo_cargo)
     };
     const response = await api.post(URL_CARGOS, payload);
     return { success: true, data: response.data };

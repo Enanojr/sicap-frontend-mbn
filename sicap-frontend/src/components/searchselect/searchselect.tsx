@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-// Asegúrate de importar el CSS nuevo
-import '../../styles/styles.css'; 
+import '../../styles/styles.css';
 
 interface Option {
   value: string | number;
   label: string;
-  keywords?: string; 
+  keywords?: string;
 }
 
 interface SearchableSelectProps {
@@ -13,18 +12,30 @@ interface SearchableSelectProps {
   value: string | number;
   onChange: (value: string | number) => void;
   placeholder?: string;
+  onSearch?: (term: string) => void;
 }
 
-const SearchableSelect: React.FC<SearchableSelectProps> = ({ options, value, onChange, placeholder }) => {
+const SearchableSelect: React.FC<SearchableSelectProps> = ({
+  options,
+  value,
+  onChange,
+  placeholder,
+  onSearch,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  // Flag: true mientras el usuario está escribiendo activamente (modo búsqueda externa)
+  const isTypingRef = useRef(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
+  // Sincroniza el label cuando cambia el value seleccionado,
+  // pero NO interrumpe si el usuario está escribiendo en modo onSearch.
   useEffect(() => {
-    const selectedOption = options.find(opt => opt.value === value);
+    if (isTypingRef.current && onSearch) return; // no pisamos lo que escribe el usuario
+    const selectedOption = options.find(opt => String(opt.value) === String(value));
     if (selectedOption) {
       setSearchTerm(selectedOption.label);
-    } else {
+    } else if (!value) {
       setSearchTerm('');
     }
   }, [value, options]);
@@ -32,41 +43,58 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({ options, value, onC
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+        isTypingRef.current = false;
         setIsOpen(false);
-        const selectedOption = options.find(opt => opt.value === value);
+        const selectedOption = options.find(opt => String(opt.value) === String(value));
         setSearchTerm(selectedOption ? selectedOption.label : '');
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [value, options]);
 
-  const filteredOptions = options.filter(option => {
-    const term = searchTerm.toLowerCase();
-    const labelMatch = option.label.toLowerCase().includes(term);
-    const keywordMatch = option.keywords ? option.keywords.toLowerCase().includes(term) : false;
-    return labelMatch || keywordMatch;
-  });
+  // Filtrado local solo cuando NO hay búsqueda externa
+  const filteredOptions = onSearch
+    ? options
+    : options.filter(option => {
+        const term = searchTerm.toLowerCase();
+        return (
+          option.label.toLowerCase().includes(term) ||
+          (option.keywords ? option.keywords.toLowerCase().includes(term) : false)
+        );
+      });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const term = e.target.value;
+    isTypingRef.current = true; // marca que el usuario está escribiendo
+    setSearchTerm(term);
+    setIsOpen(true);
+    onSearch?.(term);
+  };
 
   const handleSelect = (option: Option) => {
+    isTypingRef.current = false; // ya no está buscando, seleccionó
     onChange(option.value);
     setSearchTerm(option.label);
     setIsOpen(false);
   };
 
+  const handleFocus = () => {
+    setIsOpen(true);
+    // Si tiene onSearch y no hay valor seleccionado, dispara búsqueda vacía
+    // para que el padre decida si mostrar algo o no
+    if (onSearch && !value) onSearch(searchTerm);
+  };
+
   return (
-    // CLASES ACTUALIZADAS CON PREFIJO 'cm-'
     <div className="cm-search-wrapper" ref={wrapperRef}>
       <input
         type="text"
         className="cm-input-select cm-search-input"
         placeholder={placeholder}
         value={searchTerm}
-        onChange={(e) => {
-          setSearchTerm(e.target.value);
-          setIsOpen(true);
-        }}
-        onFocus={() => setIsOpen(true)}
+        onChange={handleInputChange}
+        onFocus={handleFocus}
       />
       <span className="cm-search-arrow">▼</span>
 
@@ -77,7 +105,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({ options, value, onC
               <li
                 key={option.value}
                 onClick={() => handleSelect(option)}
-                className={option.value === value ? 'cm-selected' : ''}
+                className={String(option.value) === String(value) ? 'cm-selected' : ''}
               >
                 {option.label}
               </li>
