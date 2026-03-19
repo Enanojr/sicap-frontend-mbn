@@ -7,12 +7,13 @@ function Tesoreria_Cards() {
   const navigate = useNavigate();
 
   const handleEgresos = () => navigate("/egresos");
-  const handleCorte = () => navigate("tesoreria");
+  const handleCorte = () => navigate("/tesoreria");
 
   const cards = [
     {
       title: "Gestión de Egresos",
-      description: "Administra y registra los egresos.",
+      description:
+        "Administra, registra y consulta los egresos generados dentro del módulo de tesorería.",
       icon: BanknoteArrowUp,
       ctaText: "Registrar Egreso",
       gradientColors: ["#ff9800", "#f57c00"] as [string, string],
@@ -21,7 +22,8 @@ function Tesoreria_Cards() {
     },
     {
       title: "Corte de Caja",
-      description: "Consulta, genera y administra los cortes de caja",
+      description:
+        "Consulta, genera y da seguimiento a los cortes de caja del sistema.",
       icon: Archive,
       ctaText: "Gestionar Corte de Caja",
       gradientColors: ["#4caf50", "#388e3c"] as [string, string],
@@ -32,16 +34,15 @@ function Tesoreria_Cards() {
 
   return (
     <div className="admin-page-container">
-      {/* Header Section */}
       <div className="admin-header">
         <h1 className="admin-title">Módulo de Tesorería</h1>
         <p className="admin-subtitle">
-          Gestiona de forma eficiente los movimientos y operaciones del área de
-          tesorería.
+          Administra de forma eficiente los movimientos y procesos clave del
+          área de tesorería.
         </p>
       </div>
 
-      <div className="cards-grid">
+      <div className="cards-grid two-cards-grid">
         {cards.map((card, index) => (
           <WaterServiceCard
             key={index}
