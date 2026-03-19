@@ -4170,7 +4170,6 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 }
 
-<<<<<<< HEAD
 /* ─────────────────────────────────────────────────
    Panel de Cargos Activos (dentro del form de Pago)
    Añade estas reglas a tu styles.css existente
@@ -4309,7 +4308,6 @@ input[type="number"]::-webkit-inner-spin-button {
   font-weight: 700;
   color: #b91c1c;
 }
-=======
 .two-cards-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(280px, 420px));
@@ -4322,4 +4320,3 @@ input[type="number"]::-webkit-inner-spin-button {
     grid-template-columns: 1fr;
   }
 }
->>>>>>> dev-kirby
