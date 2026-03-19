@@ -26,6 +26,10 @@ import CorteCaja from "../pages/CorteCaja/CorteCaja";
 //Test
 
 import Tesoreria_Cards from "../pages/Home/Tesorero_Cards";
+import EgresosManager from "../pages/tesoreria/formulario_egresos";
+import HistoricoEgresos from "../pages/tesoreria/tabla_egresos";
+import HistoricoIngresos from "../pages/tesoreria/tabla_ingresos";
+import TesoreriaDashboard from "../pages/tesoreria/main_egresos";
 
 const Rutas = [
   // Ruta #1: Login (pública)
@@ -125,6 +129,22 @@ const Rutas = [
           {
             path: "/tesoreria",
             element: <Tesoreria_Cards />,
+          },
+          {
+            path: "/egresos",
+            element: <EgresosManager />,
+          },
+          {
+            path: "/tabla_egresos",
+            element: <HistoricoEgresos />,
+          },
+          {
+            path: "/tabla_ingresos",
+            element: <HistoricoIngresos />,
+          },
+          {
+            path: "/main_egresos",
+            element: <TesoreriaDashboard />,
           },
         ],
       },
