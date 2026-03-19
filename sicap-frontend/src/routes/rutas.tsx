@@ -23,6 +23,9 @@ import CargosManager from "../pages/cargos/cargos";
 import CargosPage from "../pages/Principal_Form_Table/cargospage";
 import CorteCaja from "../pages/CorteCaja/CorteCaja";
 
+//Test
+
+import Tesoreria_Cards from "../pages/Home/Tesorero_Cards";
 
 const Rutas = [
   // Ruta #1: Login (pública)
@@ -113,14 +116,16 @@ const Rutas = [
           },
           {
             path: "/tcargos",
-            element: (
-              <CargosPage/>
-            ),
+            element: <CargosPage />,
           },
           {
             path: "/corte-caja",
             element: <CorteCaja />,
-          }
+          },
+          {
+            path: "/tesoreria",
+            element: <Tesoreria_Cards />,
+          },
         ],
       },
     ],
