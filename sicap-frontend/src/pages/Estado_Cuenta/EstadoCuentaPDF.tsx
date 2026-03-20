@@ -34,6 +34,9 @@ const formatFechaLocal = (fecha: string) => {
   if (!fecha) return "—";
   const clean = fecha.includes("T") ? fecha.split("T")[0] : fecha;
   const [y, m, d] = clean.split("-").map(Number);
+
+  if (!y || !m || !d) return "—";
+
   const dt = new Date(y, m - 1, d);
   return dt.toLocaleDateString("es-MX", {
     day: "2-digit",
@@ -42,13 +45,14 @@ const formatFechaLocal = (fecha: string) => {
   });
 };
 
-const statusColor = (estatus: string) => {
-  const v = (estatus || "").trim().toLowerCase();
-  if (v === "pagado") return "#16a34a";
-  if (v === "rezagado") return "#f59e0b";
-  if (v === "adeudo") return "#ef4444";
-  if (v === "corriente") return "#16a34a";
-  return "#64748b";
+const getLastPayment = (historico: EstadoCuentaPDFData["historico"]) => {
+  if (!historico?.length) return null;
+
+  return [...historico].sort((a, b) => {
+    const fa = new Date(a.fecha_pago).getTime();
+    const fb = new Date(b.fecha_pago).getTime();
+    return fa - fb;
+  })[historico.length - 1];
 };
 
 const getPdfTitle = (
@@ -56,23 +60,48 @@ const getPdfTitle = (
   historico: EstadoCuentaPDFData["historico"],
 ) => {
   const v = (estatus || "").trim().toLowerCase();
+  const last = getLastPayment(historico);
 
-  if (v === "pagado" && historico?.length) {
-    const last = historico[historico.length - 1];
-    return `Recibo de Pago ${last.anio}`;
+  if (v === "pagado" && last) {
+    return `Recibo y Estado de Cuenta`;
   }
-  return "Estado de Cuenta";
+
+  return "Recibo y Estado de Cuenta";
 };
 
-const getBrandYear = (data: EstadoCuentaPDFData) => {
-  const v = (data.estatus || "").trim().toLowerCase();
+const groupByYear = (historico: EstadoCuentaPDFData["historico"]) => {
+  const grouped: Record<
+    number,
+    Array<{
+      fecha_pago: string;
+      monto_recibido: number;
+      anio: number;
+    }>
+  > = {};
 
-  if (v === "pagado" && data.historico?.length) {
-    const last = data.historico[data.historico.length - 1];
-    return last.anio;
-  }
+  (historico || []).forEach((p) => {
+    const year = Number(p.anio);
+    if (!grouped[year]) {
+      grouped[year] = [];
+    }
+    grouped[year].push(p);
+  });
 
-  return new Date().getFullYear();
+  Object.keys(grouped).forEach((year) => {
+    grouped[Number(year)].sort((a, b) => {
+      return (
+        new Date(a.fecha_pago).getTime() - new Date(b.fecha_pago).getTime()
+      );
+    });
+  });
+
+  return Object.entries(grouped)
+    .map(([anio, pagos]) => ({
+      anio: Number(anio),
+      pagos,
+      total: pagos.reduce((sum, p) => sum + Number(p.monto_recibido || 0), 0),
+    }))
+    .sort((a, b) => a.anio - b.anio);
 };
 
 const styles = StyleSheet.create({
@@ -95,6 +124,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     opacity: 0.18,
   },
+
   watermarkImg: {
     width: 400,
     height: 400,
@@ -153,7 +183,10 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
 
-  label: { color: "#475569", fontSize: 9 },
+  label: {
+    color: "#475569",
+    fontSize: 9,
+  },
 
   value: {
     color: "#0f172a",
@@ -163,42 +196,12 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
 
-  cardsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 12,
-  },
-
-  card: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: "#dbe4f0",
-    borderRadius: 10,
-    padding: 10,
-    backgroundColor: "transparent",
-    marginRight: 8,
-  },
-
-  cardTitle: { color: "#475569", marginBottom: 6, fontSize: 9 },
-
-  cardBig: { fontSize: 12, fontWeight: 700, color: "#0f172a" },
-
-  statusPill: {
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 999,
-    color: "#ffffff",
-    fontSize: 9,
-    fontWeight: 700,
-    alignSelf: "flex-start",
-    opacity: 1,
-  },
-
-  sectionTitle: {
-    fontSize: 12,
+  yearTitle: {
+    fontSize: 11,
     fontWeight: 700,
     color: "#0b3a66",
-    marginBottom: 8,
+    marginTop: 10,
+    marginBottom: 6,
   },
 
   table: {
@@ -216,7 +219,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
 
-  th: { color: "#ffffff", fontWeight: 700, fontSize: 9 },
+  th: {
+    color: "#ffffff",
+    fontWeight: 700,
+    fontSize: 9,
+  },
 
   tr: {
     flexDirection: "row",
@@ -226,20 +233,46 @@ const styles = StyleSheet.create({
     borderTopColor: "#000000",
   },
 
-  td: { fontSize: 9, color: "#0f172a" },
+  td: {
+    fontSize: 9,
+    color: "#0f172a",
+  },
 
-  colFecha: { width: "55%" },
-  colMonto: { width: "25%", textAlign: "right" },
-  colAnio: { width: "20%", textAlign: "right" },
+  colFecha: {
+    width: "55%",
+  },
 
-  totalBox: {
-    marginTop: 10,
+  colMonto: {
+    width: "25%",
+    textAlign: "right",
+  },
+
+  colAnio: {
+    width: "20%",
+    textAlign: "right",
+  },
+
+  yearTotalBox: {
+    marginTop: 6,
+    marginBottom: 10,
     flexDirection: "row",
     justifyContent: "flex-end",
   },
 
-  totalText: {
-    fontSize: 10,
+  yearTotalText: {
+    fontSize: 9,
+    fontWeight: 700,
+    color: "#0f172a",
+  },
+
+  grandTotalBox: {
+    marginTop: 12,
+    flexDirection: "row",
+    justifyContent: "flex-end",
+  },
+
+  grandTotalText: {
+    fontSize: 11,
     fontWeight: 700,
     color: "#0f172a",
   },
@@ -266,13 +299,14 @@ export default function EstadoCuentaPDF({
 }: {
   data: EstadoCuentaPDFData;
 }) {
-  const totalHistorico = (data.historico || []).reduce(
-    (sum, p) => sum + Number(p.monto_recibido || 0),
+  const historicoAgrupado = groupByYear(data.historico || []);
+
+  const totalGeneral = historicoAgrupado.reduce(
+    (sum, grupo) => sum + grupo.total,
     0,
   );
 
   const footerDate = new Date().toLocaleDateString("es-MX");
-  const brandYear = getBrandYear(data);
 
   return (
     <Document>
@@ -287,8 +321,7 @@ export default function EstadoCuentaPDF({
               <Image src={Logo} style={styles.logo} />
             </View>
             <Text style={styles.brandText}>
-              COMISIÓN DE AGUA{"\n"}GUADALUPE HIDALGO,{"\n"}ACUAMANALA, TLAX.{" "}
-              {brandYear}
+              COMISIÓN DE AGUA{"\n"}GUADALUPE HIDALGO,{"\n"}ACUAMANALA, TLAX.
             </Text>
           </View>
 
@@ -310,63 +343,60 @@ export default function EstadoCuentaPDF({
             <View style={styles.infoRow}>
               <Text style={styles.label}>Dirección</Text>
               <Text style={styles.value}>
-                {data.direccion}, Guadalupe Hidalgo, {"\n"} Acuamanala, Tlax.
+                {data.direccion}, Guadalupe Hidalgo, {"\n"}Acuamanala, Tlax.
                 C.P. 90860
               </Text>
             </View>
           </View>
         </View>
 
-        <View style={styles.cardsRow}>
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Estatus</Text>
-            <Text
-              style={[
-                styles.statusPill,
-                { backgroundColor: statusColor(data.estatus) },
-              ]}
-            >
-              {(data.estatus || "—").toUpperCase()}
-            </Text>
-          </View>
+        {historicoAgrupado.length ? (
+          historicoAgrupado.map((grupo) => (
+            <View key={grupo.anio}>
+              <Text style={styles.yearTitle}>
+                Histórico de pagos {grupo.anio}
+              </Text>
 
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Saldo pendiente</Text>
-            <Text style={styles.cardBig}>{money(data.saldo_pendiente)}</Text>
-          </View>
-        </View>
+              <View style={styles.table}>
+                <View style={styles.thead}>
+                  <Text style={[styles.th, styles.colFecha]}>
+                    Fecha de pago
+                  </Text>
+                  <Text style={[styles.th, styles.colMonto]}>Monto</Text>
+                  <Text style={[styles.th, styles.colAnio]}>Año</Text>
+                </View>
 
-        <Text style={styles.sectionTitle}>Histórico de pagos</Text>
-
-        <View style={styles.table}>
-          <View style={styles.thead}>
-            <Text style={[styles.th, styles.colFecha]}>Fecha de pago</Text>
-            <Text style={[styles.th, styles.colMonto]}>Monto</Text>
-            <Text style={[styles.th, styles.colAnio]}>Año</Text>
-          </View>
-
-          {data.historico?.length ? (
-            data.historico.map((p, idx) => (
-              <View key={idx} style={styles.tr}>
-                <Text style={[styles.td, styles.colFecha]}>
-                  {formatFechaLocal(p.fecha_pago)}
-                </Text>
-                <Text style={[styles.td, styles.colMonto]}>
-                  {money(p.monto_recibido)}
-                </Text>
-                <Text style={[styles.td, styles.colAnio]}>{p.anio}</Text>
+                {grupo.pagos.map((p, idx) => (
+                  <View key={idx} style={styles.tr}>
+                    <Text style={[styles.td, styles.colFecha]}>
+                      {formatFechaLocal(p.fecha_pago)}
+                    </Text>
+                    <Text style={[styles.td, styles.colMonto]}>
+                      {money(p.monto_recibido)}
+                    </Text>
+                    <Text style={[styles.td, styles.colAnio]}>{p.anio}</Text>
+                  </View>
+                ))}
               </View>
-            ))
-          ) : (
+
+              <View style={styles.yearTotalBox}>
+                <Text style={styles.yearTotalText}>
+                  Total {grupo.anio}: {money(grupo.total)}
+                </Text>
+              </View>
+            </View>
+          ))
+        ) : (
+          <View style={styles.table}>
             <View style={styles.tr}>
               <Text style={styles.td}>Sin pagos registrados</Text>
             </View>
-          )}
-        </View>
+          </View>
+        )}
 
-        <View style={styles.totalBox}>
-          <Text style={styles.totalText}>
-            Total recaudado: {money(totalHistorico)}
+        <View style={styles.grandTotalBox}>
+          <Text style={styles.grandTotalText}>
+            Total general de todos los años: {money(totalGeneral)}
           </Text>
         </View>
 
