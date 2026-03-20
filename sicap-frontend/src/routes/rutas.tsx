@@ -22,6 +22,8 @@ import CierreAnual from "../pages/cierre_anual/cierreanual";
 import CargosManager from "../pages/cargos/cargos";
 import CargosPage from "../pages/Principal_Form_Table/cargospage";
 import CorteCaja from "../pages/CorteCaja/CorteCaja";
+import CorteJunior from "../pages/CorteJunior/CorteJunior";
+import CorteSenior from "../pages/CorteSenior/CorteSenior";
 
 //Test
 
@@ -125,6 +127,14 @@ const Rutas = [
           {
             path: "/tesoreria",
             element: <Tesoreria_Cards />,
+          },
+          {
+            path: "/corte-junior",
+            element: <CorteJunior />,
+          },
+          {
+            path: "/corte-senior",
+            element: <CorteSenior />,
           },
         ],
       },

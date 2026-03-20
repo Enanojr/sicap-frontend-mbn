@@ -23,8 +23,31 @@ import Swal from "sweetalert2";
 import "../../styles/styles.css";
 
 // ────────────────────────────────────────────────────────────
+// Trae TODOS los cargos recorriendo la paginación.
+// Cargos activos son muchos menos que cuentahabientes,
+// así que las páginas son pocas y no satura el servidor.
+// ────────────────────────────────────────────────────────────
+const getTodosLosCargosActivos = async (): Promise<CargoResponse[]> => {
+  const todos: CargoResponse[] = [];
+  // Filtramos activos directo en el endpoint para reducir páginas
+  let nextUrl: string | null = "/cargos/?activo=true";
+
+  while (nextUrl) {
+    const res = await getCargos(nextUrl);
+    if (!res.success || !res.data) break;
+
+    const pagina: CargoResponse[] = res.data.results || res.data;
+    // Guardamos solo los que tienen saldo pendiente
+    todos.push(...pagina.filter((c) => parseFloat(c.saldo_restante_cargo) > 0));
+
+    nextUrl = res.data.next || null;
+  }
+
+  return todos;
+};
+
+// ────────────────────────────────────────────────────────────
 // Hook: búsqueda lazy de cuentahabientes (Registrar Cargo)
-// Solo llama al backend cuando el usuario escribe, 1 página.
 // ────────────────────────────────────────────────────────────
 const useCuentahabientesSearch = () => {
   const [opciones, setOpciones] = useState<
@@ -67,7 +90,6 @@ const useCuentahabientesSearch = () => {
     if (encontrado) setSeleccionado(encontrado);
   };
 
-  // Siempre incluye el seleccionado actual para que no pierda el label
   const opcionesFinales = seleccionado
     ? [
         seleccionado,
@@ -82,7 +104,8 @@ const useCuentahabientesSearch = () => {
 
 // ────────────────────────────────────────────────────────────
 // Hook: usuarios únicos con cargos activos (Realizar Pago)
-// Construye el label directo desde cargos — 0 llamadas extra.
+// Recorre TODAS las páginas de cargos activos — sin llamadas
+// extra por usuario, solo el endpoint de cargos.
 // ────────────────────────────────────────────────────────────
 const useUsuariosConCargosActivos = () => {
   const [opciones, setOpciones] = useState<
@@ -92,30 +115,25 @@ const useUsuariosConCargosActivos = () => {
 
   const cargar = async () => {
     setCargando(true);
-    const res = await getCargos(undefined, undefined);
-    if (res.success && res.data) {
-      const lista: CargoResponse[] = res.data.results || res.data;
 
-      // Deduplicar por cuentahabiente, solo activos con saldo > 0
-      const mapa = new Map<
-        number,
-        { value: number; label: string; keywords: string }
-      >();
-      lista
-        .filter((c) => c.activo && parseFloat(c.saldo_restante_cargo) > 0)
-        .forEach((c) => {
-          if (!mapa.has(c.cuentahabiente)) {
-            mapa.set(c.cuentahabiente, {
-              value: c.cuentahabiente,
-              // Usamos cuentahabiente_nombre que ya viene en el cargo — sin peticiones extra
-              label: c.cuentahabiente_nombre,
-              keywords: String(c.cuentahabiente),
-            });
-          }
+    const todosLosCargos = await getTodosLosCargosActivos();
+
+    // Deduplicar por cuentahabiente
+    const mapa = new Map<
+      number,
+      { value: number; label: string; keywords: string }
+    >();
+    todosLosCargos.forEach((c) => {
+      if (!mapa.has(c.cuentahabiente)) {
+        mapa.set(c.cuentahabiente, {
+          value: c.cuentahabiente,
+          label: c.cuentahabiente_nombre,
+          keywords: String(c.cuentahabiente),
         });
+      }
+    });
 
-      setOpciones(Array.from(mapa.values()));
-    }
+    setOpciones(Array.from(mapa.values()));
     setCargando(false);
   };
 
@@ -391,7 +409,7 @@ const CargosManager = () => {
                   setFormPago({ ...formPago, cuentahabiente_id: v });
                   setErrorsPago({});
                 }}
-                placeholder={cargandoPago ? "Cargando..." : "Buscar por nombre..."}
+                placeholder={cargandoPago ? "Cargando deudores..." : "Buscar por nombre..."}
               />
               {errorsPago.cuentahabiente_id && (
                 <span className="cm-error-msg">{errorsPago.cuentahabiente_id}</span>
@@ -502,7 +520,10 @@ const CargosManager = () => {
                   <td>{item.fecha_cargo}</td>
                   <td
                     style={{
-                      color: parseFloat(item.saldo_restante_cargo) > 0 ? "#e74c3c" : "#27ae60",
+                      color:
+                        parseFloat(item.saldo_restante_cargo) > 0
+                          ? "#e74c3c"
+                          : "#27ae60",
                       fontWeight: "bold",
                     }}
                   >
