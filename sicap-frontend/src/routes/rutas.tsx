@@ -30,6 +30,7 @@ import EgresosManager from "../pages/tesoreria/formulario_egresos";
 import HistoricoEgresos from "../pages/tesoreria/tabla_egresos";
 import HistoricoIngresos from "../pages/tesoreria/tabla_ingresos";
 import TesoreriaDashboard from "../pages/tesoreria/main_egresos";
+import Grupos from "../pages/grupos/grupo";
 
 const Rutas = [
   // Ruta #1: Login (pública)
@@ -145,6 +146,10 @@ const Rutas = [
           {
             path: "/main_egresos",
             element: <TesoreriaDashboard />,
+          },
+          {
+            path: "/grupos",
+            element: <Grupos />,
           },
         ],
       },

@@ -12,6 +12,7 @@ import {
   Settings,
   //TrendingUp,
   //Users,
+  UsersRound,
 } from "lucide-react";
 
 // Componente para las tarjetas de estadísticas
@@ -51,6 +52,7 @@ function Admin_Cards() {
   const handleServicios = () => navigate("/Servicios");
   const handleCierreAnual = () => navigate("/cierreanual");
   const handleCargos = () => navigate("/tcargos");
+  const handleGrupos = () => navigate("/grupos");
 
   // Array de configuración de cards
   const cards = [
@@ -134,6 +136,15 @@ function Admin_Cards() {
       gradientColors: ["#a7a546", "#979639"] as [string, string],
       waterDropColor: "rgba(129, 118, 56, 0.6)",
       onClick: handleCierreAnual,
+    },
+    {
+      title: "Gestión de Grupos",
+      description: "Administra y organiza los grupos del sistema.",
+      icon: UsersRound,
+      ctaText: "Administrar Grupos",
+      gradientColors: ["#7b2cbf", "#5a189a"] as [string, string],
+      waterDropColor: "rgba(123, 44, 191, 0.6)",
+      onClick: handleGrupos,
     },
   ];
 

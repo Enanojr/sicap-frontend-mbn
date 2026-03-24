@@ -274,11 +274,9 @@ const EgresosManager: React.FC = () => {
 
   return (
     <div className="cm-container">
-      <h2 className="cm-page-title">Registro de Egresos</h2>
-
       <div className="cm-top-section cm-top-section-egreso">
         <div className="cm-card cm-form-card cm-egreso-mode cm-egreso-wide">
-          <h3>Registrar Egreso</h3>
+          <h3>Registrar Egresos</h3>
 
           <form onSubmit={handleSubmitEgreso}>
             <div className="cm-form-row">
