@@ -1,14 +1,11 @@
 import { registerUser } from "../../services/Rcobradores.service";
 import Swal from "sweetalert2";
-import { User, Mail, Lock, UserPlus } from "lucide-react";
+import { User, Mail, Lock, UserPlus, Users } from "lucide-react";
 
-// Importa los componentes y tipos del formulario reutilizable
 import FormularioReutilizable from "../../components/forms/form";
 import type { FormConfig } from "../../components/forms/form";
 
 export default function RegisterCobrador() {
-  // --- Configuración del Formulario ---
-
   const formConfig: FormConfig = {
     title: "Registro de Cobradores",
     fields: [
@@ -45,7 +42,7 @@ export default function RegisterCobrador() {
         placeholder: "correo@ejemplo.com",
         validation: (
           value: string | number,
-          _allData?: Record<string, any>
+          _allData?: Record<string, any>,
         ) => {
           const strValue = String(value);
           if (!strValue.trim()) {
@@ -108,9 +105,22 @@ export default function RegisterCobrador() {
           return null;
         },
       },
+      {
+        name: "equipo",
+        label: "Selecciona tu equipo",
+        type: "select",
+        icon: Users,
+        required: false,
+        defaultValue: "",
+        options: [
+          { value: "", label: "Seleccione un equipo (opcional)" },
+          { value: "equipo_1", label: "Equipo 1" },
+          { value: "equipo_2", label: "Equipo 2" },
+          { value: "equipo_3", label: "Equipo 3" },
+        ],
+      },
     ],
 
-    // --- Lógica de Envío ---
     onSubmit: async (data) => {
       try {
         const result = await registerUser(data as any);
@@ -125,7 +135,6 @@ export default function RegisterCobrador() {
             timerProgressBar: true,
           });
         } else {
-          // Manejar errores específicos del servidor
           let errorMessage = "Error al registrar usuario";
           if (result.errors) {
             if (typeof result.errors === "object") {
@@ -164,7 +173,6 @@ export default function RegisterCobrador() {
       }
     },
 
-    // --- Configuración de Botones ---
     submitButtonText: "Registrar Usuario",
     resetButtonText: "Limpiar Formulario",
     showResetButton: true,

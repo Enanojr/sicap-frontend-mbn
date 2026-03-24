@@ -22,6 +22,7 @@ import CierreAnual from "../pages/cierre_anual/cierreanual";
 import CargosManager from "../pages/cargos/cargos";
 import CargosPage from "../pages/Principal_Form_Table/cargospage";
 import CorteCaja from "../pages/CorteCaja/CorteCaja";
+import CallesPage from "../pages/Principal_Form_Table/callespage";
 
 //Test
 
@@ -150,6 +151,10 @@ const Rutas = [
           {
             path: "/grupos",
             element: <Grupos />,
+          },
+          {
+            path: "/calles",
+            element: <CallesPage />,
           },
         ],
       },
