@@ -1,6 +1,6 @@
 import { registerUser } from "../../services/Rcobradores.service";
 import Swal from "sweetalert2";
-import { User, Mail, Lock, UserPlus, Users } from "lucide-react";
+import { User, Mail, Lock, UserPlus } from "lucide-react";
 
 import FormularioReutilizable from "../../components/forms/form";
 import type { FormConfig } from "../../components/forms/form";
@@ -104,20 +104,6 @@ export default function RegisterCobrador() {
           }
           return null;
         },
-      },
-      {
-        name: "equipo",
-        label: "Selecciona tu equipo",
-        type: "select",
-        icon: Users,
-        required: false,
-        defaultValue: "",
-        options: [
-          { value: "", label: "Seleccione un equipo (opcional)" },
-          { value: "equipo_1", label: "Equipo 1" },
-          { value: "equipo_2", label: "Equipo 2" },
-          { value: "equipo_3", label: "Equipo 3" },
-        ],
       },
     ],
 
