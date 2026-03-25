@@ -2,34 +2,39 @@ import api from "../api_axios";
 
 const API_URL = "/equipos/";
 
+export interface CalleDetalle {
+  id_calle: number;
+  nombre_calle: string;
+}
+
+export interface CobradorGrupo {
+  id_cobrador: number;
+  nombre?: string;
+  apellidos?: string;
+  nombre_completo?: string;
+  telefono?: string;
+  fecha_ingreso?: string | null;
+}
+
 export interface GrupoResponse {
   id_equipo: number;
   nombre_equipo: string;
+  calle: number;
+  calle_detalle?: CalleDetalle;
   fecha_asignacion: string;
   fecha_termino?: string | null;
   activo?: boolean | string | number;
-  id_calle: number;
-  id_cobrador: number;
-
-  calle?: {
-    id_calle: number;
-    nombre_calle: string;
-  };
-
-  cobrador?: {
-    id_cobrador: number;
-    nombre?: string;
-    nombre_completo?: string;
-  };
+  cobradores?: CobradorGrupo[];
 }
 
 export interface GrupoPayload {
   nombre_equipo: string;
+  calle: number;
   fecha_asignacion: string;
   fecha_termino?: string | null;
   activo?: boolean;
-  id_calle: number;
-  id_cobrador: number;
+  cobradores_ids: number[];
+  fecha_ingreso_cobradores: string;
 }
 
 export interface ApiResult<T> {
