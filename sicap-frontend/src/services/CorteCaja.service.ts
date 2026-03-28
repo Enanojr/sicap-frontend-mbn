@@ -1,21 +1,20 @@
-import api from "../api_axios"; // Ajusta la ruta según tu estructura
+import api from "../api_axios";
 
-const API_URL = "/api/corte/generar/"; // Ajusta a tu endpoint real
+const API_URL = "/api/corte/generar/";
 
 // --- Interfaces ---
 
-// 1. Lo que enviamos (Solo fechas)
 export interface CorteCajaRequest {
-  fecha_inicio: string; // YYYY-MM-DD
-  fecha_fin: string;    // YYYY-MM-DD
+  fecha_inicio: string;
+  fecha_fin: string;
+  cobrador_id: number; // <-- NUEVO
 }
 
-// 2. Lo que recibimos (Respuesta del SQL)
 export interface Movimiento {
-  fecha_pago: string;      // Debe coincidir con el JSON
-  usuario: string;         // Ojo: en minúscula, como llega en tu captura
-  monto_recibido: number;  // Ojo: es monto_recibido, no "monto"
-  cobrador: string;        // Agregamos el cobrador
+  fecha_pago: string;
+  usuario: string;
+  monto_recibido: number;
+  cobrador: string;
   tipo: "Pago" | "Cargo";
 }
 
@@ -35,17 +34,13 @@ export interface CorteCajaResponse {
   movimientos: Movimiento[];
 }
 
-/**
- * Obtiene el token desde localStorage
- */
 const getAdminToken = (): string | null => {
   return localStorage.getItem("access");
 };
 
 /**
- * Genera el corte de caja enviando solo el rango de fechas.
- * El backend infiere el cobrador_id desde el token.
- * @param corteData - Objeto con fecha_inicio y fecha_fin
+ * Genera el corte de caja enviando el rango de fechas y el cobrador seleccionado.
+ * @param corteData - Objeto con fecha_inicio, fecha_fin y cobrador_id
  */
 export const generarCorteCaja = async (corteData: CorteCajaRequest) => {
   try {
@@ -60,9 +55,10 @@ export const generarCorteCaja = async (corteData: CorteCajaRequest) => {
       };
     }
 
-    const response = await api.post(`${API_URL}`, {
+    const response = await api.post(API_URL, {
       fecha_inicio: corteData.fecha_inicio,
-      fecha_fin: corteData.fecha_fin
+      fecha_fin: corteData.fecha_fin,
+      cobrador_id: corteData.cobrador_id, // <-- NUEVO
     }, {
       headers: {
         Authorization: `Bearer ${token}`,
