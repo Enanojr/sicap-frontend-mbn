@@ -18,7 +18,7 @@ const Navbar: React.FC = () => {
   const userRole = usuario?.role?.toLowerCase().trim();
 
   const canViewAdminPanel =
-    userRole === "admin" || userRole === "supervisor";
+    userRole === "admin" || userRole === "supervisor" || userRole === "tesorero_sr" || userRole === "tesorero_jr";
 
   // Efecto para cerrar el menú
   useEffect(() => {

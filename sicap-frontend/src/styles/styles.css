@@ -4158,6 +4158,69 @@ input[type="number"]::-webkit-inner-spin-button {
   width: 20px;
   height: 20px;
 }
+/* ── Selector de cobrador (dentro de corte-card) ── */
+
+.corte-cobradores-loading {
+  font-size: 0.85rem;
+  color: #999;
+  font-style: italic;
+  margin: 4px 0 0;
+}
+
+.corte-cobradores-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.corte-cobrador-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border: 2px solid #444;
+  border-radius: 40px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Poppins', Arial, sans-serif;
+  font-size: 0.82rem;
+  color: #ccc;
+}
+
+.corte-cobrador-chip:hover {
+  border-color: #1e6bb8;
+  color: #fff;
+}
+
+.corte-cobrador-chip.selected {
+  background: #1e6bb8;
+  border-color: #1e6bb8;
+  color: #fff;
+}
+
+.corte-cobrador-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.corte-cobrador-chip.selected .corte-cobrador-avatar {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.corte-cobrador-name {
+  white-space: nowrap;
+}
 
 @media (max-width: 600px) {
   .corte-summary-grid {
@@ -4331,25 +4394,16 @@ input[type="number"]::-webkit-inner-spin-button {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  max-width: 650px;
+  max-width: 900px;          /* antes: 600px */
   margin: 0 auto;
-  padding: 10px;
+  padding: 16px;
   font-family: "Poppins", Arial, sans-serif;
   color: #e0e0e0;
-}
-
-.cdc-Titulo-junior {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #58b2ee;
-  margin: 0;
-  text-align: center;
 }
 
 /* ── Tarjeta / sección ── */
 .cdc-card {
   background: #1a1d23;
-  border-top: 4px solid #27ae60;
   border-radius: 12px;
   padding: 24px;
   display: flex;
@@ -4371,7 +4425,12 @@ input[type="number"]::-webkit-inner-spin-button {
 .cdc-titulo {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #ffff;
+  color: #58b2ee;
+  margin: 0;
+  text-align: center;
+}
+.cdc-Titulo-junior {
+  color: #58b2ee;
   margin: 0;
   text-align: center;
 }
@@ -4414,6 +4473,8 @@ input[type="number"]::-webkit-inner-spin-button {
 
 .cdc-select-wrapper {
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .cdc-full-width {
@@ -4452,12 +4513,13 @@ input[type="number"]::-webkit-inner-spin-button {
 .cdc-select-arrow {
   position: absolute;
   right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #999;
-  font-size: 0.65rem;
+  bottom: 15px;        /* ancla al fondo del select, no al wrapper */
+  color: #fff;      /* acento del tema en vez de gris */
+  font-size: 0.6rem;
   pointer-events: none;
+  line-height: 1;
 }
+
 
 /* ── Tabla ── */
 .cdc-tabla-container {
@@ -4466,7 +4528,74 @@ input[type="number"]::-webkit-inner-spin-button {
   background-color: #1a1d23;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
+/* ── NUEVO: wrapper con scroll ── */
+.cdc-tabla-scroll {
+  max-height: 280px;   /* 5 filas × ~56px por fila con padding de 10px arriba y abajo */
+  overflow-y: auto;
+  overflow-x: hidden;
+}
 
+/* Cabecera fija al hacer scroll */
+.cdc-tabla-scroll thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: #1a1d23; /* mismo color que tu tema */
+}
+
+
+/* Scrollbar estilizado (opcional, WebKit) */
+.cdc-tabla-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.cdc-tabla-scroll::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+.cdc-tabla-scroll::-webkit-scrollbar-thumb {
+  background: #bdbdbd;
+  border-radius: 4px;
+}
+.cdc-tabla-scroll::-webkit-scrollbar-thumb:hover {
+  background: #9e9e9e;
+}
+
+/* Fila de total — siempre visible fuera del scroll */
+.cdc-total-row {
+  background: #2b2e35;
+  padding: 10px 14px;
+  text-align: right;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #ffffff;
+  border-top: 1px solid #3b3f47;
+}
+
+/* Info de carga */
+.cdc-info {
+  color: #999;
+  font-size: 0.9rem;
+  padding: 8px 0;
+}
+
+/* Badges de validación */
+.cdc-badge-ok {
+  background-color: #e6f4ea;
+  color: #2e7d32;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.cdc-badge-pendiente {
+  background-color: #fff8e1;
+  color: #f57f17;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
 .cdc-tabla {
   width: 100%;
   border-collapse: collapse;
@@ -4759,4 +4888,197 @@ input[type="number"]::-webkit-inner-spin-button {
 .cdc-btn-confirmar:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+/* ── Mensaje de error ── */
+.cdc-error {
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid #ef4444;
+  color: #ef4444;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+/* ── Grid de resumen del corte ── */
+.cdc-resumen-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.cdc-resumen-item {
+  background: #2b2e35;
+  border: 1px solid #3b3f47;
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cdc-resumen-total {
+  grid-column: 1 / -1;
+  border-color: #58b2ee;
+  background: rgba(88, 178, 238, 0.08);
+}
+
+.cdc-resumen-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #999;
+  font-weight: 600;
+}
+
+.cdc-resumen-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #e0e0e0;
+}
+
+.cdc-resumen-total .cdc-resumen-value {
+  color: #58b2ee;
+  font-size: 1.1rem;
+}
+
+/* ── Botón generar deshabilitado ── */
+.cdc-btn-generar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ── Banner total de ingresos ── */
+.cdc-ingresos-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 10px;
+  padding: 14px 24px;
+  margin-bottom: 4px;
+}
+
+.cdc-ingresos-banner__label {
+  color: #58b2ee;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.cdc-ingresos-banner__valor {
+  color: #ffffff;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* ── Botón validado (deshabilitado) ── */
+.cdc-btn-validado {
+  background-color: rgba(74, 222, 128, 0.15);
+  color: #4ade80;
+  border: 1px solid #4ade80;
+  border-radius: 8px;              /* mismo que cdc-btn-validar */
+  padding: 6px 16px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: "Poppins", Arial, sans-serif;
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+.cdc-card-corte .cdc-tabla thead tr {
+  background: #2b2e35;
+  border-bottom: 2px solid #58b2ee;
+}
+
+.cdc-card-corte .cdc-tabla th {
+  color: #58b2ee;
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 12px 10px;
+  text-align: left;
+  white-space: nowrap;
+  background-color: #2b2e35;   /* sticky funciona con bg sólido */
+}
+
+.cdc-card-corte .cdc-tabla tbody tr {
+  border-bottom: 1px solid #2a2a2a;
+  transition: background 0.2s;
+}
+
+.cdc-card-corte .cdc-tabla tbody tr:nth-child(even) {
+  background-color: transparent;   /* quita el azul ajeno al tema */
+}
+
+.cdc-card-corte .cdc-tabla tbody tr:hover {
+  background: #2f3b7e;             /* mismo hover que tabla superior */
+  transition: background-color 0.15s ease;
+}
+
+.cdc-card-corte .cdc-tabla tbody td {
+  padding: 10px 10px;
+  color: #ccc;
+  font-size: 0.85rem;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+/* ── Scroll: fondo sticky igual al tema ── */
+.cdc-tabla-scroll thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: #2b2e35;   /* antes era #1a1d23, ahora igual al thead */
+}
+
+/* ── Scrollbar acorde al tema oscuro ── */
+.cdc-tabla-scroll::-webkit-scrollbar-track {
+  background: #2b2e35;         /* antes era #f1f1f1 (claro) */
+  border-radius: 4px;
+}
+
+.cdc-tabla-scroll::-webkit-scrollbar-thumb {
+  background: #3b3f47;         /* antes era #bdbdbd */
+  border-radius: 4px;
+}
+
+.cdc-tabla-scroll::-webkit-scrollbar-thumb:hover {
+  background: #58b2ee;         /* acento azul del tema */
+}
+
+/* ── Popup detalle más ancho ── */
+.cdc-popup--detalle {
+  max-width: 520px;
+}
+
+/* ── Botón Ver más ── */
+.cdc-btn-detalle {
+  background: transparent;
+  color: #58b2ee;
+  border: 1px solid #58b2ee;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  font-family: "Poppins", Arial, sans-serif;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.cdc-btn-detalle:hover {
+  background: #58b2ee;
+  color: #fff;
+}
+
+/* ── Fila estado validación en popup ── */
+.cdc-detalle-validacion {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
 }
