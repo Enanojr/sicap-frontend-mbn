@@ -14,6 +14,20 @@ interface TablaCallesProps {
   onEdit: (calle: CalleResponse) => void;
 }
 
+const isActivo = (value: unknown): boolean => {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value === 1;
+
+  if (typeof value === "string") {
+    const clean = value.trim().toLowerCase();
+    return (
+      clean === "true" || clean === "1" || clean === "si" || clean === "sí"
+    );
+  }
+
+  return false;
+};
+
 const TablaCalles: React.FC<TablaCallesProps> = ({ onEdit }) => {
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -22,21 +36,29 @@ const TablaCalles: React.FC<TablaCallesProps> = ({ onEdit }) => {
     {
       key: "activo",
       label: "Activo",
-      render: (item) => {
-        const activo =
-          item.activo === true ||
-          item.activo === 1 ||
-          item.activo === "1" ||
-          item.activo === "true";
+      render: (value: any, row?: CalleResponse) => {
+        const rawValue = row && typeof row === "object" ? row.activo : value;
 
-        return activo ? "Sí" : "No";
+        return isActivo(rawValue) ? "Sí" : "No";
       },
     },
   ];
 
   const fetchData = async (): Promise<CalleResponse[]> => {
     const result = await getCalles();
-    const data = (result.data as any).results || result.data;
+
+    if (!result.success) {
+      throw new Error(
+        result.errors?.general ||
+          JSON.stringify(result.errors) ||
+          "No se pudieron obtener las calles.",
+      );
+    }
+
+    const data = result.data?.results || result.data;
+
+    console.log("Calles recibidas:", data);
+
     return Array.isArray(data) ? data : [];
   };
 
@@ -57,19 +79,24 @@ const TablaCalles: React.FC<TablaCallesProps> = ({ onEdit }) => {
     const result = await deleteCalle(item.id_calle);
 
     if (result.success) {
-      Swal.fire({
+      await Swal.fire({
         icon: "success",
         title: "¡Calle eliminada!",
         timer: 2000,
+        showConfirmButton: false,
       });
+
       setRefreshKey((prev) => prev + 1);
       return true;
     }
 
-    Swal.fire({
+    await Swal.fire({
       icon: "error",
       title: "Error",
-      text: "No se pudo eliminar la calle.",
+      text:
+        result.errors?.general ||
+        JSON.stringify(result.errors) ||
+        "No se pudo eliminar la calle.",
     });
 
     return false;

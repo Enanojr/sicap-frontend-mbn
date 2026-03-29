@@ -5,13 +5,15 @@ import {
   ChevronRight,
   Plus,
   Pencil,
-  Trash2,
   Users,
-  MapPinned,
   ShieldCheck,
   CircleOff,
   CalendarRange,
   X,
+  UserPlus,
+  CheckCircle2,
+  AlertTriangle,
+  Lock,
 } from "lucide-react";
 import Swal from "sweetalert2";
 import "../../styles/styles.css";
@@ -20,7 +22,8 @@ import {
   getGrupos,
   createGrupo,
   updateGrupo,
-  deleteGrupo,
+  type GrupoResponse,
+  type GrupoPayload,
 } from "../../services/grupos.service";
 import { getCalles } from "../../services/calle.service";
 import { getCobradores } from "../../services/Rcobradores.service";
@@ -34,66 +37,39 @@ interface CalleResponse {
 interface CobradorResponse {
   id_cobrador: number;
   nombre?: string;
+  apellidos?: string;
   nombre_completo?: string;
+  telefono?: string;
   activo?: boolean | string | number;
-}
-
-interface GrupoResponse {
-  id_equipo: number;
-  nombre_equipo: string;
-  fecha_asignacion: string;
-  fecha_termino?: string | null;
-  activo?: boolean | string | number;
-  id_calle?: number | string;
-  id_cobrador?: number | string;
-  calle?: {
-    id_calle: number;
-    nombre_calle: string;
-  };
-  cobrador?: {
-    id_cobrador: number;
-    nombre?: string;
-    nombre_completo?: string;
-  };
-}
-
-interface GrupoPayload {
-  nombre_equipo: string;
-  fecha_asignacion: string;
-  fecha_termino: string | null;
-  activo: boolean;
-  id_calle: number;
-  id_cobrador: number;
 }
 
 interface FormState {
   nombre_equipo: string;
+  calle: string;
   fecha_asignacion: string;
   fecha_termino: string;
   activo: boolean;
-  id_calle: string;
-  id_cobrador: string;
+  cobradores_ids: string[];
+  fecha_ingreso_cobradores: string;
 }
 
 const initialForm: FormState = {
   nombre_equipo: "",
+  calle: "",
   fecha_asignacion: "",
   fecha_termino: "",
   activo: true,
-  id_calle: "",
-  id_cobrador: "",
+  cobradores_ids: [],
+  fecha_ingreso_cobradores: "",
 };
 
 const formatFechaLocal = (fechaString?: string | null): string => {
   if (!fechaString) return "—";
-
   const fechaLimpia = fechaString.includes("T")
     ? fechaString.split("T")[0]
     : fechaString;
-
   const [year, month, day] = fechaLimpia.split("-").map(Number);
   if (!year || !month || !day) return "—";
-
   const fecha = new Date(year, month - 1, day);
   return fecha.toLocaleDateString("es-MX", {
     day: "2-digit",
@@ -110,20 +86,15 @@ const normalizeDateInput = (fecha?: string | null): string => {
 const isActiveValue = (value: unknown): boolean => {
   if (typeof value === "boolean") return value;
   if (typeof value === "number") return value === 1;
-
   if (typeof value === "string") {
     const v = value.trim().toLowerCase();
     return ["1", "true", "activo", "activa", "sí", "si"].includes(v);
   }
-
   return false;
 };
 
 const getEstadoLabel = (grupo: GrupoResponse): string =>
   isActiveValue(grupo.activo) ? "Activo" : "Inactivo";
-
-const getStatusClass = (grupo: GrupoResponse): string =>
-  isActiveValue(grupo.activo) ? "status-current" : "status-danger";
 
 const getStatusStyle = (grupo: GrupoResponse): React.CSSProperties =>
   isActiveValue(grupo.activo)
@@ -160,24 +131,25 @@ const extractList = <T,>(data: any): T[] => {
 };
 
 const primaryGradient =
-  "linear-gradient(135deg, #7b2cbf 0%, #5a189a 55%, #3c096c 100%)";
+  "linear-gradient(135deg, #0ea5e9 0%, #2563eb 55%, #1d4ed8 100%)";
 
 const surfaceStyle: React.CSSProperties = {
-  background: "linear-gradient(180deg, #171a20 0%, #101319 100%)",
-  border: "1px solid rgba(255,255,255,0.06)",
-  boxShadow: "0 18px 40px rgba(0,0,0,0.28)",
-  borderRadius: "24px",
+  background: "linear-gradient(180deg, #0e141c 0%, #0a1017 100%)",
+  border: "1px solid rgba(255,255,255,0.07)",
+  boxShadow: "0 18px 40px rgba(0,0,0,0.32)",
+  borderRadius: "0px",
 };
 
 const softPanelStyle: React.CSSProperties = {
-  background: "rgba(255,255,255,0.03)",
-  border: "1px solid rgba(255,255,255,0.06)",
-  borderRadius: "18px",
+  background: "rgba(15, 21, 30, 0.96)",
+  border: "1px solid rgba(255,255,255,0.07)",
+  borderRadius: "0px",
   backdropFilter: "blur(8px)",
 };
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
+  boxSizing: "border-box",
   background: "#11141a",
   color: "#f5f5f5",
   border: "1px solid rgba(255,255,255,0.08)",
@@ -199,7 +171,7 @@ const primaryButton: React.CSSProperties = {
   gap: "0.55rem",
   fontWeight: 700,
   cursor: "pointer",
-  boxShadow: "0 16px 28px rgba(123, 44, 191, 0.28)",
+  boxShadow: "0 16px 28px rgba(37, 99, 235, 0.28)",
 };
 
 const secondaryButton: React.CSSProperties = {
@@ -220,13 +192,21 @@ const smallIconButtonBase: React.CSSProperties = {
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
-  gap: "0.45rem",
-  borderRadius: "12px",
-  padding: "0.62rem 0.85rem",
-  fontSize: "0.86rem",
-  fontWeight: 700,
+  borderRadius: "10px",
+  padding: "0.55rem",
   cursor: "pointer",
   transition: "all 0.2s ease",
+};
+
+const policyNoticeStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "flex-start",
+  gap: "0.8rem",
+  padding: "0.95rem 1rem",
+  borderRadius: "16px",
+  background: "rgba(250, 204, 21, 0.08)",
+  border: "1px solid rgba(250, 204, 21, 0.18)",
+  color: "#fde68a",
 };
 
 const GruposTable: React.FC = () => {
@@ -236,9 +216,13 @@ const GruposTable: React.FC = () => {
 
   const [loading, setLoading] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
+  const [savingMembers, setSavingMembers] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [formCobradorSearch, setFormCobradorSearch] = useState<string>("");
+  const [membersCobradorSearch, setMembersCobradorSearch] =
+    useState<string>("");
 
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 10;
@@ -246,6 +230,14 @@ const GruposTable: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [editingGrupo, setEditingGrupo] = useState<GrupoResponse | null>(null);
   const [formData, setFormData] = useState<FormState>(initialForm);
+
+  const [isMembersModalOpen, setIsMembersModalOpen] = useState<boolean>(false);
+  const [selectedGrupo, setSelectedGrupo] = useState<GrupoResponse | null>(
+    null,
+  );
+  const [membersSelection, setMembersSelection] = useState<string[]>([]);
+  const [existingMembersIds, setExistingMembersIds] = useState<string[]>([]);
+  const [membersFechaIngreso, setMembersFechaIngreso] = useState<string>("");
 
   useEffect(() => {
     loadData();
@@ -271,13 +263,11 @@ const GruposTable: React.FC = () => {
           gruposResult.errors?.general || "Error al obtener grupos.",
         );
       }
-
       if (!callesResult.success) {
         throw new Error(
           callesResult.errors?.general || "Error al obtener calles.",
         );
       }
-
       if (!cobradoresResult.success) {
         throw new Error(
           cobradoresResult.errors?.general || "Error al obtener cobradores.",
@@ -291,86 +281,92 @@ const GruposTable: React.FC = () => {
       const message =
         err?.message || "Ocurrió un error al cargar la información.";
       setError(message);
-
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: message,
-      });
+      Swal.fire({ icon: "error", title: "Error", text: message });
     } finally {
       setLoading(false);
     }
   };
 
   const resolveCalleId = (grupo: GrupoResponse): number | null => {
-    if (grupo.id_calle !== undefined && grupo.id_calle !== null) {
-      return Number(grupo.id_calle);
+    if (grupo.calle !== undefined && grupo.calle !== null) {
+      return Number(grupo.calle);
     }
-    if (grupo.calle?.id_calle) return Number(grupo.calle.id_calle);
-    return null;
-  };
-
-  const resolveCobradorId = (grupo: GrupoResponse): number | null => {
-    if (grupo.id_cobrador !== undefined && grupo.id_cobrador !== null) {
-      return Number(grupo.id_cobrador);
+    if (grupo.calle_detalle?.id_calle) {
+      return Number(grupo.calle_detalle.id_calle);
     }
-    if (grupo.cobrador?.id_cobrador) return Number(grupo.cobrador.id_cobrador);
     return null;
   };
 
   const resolveCalleNombre = (grupo: GrupoResponse): string => {
-    if (grupo.calle?.nombre_calle) return grupo.calle.nombre_calle;
-
+    if (grupo.calle_detalle?.nombre_calle) {
+      return grupo.calle_detalle.nombre_calle;
+    }
     const idCalle = resolveCalleId(grupo);
     const calle = calles.find((c) => Number(c.id_calle) === Number(idCalle));
-
     return calle?.nombre_calle || "Sin calle";
   };
 
-  const resolveCobradorNombre = (grupo: GrupoResponse): string => {
-    if (grupo.cobrador?.nombre_completo) return grupo.cobrador.nombre_completo;
-    if (grupo.cobrador?.nombre) return grupo.cobrador.nombre;
+  const getCobradorNombre = (cobrador: {
+    id_cobrador: number;
+    nombre?: string;
+    apellidos?: string;
+    nombre_completo?: string;
+  }): string =>
+    cobrador.nombre_completo ||
+    [cobrador.nombre, cobrador.apellidos].filter(Boolean).join(" ").trim() ||
+    `Cobrador ${cobrador.id_cobrador}`;
 
-    const idCobrador = resolveCobradorId(grupo);
-    const cobrador = cobradores.find(
-      (c) => Number(c.id_cobrador) === Number(idCobrador),
-    );
+  const getActiveMembers = (grupo: GrupoResponse) =>
+    (grupo.cobradores || []).filter((c) => {
+      const a = (c as any).activo;
+      if (a === undefined || a === null) return true;
+      return isActiveValue(a);
+    });
 
-    return (
-      cobrador?.nombre_completo || cobrador?.nombre || "Sin cobrador asignado"
-    );
+  const getUniqueFechasIngreso = (grupo: GrupoResponse): string[] => [
+    ...new Set(
+      getActiveMembers(grupo)
+        .map((c) =>
+          c.fecha_ingreso ? normalizeDateInput(c.fecha_ingreso) : "",
+        )
+        .filter(Boolean),
+    ),
+  ];
+
+  const resolveFechaIngresoCobradores = (grupo: GrupoResponse): string => {
+    const fechas = getUniqueFechasIngreso(grupo);
+    if (fechas.length === 0) return "—";
+    if (fechas.length === 1) return formatFechaLocal(fechas[0]);
+    return fechas.map((f) => formatFechaLocal(f)).join(", ");
   };
+
+  const getDefaultFechaIngresoForForm = (grupo: GrupoResponse): string =>
+    getUniqueFechasIngreso(grupo)[0] || "";
+
+  const getMembersCount = (grupo: GrupoResponse): number =>
+    getActiveMembers(grupo).length;
 
   const filteredGrupos = useMemo(() => {
     const term = searchTerm.toLowerCase().trim();
-
-    return grupos.filter((grupo) => {
-      const calleNombre = resolveCalleNombre(grupo).toLowerCase();
-      const cobradorNombre = resolveCobradorNombre(grupo).toLowerCase();
-      const estado = getEstadoLabel(grupo).toLowerCase();
-
-      return (
+    return grupos.filter(
+      (grupo) =>
         grupo.id_equipo.toString().includes(term) ||
         grupo.nombre_equipo.toLowerCase().includes(term) ||
-        calleNombre.includes(term) ||
-        cobradorNombre.includes(term) ||
-        estado.includes(term)
-      );
-    });
-  }, [grupos, searchTerm, calles, cobradores]);
+        resolveCalleNombre(grupo).toLowerCase().includes(term) ||
+        getEstadoLabel(grupo).toLowerCase().includes(term),
+    );
+  }, [grupos, searchTerm, calles]);
 
   const stats = useMemo(() => {
     const activos = grupos.filter((g) => isActiveValue(g.activo)).length;
-    const inactivos = grupos.length - activos;
-    const conCalle = grupos.filter(
-      (g) => resolveCalleNombre(g) !== "Sin calle",
-    ).length;
-
-    return { activos, inactivos, conCalle };
-  }, [grupos, calles, cobradores]);
+    return {
+      activos,
+      inactivos: grupos.length - activos,
+      miembros: grupos.reduce((acc, g) => acc + getMembersCount(g), 0),
+    };
+  }, [grupos]);
 
   const totalPages = Math.ceil(filteredGrupos.length / itemsPerPage);
-
   const currentRows = filteredGrupos.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
@@ -382,7 +378,6 @@ const GruposTable: React.FC = () => {
 
   const getPageNumbers = (): (number | string)[] => {
     const pages: (number | string)[] = [];
-
     if (totalPages <= 5) {
       for (let i = 1; i <= totalPages; i++) pages.push(i);
     } else if (currentPage <= 3) {
@@ -402,13 +397,13 @@ const GruposTable: React.FC = () => {
       pages.push("...");
       pages.push(totalPages);
     }
-
     return pages;
   };
 
   const openCreateModal = () => {
     setEditingGrupo(null);
     setFormData(initialForm);
+    setFormCobradorSearch("");
     setIsModalOpen(true);
   };
 
@@ -416,12 +411,14 @@ const GruposTable: React.FC = () => {
     setEditingGrupo(grupo);
     setFormData({
       nombre_equipo: grupo.nombre_equipo || "",
+      calle: resolveCalleId(grupo)?.toString() || "",
       fecha_asignacion: normalizeDateInput(grupo.fecha_asignacion),
       fecha_termino: normalizeDateInput(grupo.fecha_termino),
       activo: isActiveValue(grupo.activo),
-      id_calle: resolveCalleId(grupo)?.toString() || "",
-      id_cobrador: resolveCobradorId(grupo)?.toString() || "",
+      cobradores_ids: getActiveMembers(grupo).map((c) => String(c.id_cobrador)),
+      fecha_ingreso_cobradores: getDefaultFechaIngresoForForm(grupo),
     });
+    setFormCobradorSearch("");
     setIsModalOpen(true);
   };
 
@@ -429,13 +426,80 @@ const GruposTable: React.FC = () => {
     setIsModalOpen(false);
     setEditingGrupo(null);
     setFormData(initialForm);
+    setFormCobradorSearch("");
   };
+
+  const openMembersModal = (grupo: GrupoResponse) => {
+    const assignedIds = getActiveMembers(grupo).map((c) =>
+      String(c.id_cobrador),
+    );
+    setSelectedGrupo(grupo);
+    setExistingMembersIds(assignedIds);
+    setMembersSelection(assignedIds);
+    setMembersFechaIngreso(getDefaultFechaIngresoForForm(grupo));
+    setMembersCobradorSearch("");
+    setIsMembersModalOpen(true);
+  };
+
+  const closeMembersModal = () => {
+    setIsMembersModalOpen(false);
+    setSelectedGrupo(null);
+    setMembersSelection([]);
+    setExistingMembersIds([]);
+    setMembersFechaIngreso("");
+    setMembersCobradorSearch("");
+  };
+
+  const toggleCobradorSelection = (id: number, source: "form" | "members") => {
+    const idString = String(id);
+
+    if (source === "form") {
+      setFormData((prev) => ({
+        ...prev,
+        cobradores_ids: prev.cobradores_ids.includes(idString)
+          ? prev.cobradores_ids.filter((item) => item !== idString)
+          : [...prev.cobradores_ids, idString],
+      }));
+      return;
+    }
+
+    if (existingMembersIds.includes(idString)) {
+      Swal.fire({
+        icon: "info",
+        title: "Miembro bloqueado",
+        text: "Los cobradores ya asignados no pueden retirarse desde este módulo. Solo pueden desactivarse.",
+      });
+      return;
+    }
+
+    setMembersSelection((prev) =>
+      prev.includes(idString)
+        ? prev.filter((item) => item !== idString)
+        : [...prev, idString],
+    );
+  };
+
+  const filteredFormCobradores = useMemo(() => {
+    const term = formCobradorSearch.toLowerCase().trim();
+    if (!term) return cobradores;
+    return cobradores.filter((c) =>
+      getCobradorNombre(c).toLowerCase().includes(term),
+    );
+  }, [cobradores, formCobradorSearch]);
+
+  const filteredMembersCobradores = useMemo(() => {
+    const term = membersCobradorSearch.toLowerCase().trim();
+    if (!term) return cobradores;
+    return cobradores.filter((c) =>
+      getCobradorNombre(c).toLowerCase().includes(term),
+    );
+  }, [cobradores, membersCobradorSearch]);
 
   const validateForm = (): boolean => {
     if (!formData.nombre_equipo.trim()) {
       Swal.fire(
         "Campo requerido",
-        "Debe ingresar el nombre del grupo.",
+        "Debe ingresar el nombre del equipo.",
         "warning",
       );
       return false;
@@ -450,13 +514,26 @@ const GruposTable: React.FC = () => {
       return false;
     }
 
-    if (!formData.id_calle) {
+    if (!formData.calle) {
       Swal.fire("Campo requerido", "Debe seleccionar una calle.", "warning");
       return false;
     }
 
-    if (!formData.id_cobrador) {
-      Swal.fire("Campo requerido", "Debe seleccionar un cobrador.", "warning");
+    if (!editingGrupo && formData.cobradores_ids.length === 0) {
+      Swal.fire(
+        "Campo requerido",
+        "Debe seleccionar al menos un cobrador.",
+        "warning",
+      );
+      return false;
+    }
+
+    if (!editingGrupo && !formData.fecha_ingreso_cobradores) {
+      Swal.fire(
+        "Campo requerido",
+        "Debe ingresar la fecha de ingreso de los cobradores.",
+        "warning",
+      );
       return false;
     }
 
@@ -478,47 +555,44 @@ const GruposTable: React.FC = () => {
 
   const buildPayload = (): GrupoPayload => ({
     nombre_equipo: formData.nombre_equipo.trim(),
+    calle: Number(formData.calle),
     fecha_asignacion: formData.fecha_asignacion,
     fecha_termino: formData.fecha_termino || null,
     activo: formData.activo,
-    id_calle: Number(formData.id_calle),
-    id_cobrador: Number(formData.id_cobrador),
+    cobradores_ids: formData.cobradores_ids.map(Number),
+    fecha_ingreso_cobradores: formData.fecha_ingreso_cobradores,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validateForm()) return;
 
     try {
       setSaving(true);
-
       const payload = buildPayload();
 
       if (editingGrupo) {
         const result = await updateGrupo(editingGrupo.id_equipo, payload);
-
         if (!result.success) {
           throw new Error(
             result.errors?.general || "No fue posible actualizar el grupo.",
           );
         }
-
         Swal.fire(
           "Actualizado",
-          "El grupo fue actualizado correctamente.",
+          "El equipo fue actualizado correctamente.",
           "success",
         );
       } else {
         const result = await createGrupo(payload);
-
         if (!result.success) {
           throw new Error(
-            result.errors?.general || "No fue posible crear el grupo.",
+            result.errors?.general ||
+              JSON.stringify(result.errors) ||
+              "No fue posible crear el equipo.",
           );
         }
-
-        Swal.fire("Creado", "El grupo fue creado correctamente.", "success");
+        Swal.fire("Creado", "El equipo fue creado correctamente.", "success");
       }
 
       closeModal();
@@ -526,7 +600,7 @@ const GruposTable: React.FC = () => {
     } catch (err: any) {
       Swal.fire(
         "Error",
-        err?.message || "No fue posible guardar la información del grupo.",
+        err?.message || "No fue posible guardar la información del equipo.",
         "error",
       );
     } finally {
@@ -534,38 +608,126 @@ const GruposTable: React.FC = () => {
     }
   };
 
-  const handleDelete = async (grupo: GrupoResponse) => {
+  const handleSaveMembers = async () => {
+    if (!selectedGrupo) return;
+
+    if (membersSelection.length === 0) {
+      Swal.fire(
+        "Campo requerido",
+        "Debes seleccionar al menos un cobrador.",
+        "warning",
+      );
+      return;
+    }
+
+    if (!membersFechaIngreso) {
+      Swal.fire(
+        "Campo requerido",
+        "Debes ingresar la fecha de ingreso de los cobradores.",
+        "warning",
+      );
+      return;
+    }
+
+    const calleId = resolveCalleId(selectedGrupo);
+    if (!calleId) {
+      Swal.fire(
+        "Información incompleta",
+        "No se pudo identificar la calle del equipo.",
+        "warning",
+      );
+      return;
+    }
+
+    const payload: GrupoPayload = {
+      nombre_equipo: selectedGrupo.nombre_equipo.trim(),
+      calle: calleId,
+      fecha_asignacion: normalizeDateInput(selectedGrupo.fecha_asignacion),
+      fecha_termino: normalizeDateInput(selectedGrupo.fecha_termino) || null,
+      activo: isActiveValue(selectedGrupo.activo),
+      cobradores_ids: membersSelection.map(Number),
+      fecha_ingreso_cobradores: membersFechaIngreso,
+    };
+
+    try {
+      setSavingMembers(true);
+      const result = await updateGrupo(selectedGrupo.id_equipo, payload);
+
+      if (!result.success) {
+        throw new Error(
+          result.errors?.general || "No fue posible actualizar los cobradores.",
+        );
+      }
+
+      Swal.fire(
+        "Actualizado",
+        "Los cobradores del equipo fueron actualizados correctamente.",
+        "success",
+      );
+      closeMembersModal();
+      await loadData();
+    } catch (err: any) {
+      Swal.fire(
+        "Error",
+        err?.message || "No fue posible actualizar los cobradores del equipo.",
+        "error",
+      );
+    } finally {
+      setSavingMembers(false);
+    }
+  };
+
+  const handleToggleActivo = async (grupo: GrupoResponse) => {
+    const isActive = isActiveValue(grupo.activo);
+    const accion = isActive ? "desactivar" : "activar";
+
     const resultConfirm = await Swal.fire({
-      title: "¿Eliminar grupo?",
-      text: `Se eliminará el grupo "${grupo.nombre_equipo}".`,
+      title: `¿${isActive ? "Desactivar" : "Activar"} equipo?`,
+      text: `Se va a ${accion} el equipo "${grupo.nombre_equipo}". Los equipos no se eliminan del sistema.`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Sí, eliminar",
+      confirmButtonText: `Sí, ${accion}`,
       cancelButtonText: "Cancelar",
-      confirmButtonColor: "#d33",
+      confirmButtonColor: isActive ? "#d33" : "#16a34a",
     });
 
     if (!resultConfirm.isConfirmed) return;
 
     try {
-      const result = await deleteGrupo(grupo.id_equipo);
+      const calleId = resolveCalleId(grupo);
 
+      const payload: GrupoPayload = {
+        nombre_equipo: grupo.nombre_equipo.trim(),
+        calle: calleId!,
+        fecha_asignacion: normalizeDateInput(grupo.fecha_asignacion),
+        fecha_termino: normalizeDateInput(grupo.fecha_termino) || null,
+        activo: !isActive,
+        cobradores_ids: getActiveMembers(grupo).map((c) => c.id_cobrador),
+        fecha_ingreso_cobradores: getDefaultFechaIngresoForForm(grupo),
+      };
+
+      const result = await updateGrupo(grupo.id_equipo, payload);
       if (!result.success) {
         throw new Error(
-          result.errors?.general || "No fue posible eliminar el grupo.",
+          result.errors?.general || `No fue posible ${accion} el equipo.`,
         );
       }
 
+      setGrupos((prev) =>
+        prev.map((g) =>
+          g.id_equipo === grupo.id_equipo ? { ...g, activo: !isActive } : g,
+        ),
+      );
+
       Swal.fire(
-        "Eliminado",
-        "El grupo fue eliminado correctamente.",
+        isActive ? "Desactivado" : "Activado",
+        `El equipo fue ${isActive ? "desactivado" : "activado"} correctamente.`,
         "success",
       );
-      await loadData();
     } catch (err: any) {
       Swal.fire(
         "Error",
-        err?.message || "No fue posible eliminar el grupo.",
+        err?.message || `No fue posible ${accion} el equipo.`,
         "error",
       );
     }
@@ -574,26 +736,16 @@ const GruposTable: React.FC = () => {
   return (
     <div
       className="contracts-page-container"
-      style={{
-        padding: "1.25rem",
-        background:
-          "radial-gradient(circle at top right, rgba(123,44,191,0.18), transparent 25%), radial-gradient(circle at top left, rgba(14,165,233,0.12), transparent 18%)",
-      }}
+      style={{ padding: "1.25rem", background: "transparent" }}
     >
       <div
         className="contracts-card"
-        style={{
-          ...surfaceStyle,
-          padding: "1.35rem",
-          overflow: "hidden",
-        }}
+        style={{ ...surfaceStyle, padding: "1.35rem", overflow: "hidden" }}
       >
         <div
           style={{
             ...softPanelStyle,
             padding: "1.35rem",
-            background:
-              "linear-gradient(135deg, rgba(123,44,191,0.14), rgba(10,14,24,0.65) 62%)",
             marginBottom: "1.2rem",
           }}
         >
@@ -615,7 +767,7 @@ const GruposTable: React.FC = () => {
                   padding: "0.42rem 0.78rem",
                   borderRadius: "999px",
                   background: "rgba(255,255,255,0.06)",
-                  color: "#d8b4fe",
+                  color: "#93c5fd",
                   border: "1px solid rgba(255,255,255,0.08)",
                   fontSize: "0.8rem",
                   fontWeight: 700,
@@ -623,7 +775,7 @@ const GruposTable: React.FC = () => {
                 }}
               >
                 <Users size={15} />
-                Administración de grupos
+                Administración de equipos
               </div>
 
               <h2
@@ -636,7 +788,7 @@ const GruposTable: React.FC = () => {
                   letterSpacing: "-0.03em",
                 }}
               >
-                Gestión de Grupos
+                Gestión de Equipos
               </h2>
 
               <p
@@ -648,7 +800,7 @@ const GruposTable: React.FC = () => {
                   fontSize: "0.95rem",
                 }}
               >
-                Consulta, crea y administra los grupos registrados.
+                Consulta, crea y administra los equipos registrados.
               </p>
             </div>
 
@@ -657,9 +809,22 @@ const GruposTable: React.FC = () => {
               onClick={openCreateModal}
               style={primaryButton}
             >
-              <Plus size={18} />
-              Nuevo Grupo
+              <Plus size={18} /> Nuevo Equipo
             </button>
+          </div>
+
+          <div style={{ ...policyNoticeStyle, marginTop: "1rem" }}>
+            <AlertTriangle
+              size={18}
+              style={{ flexShrink: 0, marginTop: "2px" }}
+            />
+            <div style={{ lineHeight: 1.5, fontSize: "0.92rem" }}>
+              <strong>Política del módulo:</strong> los equipos y los cobradores
+              no se eliminan del sistema. Los equipos solo pueden activarse o
+              desactivarse. Los miembros ya asignados a un equipo no pueden
+              retirarse desde este módulo; si dejan de operar, deberán
+              desactivarse.
+            </div>
           </div>
 
           <div
@@ -675,8 +840,8 @@ const GruposTable: React.FC = () => {
                 label: "Total",
                 value: grupos.length,
                 icon: Users,
-                tone: "rgba(168,85,247,0.18)",
-                color: "#e9d5ff",
+                tone: "rgba(59,130,246,0.18)",
+                color: "#bfdbfe",
               },
               {
                 label: "Activos",
@@ -693,15 +858,14 @@ const GruposTable: React.FC = () => {
                 color: "#fecaca",
               },
               {
-                label: "Con calle asignada",
-                value: stats.conCalle,
-                icon: MapPinned,
+                label: "Miembros",
+                value: stats.miembros,
+                icon: UserPlus,
                 tone: "rgba(14,165,233,0.16)",
                 color: "#bae6fd",
               },
             ].map((item, index) => {
               const Icon = item.icon;
-
               return (
                 <div
                   key={index}
@@ -727,7 +891,6 @@ const GruposTable: React.FC = () => {
                   >
                     <Icon size={20} />
                   </div>
-
                   <div>
                     <div
                       style={{
@@ -770,13 +933,7 @@ const GruposTable: React.FC = () => {
               flexWrap: "wrap",
             }}
           >
-            <div
-              style={{
-                flex: 1,
-                minWidth: "260px",
-                position: "relative",
-              }}
-            >
+            <div style={{ flex: 1, minWidth: "260px", position: "relative" }}>
               <Search
                 size={18}
                 style={{
@@ -784,19 +941,15 @@ const GruposTable: React.FC = () => {
                   left: "14px",
                   top: "50%",
                   transform: "translateY(-50%)",
-                  color: "#8b5cf6",
+                  color: "#3b82f6",
                 }}
               />
-
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Buscar por ID, grupo, calle, cobrador o estado..."
-                style={{
-                  ...inputStyle,
-                  paddingLeft: "2.7rem",
-                }}
+                placeholder="Buscar por ID, equipo, calle o estado..."
+                style={{ ...inputStyle, paddingLeft: "2.7rem" }}
               />
             </div>
 
@@ -807,20 +960,20 @@ const GruposTable: React.FC = () => {
                 gap: "0.55rem",
                 padding: "0.78rem 1rem",
                 borderRadius: "14px",
-                background: "rgba(255,255,255,0.03)",
+                background: "rgba(10, 15, 22, 0.95)",
                 border: "1px solid rgba(255,255,255,0.06)",
                 color: "#d4d4d8",
                 fontSize: "0.9rem",
                 fontWeight: 600,
               }}
             >
-              <CalendarRange size={17} color="#c084fc" />
+              <CalendarRange size={17} color="#60a5fa" />
               Mostrando{" "}
               <span style={{ color: "#fff", fontWeight: 800 }}>
                 {currentRows.length}
               </span>{" "}
               de{" "}
-              <span style={{ color: "#c084fc", fontWeight: 800 }}>
+              <span style={{ color: "#60a5fa", fontWeight: 800 }}>
                 {filteredGrupos.length}
               </span>
             </div>
@@ -836,7 +989,7 @@ const GruposTable: React.FC = () => {
               color: "#d4d4d8",
             }}
           >
-            Cargando grupos...
+            Cargando equipos...
           </div>
         )}
 
@@ -862,41 +1015,38 @@ const GruposTable: React.FC = () => {
               style={{
                 ...softPanelStyle,
                 overflow: "hidden",
-                padding: "0.35rem",
+                padding: "0",
+                background: "#0b1118",
               }}
             >
-              <div style={{ overflowX: "auto" }}>
+              <div style={{ overflowX: "auto", background: "#0b1118" }}>
                 <table
                   className="contracts-table"
                   style={{
                     width: "100%",
-                    borderCollapse: "separate",
-                    borderSpacing: 0,
-                    minWidth: "1050px",
+                    borderCollapse: "collapse",
+                    minWidth: "900px",
+                    background: "#0b1118",
                   }}
                 >
                   <thead className="contracts-thead">
-                    <tr
-                      style={{
-                        background:
-                          "linear-gradient(180deg, rgba(123,44,191,0.14), rgba(255,255,255,0.03))",
-                      }}
-                    >
+                    <tr style={{ background: "rgba(12, 20, 30, 0.98)" }}>
                       {[
                         "ID",
-                        "Nombre del Grupo",
+                        "Nombre del Equipo",
                         "Fecha Asignación",
                         "Fecha Término",
+                        "Fecha Ingreso",
                         "Calle",
-                        "Cobrador",
                         "Estatus",
+                        "Miembros",
                         "Acciones",
                       ].map((header) => (
                         <th
                           key={header}
                           className="th"
                           style={{
-                            padding: "1rem 1rem",
+                            padding: "1rem",
                             textAlign: "left",
                             color: "#e5e7eb",
                             fontSize: "0.82rem",
@@ -919,8 +1069,8 @@ const GruposTable: React.FC = () => {
                         style={{
                           background:
                             index % 2 === 0
-                              ? "rgba(255,255,255,0.015)"
-                              : "rgba(255,255,255,0.03)",
+                              ? "rgba(18, 25, 35, 0.98)"
+                              : "rgba(14, 20, 29, 0.98)",
                         }}
                       >
                         <td
@@ -977,9 +1127,10 @@ const GruposTable: React.FC = () => {
                             padding: "1rem",
                             color: "#d4d4d8",
                             borderBottom: "1px solid rgba(255,255,255,0.05)",
+                            whiteSpace: "nowrap",
                           }}
                         >
-                          {resolveCalleNombre(grupo)}
+                          {resolveFechaIngresoCobradores(grupo)}
                         </td>
 
                         <td
@@ -990,7 +1141,7 @@ const GruposTable: React.FC = () => {
                             borderBottom: "1px solid rgba(255,255,255,0.05)",
                           }}
                         >
-                          {resolveCobradorNombre(grupo)}
+                          {resolveCalleNombre(grupo)}
                         </td>
 
                         <td
@@ -1000,12 +1151,31 @@ const GruposTable: React.FC = () => {
                             borderBottom: "1px solid rgba(255,255,255,0.05)",
                           }}
                         >
-                          <span
-                            className={`status-badge ${getStatusClass(grupo)}`}
-                            style={badgeStyle(grupo)}
-                          >
+                          <span style={badgeStyle(grupo)}>
                             {getEstadoLabel(grupo)}
                           </span>
+                        </td>
+
+                        <td
+                          className="td"
+                          style={{
+                            padding: "1rem",
+                            borderBottom: "1px solid rgba(255,255,255,0.05)",
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => openMembersModal(grupo)}
+                            title="Gestionar miembros"
+                            style={{
+                              ...smallIconButtonBase,
+                              background: "rgba(250,204,21,0.10)",
+                              color: "#fde68a",
+                              border: "1px solid rgba(250,204,21,0.20)",
+                            }}
+                          >
+                            <UserPlus size={16} />
+                          </button>
                         </td>
 
                         <td
@@ -1015,16 +1185,11 @@ const GruposTable: React.FC = () => {
                             borderBottom: "1px solid rgba(255,255,255,0.05)",
                           }}
                         >
-                          <div
-                            style={{
-                              display: "flex",
-                              gap: "0.55rem",
-                              flexWrap: "wrap",
-                            }}
-                          >
+                          <div style={{ display: "flex", gap: "0.45rem" }}>
                             <button
                               type="button"
                               onClick={() => openEditModal(grupo)}
+                              title="Editar"
                               style={{
                                 ...smallIconButtonBase,
                                 background: "rgba(56,189,248,0.10)",
@@ -1033,21 +1198,36 @@ const GruposTable: React.FC = () => {
                               }}
                             >
                               <Pencil size={15} />
-                              Editar
                             </button>
 
                             <button
                               type="button"
-                              onClick={() => handleDelete(grupo)}
+                              onClick={() => handleToggleActivo(grupo)}
+                              title={
+                                isActiveValue(grupo.activo)
+                                  ? "Desactivar"
+                                  : "Activar"
+                              }
                               style={{
                                 ...smallIconButtonBase,
-                                background: "rgba(239,68,68,0.10)",
-                                color: "#fca5a5",
-                                border: "1px solid rgba(239,68,68,0.22)",
+                                ...(isActiveValue(grupo.activo)
+                                  ? {
+                                      background: "rgba(239,68,68,0.10)",
+                                      color: "#fca5a5",
+                                      border: "1px solid rgba(239,68,68,0.22)",
+                                    }
+                                  : {
+                                      background: "rgba(34,197,94,0.10)",
+                                      color: "#bbf7d0",
+                                      border: "1px solid rgba(34,197,94,0.22)",
+                                    }),
                               }}
                             >
-                              <Trash2 size={15} />
-                              Eliminar
+                              {isActiveValue(grupo.activo) ? (
+                                <CircleOff size={15} />
+                              ) : (
+                                <ShieldCheck size={15} />
+                              )}
                             </button>
                           </div>
                         </td>
@@ -1064,9 +1244,10 @@ const GruposTable: React.FC = () => {
                     padding: "2rem 1rem",
                     textAlign: "center",
                     color: "#a1a1aa",
+                    background: "#0b1118",
                   }}
                 >
-                  No se encontraron grupos
+                  No se encontraron equipos
                 </div>
               )}
             </div>
@@ -1097,7 +1278,7 @@ const GruposTable: React.FC = () => {
                 {getPageNumbers().map((page, index) =>
                   typeof page === "number" ? (
                     <button
-                      key={index}
+                      key={`page-${page}`}
                       onClick={() => goToPage(page)}
                       style={{
                         minWidth: "44px",
@@ -1105,12 +1286,10 @@ const GruposTable: React.FC = () => {
                         borderRadius: "12px",
                         border:
                           currentPage === page
-                            ? "1px solid rgba(192,132,252,0.35)"
+                            ? "1px solid rgba(59,130,246,0.35)"
                             : "1px solid rgba(255,255,255,0.08)",
                         background:
-                          currentPage === page
-                            ? primaryGradient
-                            : "rgba(255,255,255,0.03)",
+                          currentPage === page ? primaryGradient : "#0f151d",
                         color: "#fff",
                         fontWeight: 700,
                         cursor: "pointer",
@@ -1120,7 +1299,7 @@ const GruposTable: React.FC = () => {
                     </button>
                   ) : (
                     <span
-                      key={index}
+                      key={`ellipsis-${index}`}
                       style={{
                         color: "#71717a",
                         padding: "0.8rem 0.4rem",
@@ -1160,13 +1339,14 @@ const GruposTable: React.FC = () => {
             <div className="grupos-modal-header">
               <div>
                 <h3 className="grupos-modal-title">
-                  {editingGrupo ? "Editar Grupo" : "Nuevo Grupo"}
+                  {editingGrupo ? "Editar Equipo" : "Nuevo Equipo"}
                 </h3>
                 <p className="grupos-modal-subtitle">
-                  Completa la información general del grupo.
+                  {editingGrupo
+                    ? "Aquí solo puedes actualizar la información general del equipo."
+                    : "Completa la información general del equipo y asigna sus miembros iniciales."}
                 </p>
               </div>
-
               <button
                 className="grupos-close-button"
                 onClick={closeModal}
@@ -1180,24 +1360,49 @@ const GruposTable: React.FC = () => {
               <div className="grupos-modal-body">
                 <div className="grupos-detail-section">
                   <div className="grupos-section-head">
-                    <div className="grupos-section-icon">
+                    <div
+                      className="grupos-section-icon"
+                      style={{
+                        background: "linear-gradient(135deg, #0ea5e9, #2563eb)",
+                        color: "#fff",
+                        border: "1px solid rgba(96,165,250,0.35)",
+                        boxShadow: "0 10px 24px rgba(37,99,235,0.22)",
+                      }}
+                    >
                       <Users size={18} />
                     </div>
-
                     <div>
                       <h4 className="grupos-section-title">
                         Información General
                       </h4>
                       <p className="grupos-section-text">
-                        Datos principales para registrar o actualizar el grupo.
+                        {editingGrupo
+                          ? "Actualiza los datos base del equipo."
+                          : "Crea tu equipo."}
                       </p>
                     </div>
                   </div>
 
+                  {editingGrupo && (
+                    <div style={{ ...policyNoticeStyle, marginBottom: "1rem" }}>
+                      <Lock
+                        size={18}
+                        style={{ flexShrink: 0, marginTop: "2px" }}
+                      />
+                      <div style={{ lineHeight: 1.5, fontSize: "0.92rem" }}>
+                        En la edición del equipo no se pueden retirar
+                        cobradores. La gestión de miembros se realiza desde el
+                        botón de
+                        <strong> gestionar miembros</strong>. Los miembros ya
+                        asignados solo pueden desactivarse.
+                      </div>
+                    </div>
+                  )}
+
                   <div className="grupos-form-grid">
                     <div className="grupos-form-field">
                       <label className="grupos-detail-label">
-                        Nombre del grupo
+                        Nombre del equipo
                       </label>
                       <input
                         type="text"
@@ -1209,7 +1414,7 @@ const GruposTable: React.FC = () => {
                           }))
                         }
                         className="grupos-form-input"
-                        placeholder="Ingrese el nombre del grupo"
+                        placeholder="Ingrese el nombre del equipo"
                       />
                     </div>
 
@@ -1244,6 +1449,7 @@ const GruposTable: React.FC = () => {
                           }))
                         }
                         className="grupos-form-input grupos-date-input"
+                        style={{ boxSizing: "border-box", width: "100%" }}
                       />
                     </div>
 
@@ -1261,17 +1467,18 @@ const GruposTable: React.FC = () => {
                           }))
                         }
                         className="grupos-form-input grupos-date-input"
+                        style={{ boxSizing: "border-box", width: "100%" }}
                       />
                     </div>
 
                     <div className="grupos-form-field">
                       <label className="grupos-detail-label">Calle</label>
                       <select
-                        value={formData.id_calle}
+                        value={formData.calle}
                         onChange={(e) =>
                           setFormData((prev) => ({
                             ...prev,
-                            id_calle: e.target.value,
+                            calle: e.target.value,
                           }))
                         }
                         className="grupos-form-input"
@@ -1285,32 +1492,248 @@ const GruposTable: React.FC = () => {
                       </select>
                     </div>
 
-                    <div className="grupos-form-field">
-                      <label className="grupos-detail-label">Cobrador</label>
-                      <select
-                        value={formData.id_cobrador}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            id_cobrador: e.target.value,
-                          }))
-                        }
-                        className="grupos-form-input"
-                      >
-                        <option value="">Seleccione un cobrador</option>
-                        {cobradores.map((cobrador) => (
-                          <option
-                            key={cobrador.id_cobrador}
-                            value={cobrador.id_cobrador}
-                          >
-                            {cobrador.nombre_completo ||
-                              cobrador.nombre ||
-                              `Cobrador ${cobrador.id_cobrador}`}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    {!editingGrupo && (
+                      <div className="grupos-form-field">
+                        <label className="grupos-detail-label">
+                          Fecha de ingreso de cobradores
+                        </label>
+                        <input
+                          type="date"
+                          value={formData.fecha_ingreso_cobradores}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              fecha_ingreso_cobradores: e.target.value,
+                            }))
+                          }
+                          className="grupos-form-input grupos-date-input"
+                          style={{ boxSizing: "border-box", width: "100%" }}
+                        />
+                      </div>
+                    )}
                   </div>
+
+                  {!editingGrupo ? (
+                    <div style={{ marginTop: "1rem" }}>
+                      <div
+                        style={{ ...policyNoticeStyle, marginBottom: "1rem" }}
+                      >
+                        <AlertTriangle
+                          size={18}
+                          style={{ flexShrink: 0, marginTop: "2px" }}
+                        />
+                        <div style={{ lineHeight: 1.5, fontSize: "0.92rem" }}>
+                          Al registrar miembros en el equipo, estos no podrán
+                          eliminarse desde este módulo. Posteriormente solo
+                          podrán desactivarse.
+                        </div>
+                      </div>
+
+                      <label
+                        className="grupos-detail-label"
+                        style={{ display: "block", marginBottom: "0.7rem" }}
+                      >
+                        Cobradores asignados
+                      </label>
+
+                      <div
+                        style={{
+                          position: "relative",
+                          marginBottom: "0.85rem",
+                        }}
+                      >
+                        <Search
+                          size={16}
+                          style={{
+                            position: "absolute",
+                            left: "12px",
+                            top: "50%",
+                            transform: "translateY(-50%)",
+                            color: "#3b82f6",
+                          }}
+                        />
+                        <input
+                          type="text"
+                          value={formCobradorSearch}
+                          onChange={(e) =>
+                            setFormCobradorSearch(e.target.value)
+                          }
+                          placeholder="Buscar cobrador por nombre..."
+                          style={{
+                            ...inputStyle,
+                            padding: "0.72rem 1rem 0.72rem 2.4rem",
+                          }}
+                        />
+                      </div>
+
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns:
+                            "repeat(auto-fit, minmax(220px, 1fr))",
+                          gap: "0.75rem",
+                          maxHeight: "260px",
+                          overflowY: "auto",
+                          paddingRight: "0.2rem",
+                        }}
+                      >
+                        {filteredFormCobradores.length === 0 && (
+                          <div
+                            style={{
+                              color: "#a1a1aa",
+                              fontSize: "0.9rem",
+                              padding: "0.75rem",
+                            }}
+                          >
+                            Sin resultados
+                          </div>
+                        )}
+
+                        {filteredFormCobradores.map((cobrador) => {
+                          const checked = formData.cobradores_ids.includes(
+                            String(cobrador.id_cobrador),
+                          );
+
+                          return (
+                            <label
+                              key={cobrador.id_cobrador}
+                              style={{
+                                background: checked
+                                  ? "rgba(37,99,235,0.14)"
+                                  : "rgba(255,255,255,0.025)",
+                                border: checked
+                                  ? "1px solid rgba(59,130,246,0.32)"
+                                  : "1px solid rgba(255,255,255,0.08)",
+                                borderRadius: "14px",
+                                padding: "0.85rem 0.95rem",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "0.75rem",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() =>
+                                  toggleCobradorSelection(
+                                    cobrador.id_cobrador,
+                                    "form",
+                                  )
+                                }
+                                style={{ accentColor: "#2563eb" }}
+                              />
+                              <div>
+                                <div
+                                  style={{
+                                    color: "#fff",
+                                    fontWeight: 700,
+                                    fontSize: "0.92rem",
+                                  }}
+                                >
+                                  {getCobradorNombre(cobrador)}
+                                </div>
+                                <div
+                                  style={{
+                                    color: "#a1a1aa",
+                                    fontSize: "0.82rem",
+                                    marginTop: "0.18rem",
+                                  }}
+                                >
+                                  ID: {cobrador.id_cobrador}
+                                </div>
+                              </div>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ marginTop: "1rem" }}>
+                      <label
+                        className="grupos-detail-label"
+                        style={{ display: "block", marginBottom: "0.7rem" }}
+                      >
+                        Cobradores asignados
+                      </label>
+
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns:
+                            "repeat(auto-fit, minmax(220px, 1fr))",
+                          gap: "0.75rem",
+                        }}
+                      >
+                        {getActiveMembers(editingGrupo).length === 0 && (
+                          <div
+                            style={{
+                              ...softPanelStyle,
+                              padding: "1rem",
+                              color: "#a1a1aa",
+                              textAlign: "center",
+                            }}
+                          >
+                            Este equipo no tiene cobradores activos.
+                          </div>
+                        )}
+
+                        {getActiveMembers(editingGrupo).map((cobrador) => (
+                          <div
+                            key={cobrador.id_cobrador}
+                            style={{
+                              background: "rgba(255,255,255,0.025)",
+                              border: "1px solid rgba(255,255,255,0.08)",
+                              borderRadius: "14px",
+                              padding: "0.9rem 1rem",
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                gap: "0.6rem",
+                                marginBottom: "0.35rem",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  color: "#fff",
+                                  fontWeight: 700,
+                                  fontSize: "0.92rem",
+                                }}
+                              >
+                                {getCobradorNombre(cobrador)}
+                              </div>
+                              <span
+                                style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: "0.3rem",
+                                  padding: "0.25rem 0.6rem",
+                                  borderRadius: "999px",
+                                  background: "rgba(250,204,21,0.10)",
+                                  border: "1px solid rgba(250,204,21,0.20)",
+                                  color: "#fde68a",
+                                  fontSize: "0.72rem",
+                                  fontWeight: 700,
+                                }}
+                              >
+                                <Lock size={12} />
+                                Bloqueado
+                              </span>
+                            </div>
+                            <div
+                              style={{ color: "#a1a1aa", fontSize: "0.82rem" }}
+                            >
+                              ID: {cobrador.id_cobrador}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="grupos-modal-actions">
@@ -1334,12 +1757,440 @@ const GruposTable: React.FC = () => {
                     {saving
                       ? "Guardando..."
                       : editingGrupo
-                        ? "Actualizar Grupo"
-                        : "Crear Grupo"}
+                        ? "Actualizar Equipo"
+                        : "Crear Equipo"}
                   </button>
                 </div>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {isMembersModalOpen && selectedGrupo && (
+        <div className="grupos-modal-overlay" onClick={closeMembersModal}>
+          <div
+            className="grupos-modal-content"
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: "1080px", width: "95%" }}
+          >
+            <div className="grupos-modal-header">
+              <div>
+                <h3 className="grupos-modal-title">
+                  Cobradores del equipo: {selectedGrupo.nombre_equipo}
+                </h3>
+                <p className="grupos-modal-subtitle">
+                  Aquí solo puedes agregar nuevos cobradores. Los ya asignados
+                  no pueden retirarse desde este módulo; si dejan de operar,
+                  deben desactivarse.
+                </p>
+              </div>
+              <button
+                className="grupos-close-button"
+                onClick={closeMembersModal}
+                type="button"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="grupos-modal-body">
+              <div style={{ ...policyNoticeStyle, marginBottom: "1rem" }}>
+                <AlertTriangle
+                  size={18}
+                  style={{ flexShrink: 0, marginTop: "2px" }}
+                />
+                <div style={{ lineHeight: 1.5, fontSize: "0.92rem" }}>
+                  Los cobradores marcados como <strong>ya asignados</strong>{" "}
+                  quedan bloqueados en esta pantalla. Puedes agregar nuevos
+                  miembros, pero no quitar los existentes.
+                </div>
+              </div>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+                  gap: "1rem",
+                }}
+              >
+                <div
+                  style={{
+                    ...softPanelStyle,
+                    padding: "1rem",
+                    minHeight: "420px",
+                  }}
+                >
+                  <div style={{ marginBottom: "1rem" }}>
+                    <h4
+                      style={{
+                        margin: 0,
+                        color: "#fff",
+                        fontSize: "1.02rem",
+                        fontWeight: 800,
+                      }}
+                    >
+                      Miembros del equipo
+                    </h4>
+                    <p
+                      style={{
+                        margin: "0.35rem 0 0",
+                        color: "#a1a1aa",
+                        fontSize: "0.9rem",
+                      }}
+                    >
+                      Total seleccionados: {membersSelection.length}
+                    </p>
+                  </div>
+
+                  <div style={{ display: "grid", gap: "0.85rem" }}>
+                    {membersSelection.length === 0 && (
+                      <div
+                        style={{
+                          ...softPanelStyle,
+                          padding: "1.2rem",
+                          textAlign: "center",
+                          color: "#a1a1aa",
+                        }}
+                      >
+                        Este equipo todavía no tiene cobradores seleccionados.
+                      </div>
+                    )}
+
+                    {cobradores
+                      .filter((cobrador) =>
+                        membersSelection.includes(String(cobrador.id_cobrador)),
+                      )
+                      .map((cobrador) => {
+                        const isExisting = existingMembersIds.includes(
+                          String(cobrador.id_cobrador),
+                        );
+
+                        return (
+                          <div
+                            key={cobrador.id_cobrador}
+                            style={{
+                              background: "rgba(255,255,255,0.025)",
+                              border: "1px solid rgba(255,255,255,0.07)",
+                              borderRadius: "16px",
+                              padding: "1rem",
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "flex-start",
+                                justifyContent: "space-between",
+                                gap: "0.8rem",
+                                flexWrap: "wrap",
+                              }}
+                            >
+                              <div>
+                                <div
+                                  style={{
+                                    color: "#fff",
+                                    fontWeight: 800,
+                                    fontSize: "1rem",
+                                    marginBottom: "0.35rem",
+                                  }}
+                                >
+                                  {getCobradorNombre(cobrador)}
+                                </div>
+
+                                <div
+                                  style={{
+                                    display: "grid",
+                                    gap: "0.35rem",
+                                    color: "#d4d4d8",
+                                    fontSize: "0.9rem",
+                                  }}
+                                >
+                                  <span>ID: {cobrador.id_cobrador}</span>
+                                  <span>
+                                    Teléfono:{" "}
+                                    {cobrador.telefono || "Sin teléfono"}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <span
+                                style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: "0.35rem",
+                                  background: isExisting
+                                    ? "rgba(250,204,21,0.10)"
+                                    : "linear-gradient(135deg, rgba(34,197,94,0.22), rgba(74,222,128,0.12))",
+                                  color: isExisting ? "#fde68a" : "#bbf7d0",
+                                  border: isExisting
+                                    ? "1px solid rgba(250,204,21,0.20)"
+                                    : "1px solid rgba(74, 222, 128, 0.24)",
+                                  padding: "0.34rem 0.72rem",
+                                  borderRadius: "9999px",
+                                  fontSize: "0.72rem",
+                                  fontWeight: 700,
+                                }}
+                              >
+                                {isExisting ? (
+                                  <Lock size={14} />
+                                ) : (
+                                  <CheckCircle2 size={14} />
+                                )}
+                                {isExisting ? "Ya asignado" : "Nuevo"}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+
+                <div style={{ ...softPanelStyle, padding: "1rem" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.7rem",
+                      marginBottom: "1rem",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "42px",
+                        height: "42px",
+                        borderRadius: "14px",
+                        display: "grid",
+                        placeItems: "center",
+                        background: "rgba(59,130,246,0.16)",
+                        color: "#bfdbfe",
+                        border: "1px solid rgba(59,130,246,0.22)",
+                      }}
+                    >
+                      <UserPlus size={19} />
+                    </div>
+
+                    <div>
+                      <h4
+                        style={{
+                          margin: 0,
+                          color: "#fff",
+                          fontSize: "1.02rem",
+                          fontWeight: 800,
+                        }}
+                      >
+                        Agregar cobradores
+                      </h4>
+                      <p
+                        style={{
+                          margin: "0.35rem 0 0",
+                          color: "#a1a1aa",
+                          fontSize: "0.9rem",
+                        }}
+                      >
+                        Puedes seleccionar nuevos miembros para este equipo.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div style={{ marginBottom: "1rem" }}>
+                    <label
+                      style={{
+                        display: "block",
+                        marginBottom: "0.45rem",
+                        color: "#d4d4d8",
+                        fontSize: "0.9rem",
+                        fontWeight: 700,
+                      }}
+                    >
+                      Fecha de ingreso de cobradores
+                    </label>
+                    <input
+                      type="date"
+                      value={membersFechaIngreso}
+                      onChange={(e) => setMembersFechaIngreso(e.target.value)}
+                      style={{ ...inputStyle, boxSizing: "border-box" }}
+                    />
+                  </div>
+
+                  <div
+                    style={{ position: "relative", marginBottom: "0.85rem" }}
+                  >
+                    <Search
+                      size={16}
+                      style={{
+                        position: "absolute",
+                        left: "12px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        color: "#3b82f6",
+                      }}
+                    />
+                    <input
+                      type="text"
+                      value={membersCobradorSearch}
+                      onChange={(e) => setMembersCobradorSearch(e.target.value)}
+                      placeholder="Buscar cobrador por nombre..."
+                      style={{
+                        ...inputStyle,
+                        padding: "0.72rem 1rem 0.72rem 2.4rem",
+                        boxSizing: "border-box",
+                      }}
+                    />
+                  </div>
+
+                  <div
+                    style={{
+                      display: "grid",
+                      gap: "0.75rem",
+                      maxHeight: "320px",
+                      overflowY: "auto",
+                      paddingRight: "0.2rem",
+                    }}
+                  >
+                    {filteredMembersCobradores.length === 0 && (
+                      <div
+                        style={{
+                          color: "#a1a1aa",
+                          fontSize: "0.9rem",
+                          padding: "0.75rem",
+                        }}
+                      >
+                        Sin resultados
+                      </div>
+                    )}
+
+                    {filteredMembersCobradores.map((cobrador) => {
+                      const checked = membersSelection.includes(
+                        String(cobrador.id_cobrador),
+                      );
+                      const isExisting = existingMembersIds.includes(
+                        String(cobrador.id_cobrador),
+                      );
+
+                      return (
+                        <label
+                          key={cobrador.id_cobrador}
+                          style={{
+                            background: checked
+                              ? "rgba(37,99,235,0.14)"
+                              : "rgba(255,255,255,0.025)",
+                            border: checked
+                              ? "1px solid rgba(59,130,246,0.32)"
+                              : "1px solid rgba(255,255,255,0.08)",
+                            borderRadius: "14px",
+                            padding: "0.85rem 0.95rem",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.75rem",
+                            cursor: isExisting ? "not-allowed" : "pointer",
+                            opacity: isExisting ? 0.82 : 1,
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            disabled={isExisting}
+                            onChange={() =>
+                              toggleCobradorSelection(
+                                cobrador.id_cobrador,
+                                "members",
+                              )
+                            }
+                            style={{ accentColor: "#2563eb" }}
+                          />
+
+                          <div style={{ flex: 1 }}>
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                gap: "0.6rem",
+                                flexWrap: "wrap",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  color: "#fff",
+                                  fontWeight: 700,
+                                  fontSize: "0.92rem",
+                                }}
+                              >
+                                {getCobradorNombre(cobrador)}
+                              </div>
+
+                              {isExisting && (
+                                <span
+                                  style={{
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: "0.3rem",
+                                    padding: "0.24rem 0.58rem",
+                                    borderRadius: "999px",
+                                    background: "rgba(250,204,21,0.10)",
+                                    border: "1px solid rgba(250,204,21,0.20)",
+                                    color: "#fde68a",
+                                    fontSize: "0.72rem",
+                                    fontWeight: 700,
+                                  }}
+                                >
+                                  <Lock size={12} />
+                                  Ya asignado
+                                </span>
+                              )}
+                            </div>
+
+                            <div
+                              style={{
+                                color: "#a1a1aa",
+                                fontSize: "0.82rem",
+                                marginTop: "0.18rem",
+                              }}
+                            >
+                              ID: {cobrador.id_cobrador}
+                              {cobrador.telefono
+                                ? ` • ${cobrador.telefono}`
+                                : ""}
+                            </div>
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "0.7rem",
+                      flexWrap: "wrap",
+                      marginTop: "1.2rem",
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={handleSaveMembers}
+                      disabled={savingMembers}
+                      style={{
+                        ...primaryButton,
+                        opacity: savingMembers ? 0.7 : 1,
+                        cursor: savingMembers ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      <UserPlus size={17} />{" "}
+                      {savingMembers ? "Guardando..." : "Guardar cobradores"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={closeMembersModal}
+                      style={secondaryButton}
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
