@@ -46,13 +46,11 @@ const TablaEgresos: React.FC<TablaEgresosProps> = ({ refreshKey = 0 }) => {
       });
       return;
     }
-
     window.open(archivoUrl, "_blank", "noopener,noreferrer");
   };
 
   const cargarTablaEgresos = async (url?: string, searchTerm?: string) => {
     setLoading(true);
-
     try {
       const result = await getTransacciones(url, searchTerm);
 
@@ -68,7 +66,6 @@ const TablaEgresos: React.FC<TablaEgresosProps> = ({ refreshKey = 0 }) => {
         const soloEgresos = result.data.filter(
           (item) => item.tipo?.toLowerCase() === "egreso",
         );
-
         setListaEgresos(soloEgresos);
         setNextPage(null);
         setPrevPage(null);
@@ -77,7 +74,6 @@ const TablaEgresos: React.FC<TablaEgresosProps> = ({ refreshKey = 0 }) => {
         const soloEgresos = (result.data.results || []).filter(
           (item) => item.tipo?.toLowerCase() === "egreso",
         );
-
         setListaEgresos(soloEgresos);
         setNextPage(result.data.next || null);
         setPrevPage(result.data.previous || null);
@@ -99,7 +95,6 @@ const TablaEgresos: React.FC<TablaEgresosProps> = ({ refreshKey = 0 }) => {
     const timeout = setTimeout(() => {
       cargarTablaEgresos(undefined, busquedaTabla);
     }, 350);
-
     return () => clearTimeout(timeout);
   }, [busquedaTabla, refreshKey]);
 
@@ -136,21 +131,30 @@ const TablaEgresos: React.FC<TablaEgresosProps> = ({ refreshKey = 0 }) => {
         </div>
       </div>
 
-      <div className="egresos-table-container">
-        <table className="egresos-table">
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Concepto</th>
-              <th>Requisitor</th>
-              <th>Monto</th>
-              <th>Comprobante</th>
-            </tr>
-          </thead>
+      {/* Estado vacío / cargando FUERA de la tabla */}
+      {listaEgresos.length === 0 && (
+        <div className="egresos-empty-state">
+          {loading
+            ? "Cargando histórico de egresos..."
+            : "No se encontraron egresos registrados."}
+        </div>
+      )}
 
-          <tbody>
-            {listaEgresos.length > 0 ? (
-              listaEgresos.map((item) => (
+      {/* Tabla solo se renderiza si hay datos */}
+      {listaEgresos.length > 0 && (
+        <div className="egresos-table-container">
+          <table className="egresos-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Concepto</th>
+                <th>Requisitor</th>
+                <th>Monto</th>
+                <th>Comprobante</th>
+              </tr>
+            </thead>
+            <tbody>
+              {listaEgresos.map((item) => (
                 <tr key={item.id}>
                   <td data-label="Fecha">{formatDate(item.fecha)}</td>
                   <td data-label="Concepto">
@@ -170,19 +174,11 @@ const TablaEgresos: React.FC<TablaEgresosProps> = ({ refreshKey = 0 }) => {
                     </button>
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={5} className="egresos-empty-row">
-                  {loading
-                    ? "Cargando histórico de egresos..."
-                    : "No se encontraron egresos registrados."}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <div className="egresos-pagination">
         <button
