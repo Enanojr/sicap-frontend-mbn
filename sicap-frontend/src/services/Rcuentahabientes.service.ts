@@ -8,7 +8,7 @@ export interface CuentahabienteBase {
   ap: string;
   am: string;
   calle: string;
-  numero: number;
+  numero: number | string;
   telefono: string;
   colonia: number;
   servicio: number;

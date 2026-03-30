@@ -89,6 +89,14 @@ const FormularioCuentahabientes: React.FC<Props> = ({
     loadCatalogs();
   }, []);
 
+  const validateNumeroCasa = (v: any) => {
+    const value = String(v ?? "").trim();
+
+    if (!value) return null;
+
+    return null;
+  };
+
   const validateRequired = (v: any) => {
     const value = String(v ?? "").trim();
     return !value ? "Este campo es requerido" : null;
@@ -170,18 +178,20 @@ const FormularioCuentahabientes: React.FC<Props> = ({
       {
         name: "numero",
         label: "Número de Casa",
-        type: "number",
+        type: "text",
         icon: Home,
         required: true,
+        placeholder: "Escribe número de casa o S/N",
         defaultValue: cuentahabienteToEdit?.numero ?? "",
-        validation: validateNumber,
+        validation: validateNumeroCasa,
       },
       {
         name: "telefono",
         label: "Teléfono",
         type: "tel",
         icon: Phone,
-        required: false,
+        required: true,
+        placeholder: "Escribe teléfono o S/N",
         defaultValue: cuentahabienteToEdit?.telefono ?? "",
         validation: validateTelefono,
       },
@@ -222,7 +232,7 @@ const FormularioCuentahabientes: React.FC<Props> = ({
         ap: String(data.ap ?? ""),
         am: String(data.am ?? ""),
         calle: String(data.calle ?? ""),
-        numero: data.numero ? Number(data.numero) : null,
+        numero: data.numero ? String(data.numero) : null,
         telefono: String(data.telefono ?? ""),
         colonia: data.colonia ? Number(data.colonia) : null,
         servicio: data.servicio ? Number(data.servicio) : null,
