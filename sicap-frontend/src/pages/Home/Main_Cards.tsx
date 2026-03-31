@@ -111,7 +111,8 @@ function Main_Card() {
         ))}
       </div>
 
-      <DashboardStats />
+      {/* Dashboard Stats */}
+      {/* <DashboardStats /> */}
     </div>
   );
 }
