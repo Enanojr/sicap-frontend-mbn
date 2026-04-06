@@ -75,7 +75,7 @@ function Admin_Cards() {
       waterDropColor: "rgba(42, 157, 143, 0.35)",
       onClick: handleCobradores,
     },
-    {
+    /* {
       title: "Registro de Sectores",
       description: "Registra nuevos sectores en el sistema.",
       icon: MapPin,
@@ -83,8 +83,8 @@ function Admin_Cards() {
       gradientColors: ["#f77f00", "#d62828"] as [string, string],
       waterDropColor: "rgba(247, 127, 0, 0.35)",
       onClick: handleSector,
-    },
-    {
+    }, 
+    /*{
       title: "Registro de Colonias",
       description: "Registra nuevas colonias en el sistema.",
       icon: Home,
@@ -101,7 +101,7 @@ function Admin_Cards() {
       gradientColors: ["#ef476f", "#d62839"] as [string, string],
       waterDropColor: "rgba(239, 71, 111, 0.35)",
       onClick: handleAsignacion,
-    },
+    },*/
     {
       title: "Registro de Descuentos",
       description: "Registra nuevos descuentos para los cuentahabientes.",
