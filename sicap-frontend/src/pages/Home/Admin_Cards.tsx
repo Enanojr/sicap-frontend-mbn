@@ -4,8 +4,8 @@ import "../../styles/styles.css";
 import {
   UserCog,
   UserSquare,
-  MapPin,
-  Home,
+  //MapPin,
+  //Home,
   Clipboard,
   Percent,
   Wrench,
@@ -44,9 +44,9 @@ function Admin_Cards() {
 
   const handleAdmin = () => navigate("/Radmin");
   const handleCobradores = () => navigate("/Rcobradores");
-  const handleColonias = () => navigate("/Rcolonia");
-  const handleSector = () => navigate("/Rsector");
-  const handleAsignacion = () => navigate("/Rasignacion");
+  //const handleColonias = () => navigate("/Rcolonia");
+  //const handleSector = () => navigate("/Rsector");
+  //const handleAsignacion = () => navigate("/Rasignacion");
   const handleDescuento = () => navigate("/Descuento");
   const handleServicios = () => navigate("/Servicios");
   const handleCierreAnual = () => navigate("/cierreanual");
