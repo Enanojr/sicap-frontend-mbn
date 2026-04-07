@@ -138,6 +138,7 @@ const FormularioReutilizable: React.FC<Props> = ({ config, isEditMode }) => {
     }
   };
 
+  // ✅ Usar useCallback para evitar recrear la función
   const handleSearchInputChange = useCallback(
     (name: string, value: string) => {
       setFormData((prev) => ({ ...prev, [name]: "" }));
@@ -150,7 +151,7 @@ const FormularioReutilizable: React.FC<Props> = ({ config, isEditMode }) => {
     [fields],
   );
 
-  //  Usar useCallback para evitar recrear la función
+  // ✅ Usar useCallback para evitar recrear la función
   const handleSelectOption = useCallback(
     (fieldName: string, value: string, label: string) => {
       setFormData((prev) => ({ ...prev, [fieldName]: value }));

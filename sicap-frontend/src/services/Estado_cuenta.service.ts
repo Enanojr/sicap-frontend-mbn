@@ -1,18 +1,17 @@
 import api from "../api_axios";
 import { getToken } from "./auth.service";
 
-export interface EstadoCuentaDetalleRow {
+export interface EstadoCuentaRow {
   id_cuentahabiente: number;
   numero_contrato: number;
   nombre: string;
   direccion: string;
   telefono: string;
   saldo_pendiente: number;
+  deuda: string;
   fecha_pago: string;
   monto_recibido: number;
   anio: number;
-  deuda: string;
-  tipo_movimiento: string;
 }
 
 const ESTADO_CUENTA_URL = "/estado-cuenta/";
@@ -26,22 +25,19 @@ const authHeaders = () => {
   };
 };
 
-export const getEstadoCuentaDetalleById = async (
-  id: number,
-): Promise<EstadoCuentaDetalleRow[]> => {
+export const getEstadosById = async (
+  id: number
+): Promise<EstadoCuentaRow[]> => {
   try {
     const res = await api.get(`${ESTADO_CUENTA_URL}`, {
       ...authHeaders(),
       params: { id_cuentahabiente: id },
     });
 
-    if (Array.isArray(res.data)) return res.data;
+    // Si viene paginado:
     return res.data?.results ?? [];
   } catch (error: any) {
-    console.error(
-      "Error en getEstadoCuentaDetalleById",
-      error?.response?.data || error,
-    );
+    console.error("Error en getEstadosById", error?.response?.data || error);
     throw error;
   }
 };
