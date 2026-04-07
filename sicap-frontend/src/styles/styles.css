@@ -5082,3 +5082,216 @@ input[type="number"]::-webkit-inner-spin-button {
   gap: 12px;
   padding: 6px 0;
 }
+
+/*estado de cuenta*/
+
+.estado-year-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid rgba(96, 165, 250, 0.35);
+  border-radius: 999px;
+  background: linear-gradient(
+    135deg,
+    rgba(37, 99, 235, 0.22),
+    rgba(56, 189, 248, 0.18)
+  );
+  color: #e0f2fe;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 122px;
+  justify-content: center;
+  box-shadow: 0 8px 22px rgba(2, 6, 23, 0.18);
+}
+
+.estado-year-chip:hover {
+  transform: translateY(-1px);
+  border-color: rgba(96, 165, 250, 0.6);
+  background: linear-gradient(
+    135deg,
+    rgba(37, 99, 235, 0.3),
+    rgba(56, 189, 248, 0.24)
+  );
+}
+
+.estado-year-chip:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.estado-year-popup {
+  border-radius: 22px !important;
+  border: 1px solid rgba(56, 189, 248, 0.18) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45) !important;
+}
+
+.estado-year-popup-title {
+  font-size: 1.45rem !important;
+  font-weight: 700 !important;
+}
+
+.estado-year-confirm,
+.estado-year-cancel {
+  border-radius: 12px !important;
+  padding: 10px 18px !important;
+  font-weight: 600 !important;
+}
+
+.swal2-radio {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 12px;
+  margin: 1.4rem 0 0.6rem 0 !important;
+  text-align: left;
+}
+
+.swal2-radio label {
+  margin: 0 !important;
+  padding: 14px 16px !important;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(30, 41, 59, 0.75);
+  color: #f8fafc !important;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.swal2-radio label:hover {
+  border-color: rgba(56, 189, 248, 0.5);
+  background: rgba(15, 23, 42, 0.95);
+}
+
+.swal2-radio input:checked + span,
+.swal2-radio label:has(input:checked) {
+  border-color: #38bdf8 !important;
+  background: rgba(14, 116, 144, 0.22) !important;
+  color: #bae6fd !important;
+}
+
+.estado-year-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 130px;
+  padding: 10px 14px;
+  border: 1px solid rgba(96, 165, 250, 0.28);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.9);
+  color: #e2e8f0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.estado-year-trigger:hover {
+  border-color: rgba(56, 189, 248, 0.55);
+  background: rgba(30, 41, 59, 1);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.estado-year-trigger:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.estado-year-modal {
+  width: 430px !important;
+  max-width: calc(100vw - 32px) !important;
+  padding: 1.6rem 1.4rem 1.25rem !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(56, 189, 248, 0.18) !important;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35) !important;
+  overflow: hidden !important;
+}
+
+.estado-year-modal .swal2-title {
+  margin: 0 0 1rem 0 !important;
+  font-size: 1.95rem !important;
+  font-weight: 700 !important;
+  line-height: 1.15 !important;
+  color: #f8fafc !important;
+}
+
+.estado-year-modal .swal2-html-container {
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+.estado-year-modal .swal2-select.estado-year-select {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 0.9rem 1rem !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(56, 189, 248, 0.45) !important;
+  background: #0b1530 !important;
+  color: #e5e7eb !important;
+  font-size: 1rem !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.08) !important;
+}
+
+.estado-year-modal .swal2-select.estado-year-select:focus {
+  border-color: rgba(56, 189, 248, 0.7) !important;
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.14) !important;
+}
+
+.estado-year-actions {
+  width: 100% !important;
+  margin: 1.25rem 0 0 0 !important;
+  gap: 12px !important;
+  justify-content: center !important;
+}
+
+.estado-year-confirm-btn,
+.estado-year-cancel-btn {
+  min-width: 104px !important;
+  border-radius: 12px !important;
+  padding: 10px 18px !important;
+  font-weight: 700 !important;
+  margin: 0 !important;
+}
+
+@media (max-width: 768px) {
+  .estado-year-modal {
+    width: calc(100vw - 24px) !important;
+    padding: 1.25rem 1rem 1rem !important;
+  }
+
+  .estado-year-modal .swal2-title {
+    font-size: 1.55rem !important;
+  }
+
+  .estado-year-modal .swal2-select.estado-year-select {
+    font-size: 0.95rem !important;
+    padding: 0.82rem 0.9rem !important;
+  }
+
+  .estado-year-confirm-btn,
+  .estado-year-cancel-btn {
+    min-width: 96px !important;
+    padding: 9px 14px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .estado-year-trigger {
+    min-width: 110px;
+    padding: 9px 12px;
+    font-size: 0.86rem;
+  }
+
+  .estado-year-modal {
+    width: calc(100% - 32px) !important;
+  }
+}
