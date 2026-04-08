@@ -24,16 +24,10 @@ import CargosPage from "../pages/Principal_Form_Table/cargospage";
 import CorteCaja from "../pages/CorteCaja/CorteCaja";
 import CorteJunior from "../pages/CorteJunior/CorteJunior";
 import CorteSenior from "../pages/CorteSenior/CorteSenior";
-import CallesPage from "../pages/Principal_Form_Table/callespage";
 
 //Test
 
 import Tesoreria_Cards from "../pages/Home/Tesorero_Cards";
-import EgresosManager from "../pages/tesoreria/formulario_egresos";
-import HistoricoEgresos from "../pages/tesoreria/tabla_egresos";
-import HistoricoIngresos from "../pages/tesoreria/tabla_ingresos";
-import TesoreriaDashboard from "../pages/tesoreria/main_egresos";
-import Grupos from "../pages/grupos/grupo";
 
 const Rutas = [
   // Ruta #1: Login (pública)
@@ -141,30 +135,6 @@ const Rutas = [
           {
             path: "/corte-senior",
             element: <CorteSenior />,
-          },
-          {
-            path: "/egresos",
-            element: <EgresosManager />,
-          },
-          {
-            path: "/tabla_egresos",
-            element: <HistoricoEgresos />,
-          },
-          {
-            path: "/tabla_ingresos",
-            element: <HistoricoIngresos />,
-          },
-          {
-            path: "/main_egresos",
-            element: <TesoreriaDashboard />,
-          },
-          {
-            path: "/grupos",
-            element: <Grupos />,
-          },
-          {
-            path: "/calles",
-            element: <CallesPage />,
           },
         ],
       },

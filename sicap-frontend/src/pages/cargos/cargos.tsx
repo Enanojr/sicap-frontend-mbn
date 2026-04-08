@@ -23,10 +23,13 @@ import Swal from "sweetalert2";
 import "../../styles/styles.css";
 
 // ────────────────────────────────────────────────────────────
-// Trae TODOS los cargos activos recorriendo la paginación
+// Trae TODOS los cargos recorriendo la paginación.
+// Cargos activos son muchos menos que cuentahabientes,
+// así que las páginas son pocas y no satura el servidor.
 // ────────────────────────────────────────────────────────────
 const getTodosLosCargosActivos = async (): Promise<CargoResponse[]> => {
   const todos: CargoResponse[] = [];
+  // Filtramos activos directo en el endpoint para reducir páginas
   let nextUrl: string | null = "/cargos/?activo=true";
 
   while (nextUrl) {
@@ -34,7 +37,9 @@ const getTodosLosCargosActivos = async (): Promise<CargoResponse[]> => {
     if (!res.success || !res.data) break;
 
     const pagina: CargoResponse[] = res.data.results || res.data;
+    // Guardamos solo los que tienen saldo pendiente
     todos.push(...pagina.filter((c) => parseFloat(c.saldo_restante_cargo) > 0));
+
     nextUrl = res.data.next || null;
   }
 
@@ -56,30 +61,11 @@ const useCuentahabientesSearch = () => {
   } | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Carga inicial: 10 registros para que el dropdown no esté vacío
-  useEffect(() => {
-    const cargarIniciales = async () => {
-      setBuscando(true);
-      const res = await getCuentahabientes(`/cuentahabientes/?limit=10`);
-      if (res.success && res.data) {
-        setOpciones(
-          res.data.results.map((u) => ({
-            value: u.id_cuentahabiente,
-            label: `#${u.numero_contrato} - ${u.nombres} ${u.ap} ${u.am}`,
-            keywords: String(u.numero_contrato),
-          }))
-        );
-      }
-      setBuscando(false);
-    };
-    cargarIniciales();
-  }, []);
-
   const buscar = useCallback((termino: string) => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       if (!termino.trim()) {
-        // Si borra todo, mantiene los iniciales (no vacía)
+        setOpciones([]);
         return;
       }
       setBuscando(true);
@@ -100,9 +86,7 @@ const useCuentahabientesSearch = () => {
   }, []);
 
   const marcarSeleccionado = (value: string | number) => {
-    const encontrado = opciones.find(
-      (o: { value: string | number; label: string; keywords: string }) => String(o.value) === String(value)
-    );
+    const encontrado = opciones.find((o) => String(o.value) === String(value));
     if (encontrado) setSeleccionado(encontrado);
   };
 
@@ -110,7 +94,7 @@ const useCuentahabientesSearch = () => {
     ? [
         seleccionado,
         ...opciones.filter(
-          (o: { value: string | number; label: string; keywords: string }) => String(o.value) !== String(seleccionado.value)
+          (o) => String(o.value) !== String(seleccionado.value)
         ),
       ]
     : opciones;
@@ -120,6 +104,8 @@ const useCuentahabientesSearch = () => {
 
 // ────────────────────────────────────────────────────────────
 // Hook: usuarios únicos con cargos activos (Realizar Pago)
+// Recorre TODAS las páginas de cargos activos — sin llamadas
+// extra por usuario, solo el endpoint de cargos.
 // ────────────────────────────────────────────────────────────
 const useUsuariosConCargosActivos = () => {
   const [opciones, setOpciones] = useState<
@@ -129,8 +115,10 @@ const useUsuariosConCargosActivos = () => {
 
   const cargar = async () => {
     setCargando(true);
+
     const todosLosCargos = await getTodosLosCargosActivos();
 
+    // Deduplicar por cuentahabiente
     const mapa = new Map<
       number,
       { value: number; label: string; keywords: string }
@@ -198,7 +186,6 @@ const CargosManager = () => {
   const [formPago, setFormPago] = useState<PagoData>({
     cuentahabiente_id: "",
     monto: 0,
-    fecha_pago: new Date().toISOString().split("T")[0],
   });
 
   const [errorsCargo, setErrorsCargo] = useState<any>({});
@@ -270,7 +257,7 @@ const CargosManager = () => {
         });
         setFormCargo({ ...formCargo, monto_cargo: 0, tipo_cargo: "", cuentahabiente: "" });
         resetSeleccionadoCargo(null);
-        cargarTablaCargos(); // ← sin URL hardcodeada
+        cargarTablaCargos();
         refrescarOpcionesPago();
       } else {
         setErrorsCargo(res.errors || { general: "Error al registrar" });
@@ -302,7 +289,7 @@ const CargosManager = () => {
     const res = await pagarCargo(formPago);
     if (res.success) {
       const usuarioPago = opcionesPago.find(
-        (u: { value: string | number; label: string; keywords: string }) => String(u.value) === String(formPago.cuentahabiente_id),
+        (u) => String(u.value) === String(formPago.cuentahabiente_id)
       );
       setTicketData({
         nombre_completo: usuarioPago?.label || "Cliente",
@@ -313,14 +300,10 @@ const CargosManager = () => {
         comentarios: "Abono aplicado correctamente.",
       });
       setShowTicket(true);
-      setFormPago({
-        cuentahabiente_id: "",
-        monto: 0,
-        fecha_pago: new Date().toISOString().split("T")[0],
-      });
+      setFormPago({ cuentahabiente_id: "", monto: 0 });
       setCargosActivosUsuario([]);
       await refrescarOpcionesPago();
-      cargarTablaCargos(); // ← sin URL hardcodeada
+      cargarTablaCargos();
     } else {
       setErrorsPago(res.errors || { general: "Error en el pago" });
     }
@@ -376,12 +359,10 @@ const CargosManager = () => {
                   }
                   required
                 >
-                  <option value="">
-                    {tiposDeCargo.length === 0 ? "Cargando tipos..." : "-- Seleccionar --"}
-                  </option>
+                  <option value="">-- Seleccionar --</option>
                   {tiposDeCargo.map((t) => (
                     <option key={t.id} value={t.id}>
-                      {t.nombre} — ${Number(t.monto).toFixed(2)}
+                      {t.nombre}
                     </option>
                   ))}
                 </select>
@@ -437,10 +418,7 @@ const CargosManager = () => {
 
             {/* Panel de cargos activos */}
             {formPago.cuentahabiente_id && (
-              <div
-                className="cm-cargos-activos-panel"
-                style={{ backgroundColor: "rgba(138, 138, 138, 0.1)" }}
-              >
+              <div className="cm-cargos-activos-panel">
                 {loadingCargosUsuario ? (
                   <p className="cm-cargos-loading">Cargando deudas...</p>
                 ) : cargosActivosUsuario.length === 0 ? (
@@ -481,32 +459,20 @@ const CargosManager = () => {
               </div>
             )}
 
-            <div className="cm-form-row">
-              <div className="cm-form-group">
-                <label>Fecha</label>
-                <input
-                  type="date"
-                  value={formPago.fecha_pago}
-                  onChange={(e) =>
-                    setFormPago({ ...formPago, fecha_pago: e.target.value })
-                  }
-                />
-              </div>
-              <div className="cm-form-group">
-                <label>Monto a Pagar</label>
-                <input
-                  type="number"
-                  className="cm-input-money"
-                  value={formPago.monto || ""}
-                  onChange={(e) =>
-                    setFormPago({ ...formPago, monto: parseFloat(e.target.value) || 0 })
-                  }
-                  placeholder="0.00"
-                />
-                {errorsPago.monto && (
-                  <span className="cm-error-msg">{errorsPago.monto}</span>
-                )}
-              </div>
+            <div className="cm-form-group">
+              <label>Monto a Pagar</label>
+              <input
+                type="number"
+                className="cm-input-money"
+                value={formPago.monto || ""}
+                onChange={(e) =>
+                  setFormPago({ ...formPago, monto: parseFloat(e.target.value) || 0 })
+                }
+                placeholder="0.00"
+              />
+              {errorsPago.monto && (
+                <span className="cm-error-msg">{errorsPago.monto}</span>
+              )}
             </div>
             <div className="cm-info-box">
               <p>Este pago se aplicará al saldo global.</p>
@@ -518,10 +484,10 @@ const CargosManager = () => {
         </div>
       </div>
 
-      {/* ── Historial de Cargos ── */}
+      {/* ── Historial ── */}
       <div className="cm-card cm-bottom-section">
         <div className="cm-table-header">
-          <h3>Historial de Cargos ({totalCargos})</h3>
+          <h3>Historial ({totalCargos})</h3>
           <div className="cm-search-box">
             <input
               type="text"
@@ -554,7 +520,10 @@ const CargosManager = () => {
                   <td>{item.fecha_cargo}</td>
                   <td
                     style={{
-                      color: parseFloat(item.saldo_restante_cargo) > 0 ? "#e74c3c" : "#27ae60",
+                      color:
+                        parseFloat(item.saldo_restante_cargo) > 0
+                          ? "#e74c3c"
+                          : "#27ae60",
                       fontWeight: "bold",
                     }}
                   >
@@ -567,21 +536,13 @@ const CargosManager = () => {
           </table>
         </div>
         <div className="cm-pagination">
-          <button
-            className="cm-btn-pag"
-            onClick={handlePrev}
-            disabled={!prevPage || loading}
-          >
+          <button className="cm-btn-pag" onClick={handlePrev} disabled={!prevPage || loading}>
             ⬅ Ant.
           </button>
           <span className="cm-pag-info">
             Mostrando {listaCargos.length} de {totalCargos}
           </span>
-          <button
-            className="cm-btn-pag"
-            onClick={handleNext}
-            disabled={!nextPage || loading}
-          >
+          <button className="cm-btn-pag" onClick={handleNext} disabled={!nextPage || loading}>
             Sig. ➡
           </button>
         </div>
