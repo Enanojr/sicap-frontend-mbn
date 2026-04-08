@@ -5,12 +5,14 @@ import { getToken, logout } from "./auth.service";
 export interface CargoCreate {
   nombre: string;
   monto: number;
+  fecha_pago: string;
 }
 
 export interface CargoResponse {
   id: number;
   nombre: string;
   monto: number;
+  fecha_pago: string;
 }
 
 // CORRECCIÓN: URL según Postman (sin la 's' extra en cargo)
