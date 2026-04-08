@@ -4242,7 +4242,7 @@ input[type="number"]::-webkit-inner-spin-button {
   margin: 0 0 12px 0;
   border: 1px solid #fde68a;
   border-radius: 8px;
-  background: #fffbeb;
+  background: #ffff;
   overflow: hidden;
   animation: fadeInPanel 0.2s ease;
 }
@@ -4282,8 +4282,8 @@ input[type="number"]::-webkit-inner-spin-button {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #92400e;
-  background: #fef3c7;
+  color: black;
+  background: #fef9e7;
   border-bottom: 1px solid #fde68a;
 }
 
@@ -4295,7 +4295,7 @@ input[type="number"]::-webkit-inner-spin-button {
   height: 18px;
   padding: 0 5px;
   border-radius: 9px;
-  background: #f59e0b;
+  background: red;
   color: #fff;
   font-size: 0.72rem;
   font-weight: 700;
@@ -4332,10 +4332,6 @@ input[type="number"]::-webkit-inner-spin-button {
   border-bottom: none;
 }
 
-.cm-cargo-activo-item:hover {
-  background: #fef9e7;
-}
-
 .cm-cargo-activo-info {
   display: flex;
   align-items: center;
@@ -4343,13 +4339,13 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 
 .cm-cargo-activo-fecha {
-  color: #9ca3af;
+  color: #fff;
   font-size: 0.75rem;
 }
 
 .cm-cargo-activo-saldo {
   font-weight: 700;
-  color: #dc2626;
+  color: #fff;
   font-size: 0.88rem;
 }
 
@@ -4359,11 +4355,11 @@ input[type="number"]::-webkit-inner-spin-button {
   align-items: center;
   justify-content: space-between;
   padding: 8px 14px;
-  background: #fef3c7;
+  background: #fef9e7;
   border-top: 1px solid #fde68a;
   font-size: 0.82rem;
   font-weight: 600;
-  color: #78350f;
+  color: black;
 }
 
 .cm-cargos-total-monto {
