@@ -29,6 +29,11 @@ const TablaCargos: React.FC<TablaCargosProps> = ({ onEdit }) => {
           minimumFractionDigits: 2,
         })}`,
     },
+    {
+      key: "fecha_pago",
+      label: "Fecha de Pago",
+      render: (value) => value || "",
+    },
   ];
 
   const fetchData = async (): Promise<CargoResponse[]> => {

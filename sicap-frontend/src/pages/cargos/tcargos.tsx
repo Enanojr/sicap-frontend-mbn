@@ -33,12 +33,20 @@ export default function FormularioCargos({ cargoToEdit, onSuccess, onCancel }: F
         defaultValue: cargoToEdit?.monto ?? "",
         validation: (value: string | number) => Number(value) <= 0 ? "El monto debe ser mayor que 0" : null,
       },
+      {
+        name: "fecha_pago",
+        label: "Fecha de Pago",
+        type: "date",
+        required: false,
+        defaultValue: cargoToEdit?.fecha_pago ?? "",
+      },
     ],
     onSubmit: async (data) => {
       try {
         const payload = {
           nombre: String(data.nombre),
           monto: Number(data.monto),
+          fecha_pago: data.fecha_pago ? String(data.fecha_pago) : "",
         };
 
         if (cargoToEdit) {

@@ -6,7 +6,7 @@ import { Archive, BanknoteArrowUp } from "lucide-react";
 function Tesoreria_Cards() {
   const navigate = useNavigate();
 
-  const handleEgresos = () => navigate("/egresos");
+  const handleEgresos = () => navigate("/main_egresos");
   const handleCorte = () => navigate("/tesoreria");
 
   const cards = [
