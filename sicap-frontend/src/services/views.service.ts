@@ -10,6 +10,7 @@ export interface HistorialPago {
   anio: number;
   nombre_descuento: string;
   comentarios: string;
+  cobrador: string;
 }
 
 export interface Pago {
@@ -116,16 +117,16 @@ export const getContractData = async (): Promise<ContractSummary[]> => {
   const result = pagos.map((contract) => {
     const pagosDelContrato = historial
       .filter(
-        (h) => String(h.numero_contrato) === String(contract.numero_contrato)
+        (h) => String(h.numero_contrato) === String(contract.numero_contrato),
       )
       .sort(
         (a, b) =>
-          new Date(b.fecha_pago).getTime() - new Date(a.fecha_pago).getTime()
+          new Date(b.fecha_pago).getTime() - new Date(a.fecha_pago).getTime(),
       );
 
     const monto_total_recibido = pagosDelContrato.reduce(
       (sum, p) => sum + Number(p.monto_recibido),
-      0
+      0,
     );
 
     const fecha_inicio = pagosDelContrato.length
