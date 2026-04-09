@@ -7,6 +7,17 @@ import {
   ChevronLeft,
   ChevronRight,
   Calendar,
+  X,
+  TrendingUp,
+  AlertCircle,
+  CheckCircle2,
+  Clock3,
+  Ban,
+  FileText,
+  MapPin,
+  DollarSign,
+  MessageSquare,
+  CreditCard,
 } from "lucide-react";
 import Swal from "sweetalert2";
 import type { ContractSummary } from "../../services/views.service";
@@ -48,6 +59,58 @@ const statusOptions: FilterOption[] = [
 ];
 
 // ─────────────────────────────────────────────
+// Status Config
+// ─────────────────────────────────────────────
+const statusConfig: Record<
+  string,
+  {
+    bg: string;
+    text: string;
+    border: string;
+    icon: React.ReactNode;
+    dot: string;
+  }
+> = {
+  pagado: {
+    bg: "#0d2e1a",
+    text: "#4ade80",
+    border: "#166534",
+    icon: <CheckCircle2 size={11} />,
+    dot: "#4ade80",
+  },
+  corriente: {
+    bg: "#0d1f2e",
+    text: "#38bdf8",
+    border: "#0c4a6e",
+    icon: <Clock3 size={11} />,
+    dot: "#38bdf8",
+  },
+  rezagado: {
+    bg: "#2d1a00",
+    text: "#fbbf24",
+    border: "#92400e",
+    icon: <AlertCircle size={11} />,
+    dot: "#fbbf24",
+  },
+  adeudo: {
+    bg: "#2d0a0a",
+    text: "#f87171",
+    border: "#7f1d1d",
+    icon: <Ban size={11} />,
+    dot: "#f87171",
+  },
+};
+
+const getStatusConf = (estatus: string) =>
+  statusConfig[estatus.trim().toLowerCase()] || {
+    bg: "#1e2028",
+    text: "#9ca3af",
+    border: "#374151",
+    icon: null,
+    dot: "#9ca3af",
+  };
+
+// ─────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────
 const formatFechaLocal = (fechaString: string): string => {
@@ -59,10 +122,18 @@ const formatFechaLocal = (fechaString: string): string => {
   const fecha = new Date(year, month - 1, day);
   return fecha.toLocaleDateString("es-MX", {
     day: "2-digit",
-    month: "2-digit",
+    month: "short",
     year: "numeric",
   });
 };
+
+const formatMoney = (amount: number): string =>
+  new Intl.NumberFormat("es-MX", {
+    style: "currency",
+    currency: "MXN",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
 
 const normalizeStreet = (value: string): string => {
   if (!value) return "";
@@ -80,6 +151,94 @@ const normalizeStreet = (value: string): string => {
 
 const prettyStreet = (value: string) =>
   value.replace(/\b\w/g, (l) => l.toUpperCase());
+
+// ─────────────────────────────────────────────
+// Sub-components
+// ─────────────────────────────────────────────
+const StatusBadge: React.FC<{ estatus: string }> = ({ estatus }) => {
+  const conf = getStatusConf(estatus);
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "0.35rem",
+        backgroundColor: conf.bg,
+        color: conf.text,
+        border: `1px solid ${conf.border}`,
+        padding: "0.28rem 0.65rem",
+        borderRadius: "9999px",
+        fontSize: "0.72rem",
+        fontWeight: 600,
+        letterSpacing: "0.03em",
+        textTransform: "capitalize",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {conf.icon}
+      {estatus}
+    </span>
+  );
+};
+
+const StatCard: React.FC<{
+  label: string;
+  value: string;
+  sub?: string;
+  color?: string;
+  icon: React.ReactNode;
+}> = ({ label, value, sub, color = "#58b2ee", icon }) => (
+  <div
+    style={{
+      backgroundColor: "#13151c",
+      border: "1px solid #252831",
+      borderRadius: "12px",
+      padding: "1rem 1.25rem",
+      display: "flex",
+      flexDirection: "column",
+      gap: "0.5rem",
+      position: "relative",
+      overflow: "hidden",
+    }}
+  >
+    <div
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        height: "2px",
+        backgroundColor: color,
+        opacity: 0.6,
+      }}
+    />
+    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+      <span style={{ color, opacity: 0.8 }}>{icon}</span>
+      <span
+        style={{
+          fontSize: "0.72rem",
+          color: "#6b7280",
+          fontWeight: 500,
+          textTransform: "uppercase",
+          letterSpacing: "0.06em",
+        }}
+      >
+        {label}
+      </span>
+    </div>
+    <div
+      style={{
+        fontSize: "1.25rem",
+        fontWeight: 700,
+        color: color,
+        fontVariantNumeric: "tabular-nums",
+      }}
+    >
+      {value}
+    </div>
+    {sub && <div style={{ fontSize: "0.72rem", color: "#6b7280" }}>{sub}</div>}
+  </div>
+);
 
 // ─────────────────────────────────────────────
 // Component
@@ -104,8 +263,8 @@ const ContractTable: React.FC = () => {
 
   const [selectedContract, setSelectedContract] =
     useState<ContractSummary | null>(null);
-  // Año que se usará para pre-filtrar el modal
   const [modalPreYear, setModalPreYear] = useState<string>("all");
+  const [hoveredRow, setHoveredRow] = useState<string | null>(null);
 
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 15;
@@ -124,38 +283,6 @@ const ContractTable: React.FC = () => {
     streetTerm,
     selectedStreetKey,
   ]);
-
-  // ── Status styles ───────────────────────────────────────────────
-  const getStatusClass = (estatus: string) => {
-    const v = estatus.trim().toLowerCase();
-    if (v === "pagado") return "status-paid";
-    if (v === "corriente") return "status-current";
-    if (v === "rezagado") return "status-warning";
-    if (v === "adeudo") return "status-danger";
-    return "status-pending";
-  };
-
-  const getStatusStyle = (estatus: string): React.CSSProperties => {
-    const v = estatus.trim().toLowerCase();
-    if (v === "pagado")
-      return { backgroundColor: "#88ffb4e7", color: "#003111" };
-    if (v === "corriente")
-      return { backgroundColor: "#5aa07375", color: "#34d474" };
-    if (v === "rezagado")
-      return { backgroundColor: "#ca8a04", color: "#fefce8" };
-    if (v === "adeudo")
-      return { backgroundColor: "#ee5252c4", color: "#3b0101" };
-    return { backgroundColor: "#374151", color: "#d1d5db" };
-  };
-
-  const badgeStyle = (estatus: string): React.CSSProperties => ({
-    ...getStatusStyle(estatus),
-    padding: "0.25rem 0.65rem",
-    borderRadius: "9999px",
-    fontSize: "0.75rem",
-    fontWeight: 600,
-    display: "inline-block",
-  });
 
   // ── Data loading ────────────────────────────────────────────────
   const loadData = async () => {
@@ -186,7 +313,7 @@ const ContractTable: React.FC = () => {
     }
   };
 
-  // ── Year options (extraídos dinámicamente, sin "todos") ─────────
+  // ── Year options ─────────────────────────────────────────────────
   const yearOptions: FilterOption[] = React.useMemo(() => {
     const years = Array.from(
       new Set(contracts.map((c) => c.anio?.toString()).filter(Boolean)),
@@ -194,7 +321,6 @@ const ContractTable: React.FC = () => {
     return years.map((y) => ({ id: `year-${y}`, label: y!, value: y! }));
   }, [contracts]);
 
-  // Auto-seleccionar el año más reciente cuando cargan los datos
   useEffect(() => {
     if (yearOptions.length > 0 && selectedYear === "all") {
       setSelectedYear(yearOptions[0].value);
@@ -236,7 +362,6 @@ const ContractTable: React.FC = () => {
 
   const filterByYear = (contract: ContractSummary): boolean => {
     if (selectedYear === "all") return true;
-    // Filtrar por el año del contrato directamente
     return contract.anio?.toString() === selectedYear;
   };
 
@@ -269,7 +394,6 @@ const ContractTable: React.FC = () => {
   // ── Table rows ──────────────────────────────────────────────────
   const tableRows: TableRow[] = React.useMemo(() => {
     return filteredContracts.map((contract) => {
-      // Calcular el total pagado solo para el año seleccionado
       const pagosDelAnio = (contract.pagos || []).filter(
         (p) => selectedYear === "all" || p.anio?.toString() === selectedYear,
       );
@@ -277,7 +401,6 @@ const ContractTable: React.FC = () => {
         (sum, p) => sum + Number(p.monto_recibido || 0),
         0,
       );
-
       return {
         rowKey: `${contract.id}-${contract.anio}`,
         contract,
@@ -379,138 +502,273 @@ const ContractTable: React.FC = () => {
       .slice(0, 10);
   }, [streetTerm, streetGroups]);
 
+  // ── Active filters count ─────────────────────────────────────────
+  const activeFiltersCount = [
+    selectedFilter !== "all",
+    selectedStatus !== "all",
+    selectedYear !== "all",
+    streetTerm.trim() !== "",
+    searchTerm.trim() !== "",
+  ].filter(Boolean).length;
+
+  // ── Shared dropdown style ────────────────────────────────────────
+  const dropdownStyle: React.CSSProperties = {
+    position: "absolute",
+    top: "calc(100% + 6px)",
+    left: 0,
+    minWidth: "200px",
+    backgroundColor: "#13151c",
+    border: "1px solid #252831",
+    borderRadius: "10px",
+    boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+    zIndex: 30,
+    overflow: "hidden",
+  };
+
+  const dropdownItemStyle = (active: boolean): React.CSSProperties => ({
+    display: "flex",
+    alignItems: "center",
+    gap: "0.6rem",
+    padding: "0.6rem 0.9rem",
+    cursor: "pointer",
+    backgroundColor: active ? "#1e2533" : "transparent",
+    color: active ? "#58b2ee" : "#d1d5db",
+    fontSize: "0.82rem",
+    transition: "background 0.15s",
+  });
+
+  const filterButtonStyle = (active: boolean): React.CSSProperties => ({
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "0.4rem",
+    padding: "0.5rem 0.85rem",
+    backgroundColor: active ? "#1a2a3a" : "#13151c",
+    border: `1px solid ${active ? "#58b2ee55" : "#252831"}`,
+    borderRadius: "8px",
+    color: active ? "#58b2ee" : "#9ca3af",
+    fontSize: "0.8rem",
+    fontWeight: 500,
+    cursor: "pointer",
+    whiteSpace: "nowrap",
+    transition: "all 0.15s",
+  });
+
   // ────────────────────────────────────────────────────────────────
   // RENDER
   // ────────────────────────────────────────────────────────────────
   return (
     <div className="contracts-page-container">
-      <div className="contracts-card">
-        <h2 className="contracts-title">
-          <span className="contracts-title-gradient">
-            Consulta de Pagos Realizados
-          </span>
-        </h2>
-        <div className="contracts-divider"></div>
+      <div
+        className="contracts-card"
+        style={{ backgroundColor: "#0d0f14", border: "1px solid #1a1d24" }}
+      >
+        {/* ── HEADER ──────────────────────────────────────────────── */}
+        <div style={{ padding: "1.5rem 1.75rem 0" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: "1.25rem",
+            }}
+          >
+            <div>
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: "1.2rem",
+                  fontWeight: 700,
+                  color: "#f9fafb",
+                }}
+              >
+                Consulta de Pagos Realizados
+              </h2>
+              <p
+                style={{
+                  margin: "0.25rem 0 0",
+                  fontSize: "0.78rem",
+                  color: "#6b7280",
+                }}
+              >
+                Gestión y seguimiento de contratos y pagos
+              </p>
+            </div>
+            {!loading && !error && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  backgroundColor: "#13151c",
+                  border: "1px solid #252831",
+                  borderRadius: "8px",
+                  padding: "0.5rem 0.9rem",
+                }}
+              >
+                <FileText size={14} style={{ color: "#58b2ee" }} />
+                <span style={{ fontSize: "0.78rem", color: "#9ca3af" }}>
+                  Total:{" "}
+                  <strong style={{ color: "#58b2ee", fontSize: "0.9rem" }}>
+                    {tableRows.length}
+                  </strong>{" "}
+                  contratos
+                </span>
+              </div>
+            )}
+          </div>
+          <div
+            style={{
+              height: "1px",
+              backgroundColor: "#1a1d24",
+              marginBottom: "1.25rem",
+            }}
+          />
+        </div>
 
         {/* ── TOOLBAR ─────────────────────────────────────────────── */}
-        <div className="contracts-toolbar">
-          {/* Filtro por fecha */}
-          <div className="contracts-dropdown-container">
+        <div
+          style={{
+            padding: "0 1.75rem 1rem",
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "0.5rem",
+            alignItems: "center",
+          }}
+        >
+          {/* Filtro fecha */}
+          <div style={{ position: "relative" }}>
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="contracts-filter-button"
+              style={filterButtonStyle(selectedFilter !== "all")}
               type="button"
             >
-              <Clock className="icon" />
+              <Clock size={13} />
               <span>{getFilterLabel()}</span>
-              <ChevronDown className="icon-small" />
+              <ChevronDown size={12} style={{ opacity: 0.6 }} />
             </button>
             {isDropdownOpen && (
-              <div className="contracts-dropdown">
-                <ul className="contracts-dropdown-list">
-                  {filterOptions.map((opt) => (
-                    <li key={opt.id}>
-                      <div
-                        className="contracts-dropdown-item"
-                        onClick={() => {
-                          setSelectedFilter(opt.value);
-                          setIsDropdownOpen(false);
-                        }}
-                      >
-                        <input
-                          type="radio"
-                          checked={selectedFilter === opt.value}
-                          readOnly
-                          className="radio"
-                        />
-                        <label className="radio-label">{opt.label}</label>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+              <div style={dropdownStyle}>
+                {filterOptions.map((opt) => (
+                  <div
+                    key={opt.id}
+                    style={dropdownItemStyle(selectedFilter === opt.value)}
+                    onClick={() => {
+                      setSelectedFilter(opt.value);
+                      setIsDropdownOpen(false);
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "6px",
+                        height: "6px",
+                        borderRadius: "50%",
+                        backgroundColor:
+                          selectedFilter === opt.value ? "#58b2ee" : "#374151",
+                        flexShrink: 0,
+                      }}
+                    />
+                    {opt.label}
+                  </div>
+                ))}
               </div>
             )}
           </div>
 
-          {/* Filtro por estado */}
-          <div className="contracts-dropdown-container">
+          {/* Filtro estado */}
+          <div style={{ position: "relative" }}>
             <button
               onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
-              className="contracts-filter-button"
+              style={filterButtonStyle(selectedStatus !== "all")}
               type="button"
             >
-              <Clock className="icon" />
+              <TrendingUp size={13} />
               <span>{getStatusLabel()}</span>
-              <ChevronDown className="icon-small" />
+              <ChevronDown size={12} style={{ opacity: 0.6 }} />
             </button>
             {isStatusDropdownOpen && (
-              <div className="contracts-dropdown">
-                <ul className="contracts-dropdown-list">
-                  {statusOptions.map((opt) => (
-                    <li key={opt.id}>
+              <div style={dropdownStyle}>
+                {statusOptions.map((opt) => {
+                  const conf = getStatusConf(opt.value);
+                  return (
+                    <div
+                      key={opt.id}
+                      style={dropdownItemStyle(selectedStatus === opt.value)}
+                      onClick={() => {
+                        setSelectedStatus(opt.value);
+                        setIsStatusDropdownOpen(false);
+                      }}
+                    >
                       <div
-                        className="contracts-dropdown-item"
-                        onClick={() => {
-                          setSelectedStatus(opt.value);
-                          setIsStatusDropdownOpen(false);
+                        style={{
+                          width: "7px",
+                          height: "7px",
+                          borderRadius: "50%",
+                          backgroundColor:
+                            opt.value !== "all" ? conf.dot : "#374151",
+                          flexShrink: 0,
                         }}
-                      >
-                        <input
-                          type="radio"
-                          checked={selectedStatus === opt.value}
-                          readOnly
-                          className="radio"
-                        />
-                        <label className="radio-label">{opt.label}</label>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                      />
+                      {opt.label}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
 
-          {/* Filtro por año */}
-          <div className="contracts-dropdown-container">
+          {/* Filtro año */}
+          <div style={{ position: "relative" }}>
             <button
               onClick={() => setIsYearDropdownOpen(!isYearDropdownOpen)}
-              className="contracts-filter-button"
+              style={filterButtonStyle(selectedYear !== "all")}
               type="button"
             >
-              <Calendar className="icon" />
+              <Calendar size={13} />
               <span>{getYearLabel()}</span>
-              <ChevronDown className="icon-small" />
+              <ChevronDown size={12} style={{ opacity: 0.6 }} />
             </button>
             {isYearDropdownOpen && (
-              <div className="contracts-dropdown">
-                <ul className="contracts-dropdown-list">
-                  {yearOptions.map((opt) => (
-                    <li key={opt.id}>
-                      <div
-                        className="contracts-dropdown-item"
-                        onClick={() => {
-                          setSelectedYear(opt.value);
-                          setIsYearDropdownOpen(false);
-                        }}
-                      >
-                        <input
-                          type="radio"
-                          checked={selectedYear === opt.value}
-                          readOnly
-                          className="radio"
-                        />
-                        <label className="radio-label">{opt.label}</label>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+              <div style={dropdownStyle}>
+                {yearOptions.map((opt) => (
+                  <div
+                    key={opt.id}
+                    style={dropdownItemStyle(selectedYear === opt.value)}
+                    onClick={() => {
+                      setSelectedYear(opt.value);
+                      setIsYearDropdownOpen(false);
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "6px",
+                        height: "6px",
+                        borderRadius: "50%",
+                        backgroundColor:
+                          selectedYear === opt.value ? "#58b2ee" : "#374151",
+                        flexShrink: 0,
+                      }}
+                    />
+                    {opt.label}
+                  </div>
+                ))}
               </div>
             )}
           </div>
 
-          {/* Filtro por calle */}
-          <div className="contracts-street-filter">
-            <div style={{ position: "relative", width: "100%" }}>
+          {/* Filtro calle */}
+          <div style={{ position: "relative", display: "flex", gap: "0.4rem" }}>
+            <div style={{ position: "relative" }}>
+              <MapPin
+                size={13}
+                style={{
+                  position: "absolute",
+                  left: "0.65rem",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "#6b7280",
+                  pointerEvents: "none",
+                }}
+              />
               <input
                 type="text"
                 value={streetTerm}
@@ -523,220 +781,463 @@ const ContractTable: React.FC = () => {
                 onBlur={() =>
                   setTimeout(() => setIsStreetDropdownOpen(false), 150)
                 }
-                className="contracts-search-input"
-                placeholder="Filtrar por calle"
+                style={{
+                  backgroundColor: selectedStreetKey ? "#1a2a3a" : "#13151c",
+                  border: `1px solid ${selectedStreetKey ? "#58b2ee55" : "#252831"}`,
+                  borderRadius: "8px",
+                  color: "#d1d5db",
+                  fontSize: "0.8rem",
+                  padding: "0.5rem 0.75rem 0.5rem 2rem",
+                  outline: "none",
+                  width: "190px",
+                }}
+                placeholder="Filtrar por calle..."
               />
               {isStreetDropdownOpen && (
-                <div
-                  className="contracts-dropdown"
-                  style={{
-                    position: "absolute",
-                    top: "calc(100% + 6px)",
-                    left: 0,
-                    right: 0,
-                    zIndex: 20,
-                  }}
-                >
-                  <ul className="contracts-dropdown-list">
-                    {streetSuggestions.length > 0 ? (
-                      streetSuggestions.map((g) => (
-                        <li key={g.key}>
-                          <div
-                            className="contracts-dropdown-item"
-                            onMouseDown={(e) => e.preventDefault()}
-                            onClick={() => {
-                              setStreetTerm(g.label);
-                              setSelectedStreetKey(g.key);
-                              setIsStreetDropdownOpen(false);
-                            }}
-                            style={{
-                              display: "flex",
-                              flexDirection: "column",
-                              gap: "0.25rem",
-                            }}
+                <div style={{ ...dropdownStyle, width: "240px" }}>
+                  {streetSuggestions.length > 0 ? (
+                    streetSuggestions.map((g) => (
+                      <div
+                        key={g.key}
+                        style={{
+                          ...dropdownItemStyle(selectedStreetKey === g.key),
+                          flexDirection: "column",
+                          alignItems: "flex-start",
+                          gap: "0.2rem",
+                        }}
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => {
+                          setStreetTerm(g.label);
+                          setSelectedStreetKey(g.key);
+                          setIsStreetDropdownOpen(false);
+                        }}
+                      >
+                        <span style={{ fontWeight: 600 }}>{g.label}</span>
+                        {g.variants.length > 0 && (
+                          <span
+                            style={{ fontSize: "0.68rem", color: "#6b7280" }}
                           >
-                            <div
-                              style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                              }}
-                            >
-                              <span style={{ fontWeight: 600 }}>{g.label}</span>
-                            </div>
-                            {g.variants.length > 0 && (
-                              <div
-                                style={{ fontSize: "0.75rem", color: "#aaa" }}
-                              >
-                                También aparece como: {g.variants.join(" · ")}
-                              </div>
-                            )}
-                          </div>
-                        </li>
-                      ))
-                    ) : (
-                      <li>
-                        <div className="contracts-dropdown-item">
-                          No hay coincidencias
-                        </div>
-                      </li>
-                    )}
-                  </ul>
+                            {g.variants.join(" · ")}
+                          </span>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <div
+                      style={{
+                        padding: "0.75rem 0.9rem",
+                        color: "#6b7280",
+                        fontSize: "0.8rem",
+                      }}
+                    >
+                      Sin coincidencias
+                    </div>
+                  )}
                 </div>
               )}
             </div>
             {(streetTerm.trim() !== "" || selectedStreetKey) && (
               <button
                 type="button"
-                className="contracts-filter-button"
-                style={{ padding: "0.55rem 0.8rem" }}
                 onClick={() => {
                   setStreetTerm("");
                   setSelectedStreetKey("");
                 }}
+                style={{ ...filterButtonStyle(false), padding: "0.5rem" }}
               >
-                Limpiar
+                <X size={13} />
               </button>
             )}
           </div>
 
           {/* Buscador */}
-          <div className="contracts-search-container">
-            <Search className="search-icon" />
+          <div style={{ position: "relative", marginLeft: "auto" }}>
+            <Search
+              size={13}
+              style={{
+                position: "absolute",
+                left: "0.65rem",
+                top: "50%",
+                transform: "translateY(-50%)",
+                color: "#6b7280",
+                pointerEvents: "none",
+              }}
+            />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="contracts-search-input"
-              placeholder="Buscar por contrato o nombre..."
-            />
-          </div>
-        </div>
-
-        {/* Indicador de totales */}
-        {!loading && !error && (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              padding: "0.75rem 1rem",
-              borderBottom: "1px solid #2a2a2a",
-            }}
-          >
-            <div
               style={{
+                backgroundColor: "#13151c",
+                border: `1px solid ${searchTerm ? "#58b2ee55" : "#252831"}`,
+                borderRadius: "8px",
+                color: "#d1d5db",
                 fontSize: "0.8rem",
-                color: "#999",
-                padding: "0.25rem 0.75rem",
-                backgroundColor: "#2b2e35",
-                borderRadius: "6px",
+                padding: "0.5rem 0.75rem 0.5rem 2rem",
+                outline: "none",
+                width: "220px",
+              }}
+              placeholder="Contrato o nombre..."
+            />
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={() => setSearchTerm("")}
+                style={{
+                  position: "absolute",
+                  right: "0.5rem",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "#6b7280",
+                  padding: "0.1rem",
+                }}
+              >
+                <X size={12} />
+              </button>
+            )}
+          </div>
+
+          {/* Limpiar todo */}
+          {activeFiltersCount > 1 && (
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedFilter("all");
+                setSelectedStatus("all");
+                setStreetTerm("");
+                setSelectedStreetKey("");
+                setSearchTerm("");
+              }}
+              style={{
+                ...filterButtonStyle(false),
+                color: "#f87171",
+                borderColor: "#7f1d1d22",
+                gap: "0.3rem",
               }}
             >
-              Total de contratos:{" "}
-              <strong style={{ color: "#58b2ee" }}>{tableRows.length}</strong>
-            </div>
-          </div>
-        )}
+              <X size={12} />
+              Limpiar todo
+            </button>
+          )}
+        </div>
 
         {loading && (
-          <p style={{ textAlign: "center", padding: "2rem" }}>
-            Cargando datos...
-          </p>
+          <div
+            style={{ textAlign: "center", padding: "3rem", color: "#6b7280" }}
+          >
+            <div style={{ fontSize: "0.9rem" }}>Cargando datos...</div>
+          </div>
         )}
         {error && (
-          <p style={{ textAlign: "center", padding: "2rem", color: "#ff6b6b" }}>
+          <div
+            style={{
+              textAlign: "center",
+              padding: "2rem",
+              color: "#f87171",
+              fontSize: "0.85rem",
+            }}
+          >
             {error}
-          </p>
+          </div>
         )}
 
         {!loading && !error && (
           <>
-            <div className="contracts-table-wrapper">
-              <table className="contracts-table">
-                <thead className="contracts-thead">
-                  <tr>
-                    <th className="th">N° Contrato</th>
-                    <th className="th">Nombre</th>
-                    <th className="th">Calle</th>
-                    <th className="th">Año</th>
-                    <th className="th">Total pagado</th>
-                    <th className="th">Total restante</th>
-                    <th className="th">Estatus</th>
-                    <th className="th">Detalles</th>
+            {/* ── TABLE ───────────────────────────────────────────── */}
+            <div style={{ overflowX: "auto" }}>
+              <table
+                style={{
+                  width: "100%",
+                  borderCollapse: "collapse",
+                  fontSize: "0.82rem",
+                }}
+              >
+                <thead>
+                  <tr
+                    style={{
+                      backgroundColor: "#0a0c10",
+                      borderBottom: "1px solid #1a1d24",
+                    }}
+                  >
+                    {[
+                      "N° Contrato",
+                      "Nombre",
+                      "Calle",
+                      "Año",
+                      "Total pagado",
+                      "Total restante",
+                      "Estatus",
+                      "",
+                    ].map((h, i) => (
+                      <th
+                        key={i}
+                        style={{
+                          padding: "0.75rem 1rem",
+                          textAlign: i >= 4 && i <= 5 ? "right" : "left",
+                          fontSize: "0.7rem",
+                          fontWeight: 600,
+                          color: "#6b7280",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.07em",
+                          whiteSpace: "nowrap",
+                          borderRight: i < 7 ? "1px solid #1a1d24" : "none",
+                        }}
+                      >
+                        {h}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
 
-                <tbody className="contracts-tbody">
-                  {currentRows.map((row) => (
-                    <tr key={row.rowKey}>
-                      <td className="td">{row.contract.numero_contrato}</td>
-                      <td className="td-name">
-                        {row.contract.nombre_completo}
-                      </td>
-                      <td className="td">{row.contract.calle}</td>
-                      <td className="td">{row.anioFila}</td>
-                      <td className="td">
-                        ${row.pagosTotalesFila.toLocaleString()}
-                      </td>
-                      <td className="td">
-                        ${row.saldoPendienteFila.toLocaleString()}
-                      </td>
-                      <td className="td">
-                        <span
-                          className={`status-badge ${getStatusClass(row.contract.estatus_deuda)}`}
-                          style={badgeStyle(row.contract.estatus_deuda)}
-                        >
-                          {row.contract.estatus_deuda}
-                        </span>
-                      </td>
-
-                      {/* Ver más — pre-filtra modal al año de esta fila */}
-                      <td className="td-actions">
-                        <button
-                          onClick={() => {
-                            setModalPreYear(row.modalYear);
-                            setSelectedContract(row.contract);
+                <tbody>
+                  {currentRows.map((row) => {
+                    const isHovered = hoveredRow === row.rowKey;
+                    return (
+                      <tr
+                        key={row.rowKey}
+                        onMouseEnter={() => setHoveredRow(row.rowKey)}
+                        onMouseLeave={() => setHoveredRow(null)}
+                        style={{
+                          backgroundColor: isHovered
+                            ? "#13151c"
+                            : "transparent",
+                          borderBottom: "1px solid #1a1d24",
+                          transition: "background 0.1s",
+                          cursor: "default",
+                        }}
+                      >
+                        {/* N° Contrato */}
+                        <td
+                          style={{
+                            padding: "0.7rem 1rem",
+                            borderRight: "1px solid #1a1d24",
                           }}
-                          className="view-button"
                         >
-                          <Eye className="icon-small" />
-                          Ver más
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                          <span
+                            style={{
+                              fontFamily: "monospace",
+                              fontSize: "0.8rem",
+                              color: "#58b2ee",
+                              backgroundColor: "#0d1f2e",
+                              padding: "0.2rem 0.5rem",
+                              borderRadius: "5px",
+                              fontWeight: 600,
+                            }}
+                          >
+                            #{row.contract.numero_contrato}
+                          </span>
+                        </td>
+
+                        {/* Nombre */}
+                        <td
+                          style={{
+                            padding: "0.7rem 1rem",
+                            color: "#e5e7eb",
+                            fontWeight: 500,
+                            maxWidth: "200px",
+                            borderRight: "1px solid #1a1d24",
+                          }}
+                        >
+                          <div
+                            style={{
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {row.contract.nombre_completo}
+                          </div>
+                        </td>
+
+                        {/* Calle */}
+                        <td
+                          style={{
+                            padding: "0.7rem 1rem",
+                            color: "#9ca3af",
+                            maxWidth: "160px",
+                            borderRight: "1px solid #1a1d24",
+                          }}
+                        >
+                          <div
+                            style={{
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "0.35rem",
+                            }}
+                          >
+                            <MapPin
+                              size={11}
+                              style={{ flexShrink: 0, color: "#4b5563" }}
+                            />
+                            {row.contract.calle || "—"}
+                          </div>
+                        </td>
+
+                        {/* Año */}
+                        <td
+                          style={{
+                            padding: "0.7rem 1rem",
+                            color: "#6b7280",
+                            fontFamily: "monospace",
+                            borderRight: "1px solid #1a1d24",
+                          }}
+                        >
+                          {row.anioFila}
+                        </td>
+
+                        {/* Total pagado */}
+                        <td
+                          style={{
+                            padding: "0.7rem 1rem",
+                            textAlign: "right",
+                            borderRight: "1px solid #1a1d24",
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontFamily: "monospace",
+                              fontWeight: 600,
+                              fontSize: "0.83rem",
+                              color:
+                                row.pagosTotalesFila > 0
+                                  ? "#4ade80"
+                                  : "#6b7280",
+                            }}
+                          >
+                            {formatMoney(row.pagosTotalesFila)}
+                          </span>
+                        </td>
+
+                        {/* Total restante */}
+                        <td
+                          style={{
+                            padding: "0.7rem 1rem",
+                            textAlign: "right",
+                            borderRight: "1px solid #1a1d24",
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontFamily: "monospace",
+                              fontWeight: 600,
+                              fontSize: "0.83rem",
+                              color:
+                                row.saldoPendienteFila > 0
+                                  ? "#f87171"
+                                  : "#4ade80",
+                            }}
+                          >
+                            {formatMoney(row.saldoPendienteFila)}
+                          </span>
+                        </td>
+
+                        {/* Estatus */}
+                        <td
+                          style={{
+                            padding: "0.7rem 1rem",
+                            borderRight: "1px solid #1a1d24",
+                          }}
+                        >
+                          <StatusBadge estatus={row.contract.estatus_deuda} />
+                        </td>
+
+                        {/* Acción */}
+                        <td
+                          style={{
+                            padding: "0.7rem 1rem",
+                            textAlign: "center",
+                          }}
+                        >
+                          <button
+                            onClick={() => {
+                              setModalPreYear(row.modalYear);
+                              setSelectedContract(row.contract);
+                            }}
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "0.35rem",
+                              padding: "0.35rem 0.7rem",
+                              backgroundColor: isHovered
+                                ? "#1a2a3a"
+                                : "#13151c",
+                              border: "1px solid #252831",
+                              borderRadius: "6px",
+                              color: "#58b2ee",
+                              fontSize: "0.75rem",
+                              fontWeight: 500,
+                              cursor: "pointer",
+                              transition: "all 0.15s",
+                            }}
+                          >
+                            <Eye size={12} />
+                            Ver
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
 
               {currentRows.length === 0 && (
-                <div className="no-results">No se encontraron datos</div>
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: "3rem",
+                    color: "#6b7280",
+                    fontSize: "0.85rem",
+                    borderTop: "1px solid #1a1d24",
+                  }}
+                >
+                  <Search
+                    size={24}
+                    style={{
+                      margin: "0 auto 0.75rem",
+                      display: "block",
+                      opacity: 0.3,
+                    }}
+                  />
+                  No se encontraron resultados con los filtros actuales
+                </div>
               )}
             </div>
 
-            {/* Paginación */}
+            {/* ── PAGINATION ──────────────────────────────────────── */}
             {tableRows.length > 0 && (
               <div
                 style={{
                   display: "flex",
                   justifyContent: "center",
-                  gap: "0.5rem",
-                  marginTop: "1.5rem",
-                  flexWrap: "wrap",
+                  alignItems: "center",
+                  gap: "0.35rem",
+                  padding: "1.25rem 1.75rem",
+                  borderTop: "1px solid #1a1d24",
                 }}
               >
                 <button
                   onClick={() => goToPage(currentPage - 1)}
                   disabled={currentPage === 1}
                   style={{
-                    backgroundColor: currentPage === 1 ? "#2b2e35" : "#58b2ee",
-                    color: currentPage === 1 ? "#666" : "white",
-                    border: "none",
-                    padding: "0.6rem 0.8rem",
-                    borderRadius: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "32px",
+                    height: "32px",
+                    backgroundColor: "#13151c",
+                    border: "1px solid #252831",
+                    borderRadius: "7px",
+                    color: currentPage === 1 ? "#374151" : "#9ca3af",
                     cursor: currentPage === 1 ? "not-allowed" : "pointer",
                   }}
                 >
-                  <ChevronLeft size={18} />
+                  <ChevronLeft size={15} />
                 </button>
 
                 {getPageNumbers().map((page, index) =>
@@ -745,23 +1246,30 @@ const ContractTable: React.FC = () => {
                       key={index}
                       onClick={() => goToPage(page)}
                       style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        minWidth: "32px",
+                        height: "32px",
+                        padding: "0 0.5rem",
                         backgroundColor:
-                          currentPage === page ? "#58b2ee" : "#2b2e35",
-                        color: currentPage === page ? "white" : "#ccc",
-                        border:
-                          currentPage === page
-                            ? "2px solid #2F3B7E"
-                            : "1px solid #3b3f47",
-                        padding: "0.6rem 1rem",
-                        borderRadius: "8px",
+                          currentPage === page ? "#58b2ee" : "#13151c",
+                        border: `1px solid ${currentPage === page ? "#58b2ee" : "#252831"}`,
+                        borderRadius: "7px",
+                        color: currentPage === page ? "#0a0c10" : "#9ca3af",
+                        fontWeight: currentPage === page ? 700 : 400,
+                        fontSize: "0.8rem",
                         cursor: "pointer",
                       }}
                     >
                       {page}
                     </button>
                   ) : (
-                    <span key={index} style={{ color: "#666" }}>
-                      ...
+                    <span
+                      key={index}
+                      style={{ color: "#374151", padding: "0 0.1rem" }}
+                    >
+                      ···
                     </span>
                   ),
                 )}
@@ -770,18 +1278,31 @@ const ContractTable: React.FC = () => {
                   onClick={() => goToPage(currentPage + 1)}
                   disabled={currentPage === totalPages}
                   style={{
-                    backgroundColor:
-                      currentPage === totalPages ? "#2b2e35" : "#58b2ee",
-                    color: currentPage === totalPages ? "#666" : "white",
-                    border: "none",
-                    padding: "0.6rem 0.8rem",
-                    borderRadius: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "32px",
+                    height: "32px",
+                    backgroundColor: "#13151c",
+                    border: "1px solid #252831",
+                    borderRadius: "7px",
+                    color: currentPage === totalPages ? "#374151" : "#9ca3af",
                     cursor:
                       currentPage === totalPages ? "not-allowed" : "pointer",
                   }}
                 >
-                  <ChevronRight size={18} />
+                  <ChevronRight size={15} />
                 </button>
+
+                <span
+                  style={{
+                    marginLeft: "0.75rem",
+                    fontSize: "0.75rem",
+                    color: "#4b5563",
+                  }}
+                >
+                  Página {currentPage} de {totalPages}
+                </span>
               </div>
             )}
           </>
@@ -789,12 +1310,11 @@ const ContractTable: React.FC = () => {
       </div>
 
       {/* ────────────────────────────────────────────────────────────
-          MODAL — pre-filtrado al año de la fila clickeada
+          MODAL
       ──────────────────────────────────────────────────────────── */}
       {selectedContract &&
         (() => {
           const allPagos = selectedContract.pagos || [];
-
           const pagosFiltrados =
             modalPreYear !== "all"
               ? allPagos.filter((p) => p.anio?.toString() === modalPreYear)
@@ -828,146 +1348,247 @@ const ContractTable: React.FC = () => {
           const ultimoPagoFiltrado = pagosOrdenados.length
             ? pagosOrdenados[pagosOrdenados.length - 1].fecha_pago
             : "";
-
           const pagosConComentarios = pagosOrdenados.filter(
             (p) => p.comentarios && p.comentarios.trim() !== "",
           );
 
           return (
             <div
-              className="modal-overlay"
+              style={{
+                position: "fixed",
+                inset: 0,
+                backgroundColor: "rgba(0,0,0,0.75)",
+                backdropFilter: "blur(4px)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 1000,
+                padding: "1rem",
+              }}
               onClick={() => setSelectedContract(null)}
             >
               <div
-                className="modal-content"
+                style={{
+                  backgroundColor: "#0d0f14",
+                  border: "1px solid #1a1d24",
+                  borderRadius: "16px",
+                  width: "100%",
+                  maxWidth: "680px",
+                  maxHeight: "90vh",
+                  display: "flex",
+                  flexDirection: "column",
+                  overflow: "hidden",
+                  boxShadow: "0 24px 80px rgba(0,0,0,0.8)",
+                }}
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="modal-header">
-                  <h3 className="modal-title">
-                    Detalles del Contrato
-                    {modalPreYear !== "all" && (
+                {/* Modal Header */}
+                <div
+                  style={{
+                    padding: "1.25rem 1.5rem",
+                    borderBottom: "1px solid #1a1d24",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    background: "linear-gradient(to bottom, #13151c, #0d0f14)",
+                  }}
+                >
+                  <div>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.75rem",
+                        marginBottom: "0.4rem",
+                      }}
+                    >
                       <span
                         style={{
-                          marginLeft: "0.75rem",
+                          fontFamily: "monospace",
                           fontSize: "0.85rem",
-                          fontWeight: 400,
                           color: "#58b2ee",
-                          backgroundColor: "#1a2a3a",
+                          backgroundColor: "#0d1f2e",
+                          border: "1px solid #1a3a5a",
                           padding: "0.2rem 0.6rem",
                           borderRadius: "6px",
-                          border: "1px solid #58b2ee44",
+                          fontWeight: 700,
                         }}
                       >
-                        Año {modalPreYear}
+                        #{selectedContract.numero_contrato}
                       </span>
-                    )}
-                  </h3>
-                  <button
-                    className="close-button"
-                    onClick={() => setSelectedContract(null)}
-                  >
-                    x
-                  </button>
-                </div>
-
-                <div className="modal-body">
-                  {/* INFO GENERAL */}
-                  <div className="detail-section">
-                    <h4 className="section-title">Información General</h4>
-                    <div className="detail-grid">
-                      <div className="detail-item">
-                        <div className="detail-label">Número de Contrato</div>
-                        <div className="detail-value">
-                          {selectedContract.numero_contrato}
-                        </div>
-                      </div>
-                      <div className="detail-item">
-                        <div className="detail-label">Nombre del Cliente</div>
-                        <div className="detail-value">
-                          {selectedContract.nombre_completo}
-                        </div>
-                      </div>
-                      <div className="detail-item">
-                        <div className="detail-label">Servicio</div>
-                        <div className="detail-value">
-                          {selectedContract.nombre_servicio}
-                        </div>
-                      </div>
-                      <div className="detail-item">
-                        <div className="detail-label">Estatus</div>
-                        <div className="detail-value">
-                          <span
-                            className={`status-badge ${getStatusClass(selectedContract.estatus_deuda)}`}
-                            style={badgeStyle(selectedContract.estatus_deuda)}
-                          >
-                            {selectedContract.estatus_deuda}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* RESUMEN FINANCIERO */}
-                  <div className="detail-section">
-                    <h4 className="section-title">
-                      Resumen Financiero
+                      <StatusBadge estatus={selectedContract.estatus_deuda} />
                       {modalPreYear !== "all" && (
                         <span
                           style={{
-                            fontSize: "0.75rem",
-                            fontWeight: 400,
-                            color: "#999",
-                            marginLeft: "0.5rem",
+                            fontSize: "0.72rem",
+                            color: "#9ca3af",
+                            backgroundColor: "#1a1d24",
+                            border: "1px solid #252831",
+                            padding: "0.2rem 0.5rem",
+                            borderRadius: "5px",
                           }}
                         >
-                          (solo {modalPreYear})
+                          {modalPreYear}
                         </span>
                       )}
-                    </h4>
-                    <div className="detail-grid">
-                      <div className="detail-item">
-                        <div className="detail-label">Total Pagado</div>
-                        <div className="detail-value text-success">
-                          ${montoFiltrado.toLocaleString()}
-                        </div>
-                      </div>
-                      <div className="detail-item">
-                        <div className="detail-label">Primer pago</div>
-                        <div className="detail-value">
-                          {formatFechaLocal(fechaInicioFiltrada)}
-                        </div>
-                      </div>
-                      <div className="detail-item">
-                        <div className="detail-label">Último Pago</div>
-                        <div className="detail-value">
-                          {formatFechaLocal(ultimoPagoFiltrado)}
-                        </div>
-                      </div>
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "1rem",
+                        fontWeight: 700,
+                        color: "#f9fafb",
+                      }}
+                    >
+                      {selectedContract.nombre_completo}
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "1rem",
+                        marginTop: "0.3rem",
+                        fontSize: "0.75rem",
+                        color: "#6b7280",
+                      }}
+                    >
+                      <span
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.3rem",
+                        }}
+                      >
+                        <CreditCard size={11} />{" "}
+                        {selectedContract.nombre_servicio}
+                      </span>
+                      {selectedContract.calle && (
+                        <span
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.3rem",
+                          }}
+                        >
+                          <MapPin size={11} /> {selectedContract.calle}
+                        </span>
+                      )}
                     </div>
                   </div>
+                  <button
+                    onClick={() => setSelectedContract(null)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: "28px",
+                      height: "28px",
+                      backgroundColor: "#13151c",
+                      border: "1px solid #252831",
+                      borderRadius: "7px",
+                      color: "#6b7280",
+                      cursor: "pointer",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
 
-                  {/* HISTORIAL agrupado por año */}
-                  <div className="detail-section">
-                    <h4 className="section-title">
-                      Historial de Pagos ({pagosFiltrados.length})
-                    </h4>
+                {/* Modal Body */}
+                <div
+                  style={{
+                    overflowY: "auto",
+                    flex: 1,
+                    padding: "1.25rem 1.5rem",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "1.25rem",
+                  }}
+                >
+                  {/* Stat Cards */}
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(3, 1fr)",
+                      gap: "0.75rem",
+                    }}
+                  >
+                    <StatCard
+                      label="Total pagado"
+                      value={formatMoney(montoFiltrado)}
+                      sub={`${pagosOrdenados.length} pagos`}
+                      color="#4ade80"
+                      icon={<DollarSign size={14} />}
+                    />
+                    <StatCard
+                      label="Primer pago"
+                      value={formatFechaLocal(fechaInicioFiltrada)}
+                      color="#38bdf8"
+                      icon={<Calendar size={14} />}
+                    />
+                    <StatCard
+                      label="Último pago"
+                      value={formatFechaLocal(ultimoPagoFiltrado)}
+                      color="#a78bfa"
+                      icon={<Clock size={14} />}
+                    />
+                  </div>
+
+                  {/* Historial */}
+                  <div>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.6rem",
+                        marginBottom: "0.9rem",
+                      }}
+                    >
+                      <CreditCard size={13} style={{ color: "#6b7280" }} />
+                      <span
+                        style={{
+                          fontSize: "0.75rem",
+                          fontWeight: 700,
+                          color: "#9ca3af",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.08em",
+                        }}
+                      >
+                        Historial de Pagos
+                      </span>
+                      <span
+                        style={{
+                          fontSize: "0.68rem",
+                          backgroundColor: "#1a1d24",
+                          color: "#6b7280",
+                          padding: "0.15rem 0.4rem",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        {pagosFiltrados.length}
+                      </span>
+                    </div>
 
                     {pagosFiltrados.length === 0 ? (
                       <div
                         style={{
                           textAlign: "center",
-                          color: "#999",
-                          padding: "1.5rem",
+                          color: "#6b7280",
+                          padding: "2rem",
+                          backgroundColor: "#0a0c10",
+                          borderRadius: "10px",
+                          border: "1px solid #1a1d24",
+                          fontSize: "0.82rem",
                         }}
                       >
-                        No hay pagos registrados para este período
+                        Sin pagos registrados para este período
                       </div>
                     ) : (
                       <div
                         style={{
                           display: "flex",
                           flexDirection: "column",
-                          gap: "1.25rem",
+                          gap: "1rem",
                         }}
                       >
                         {aniosOrdenados.map((anio) => {
@@ -978,85 +1599,214 @@ const ContractTable: React.FC = () => {
                           );
 
                           return (
-                            <div key={anio}>
-                              {/* Encabezado de sección por año — solo si hay más de 1 */}
+                            <div
+                              key={anio}
+                              style={{
+                                backgroundColor: "#0a0c10",
+                                border: "1px solid #1a1d24",
+                                borderRadius: "10px",
+                                overflow: "hidden",
+                              }}
+                            >
                               {aniosOrdenados.length > 1 && (
                                 <div
                                   style={{
                                     display: "flex",
+                                    justifyContent: "space-between",
                                     alignItems: "center",
-                                    gap: "0.75rem",
-                                    marginBottom: "0.6rem",
+                                    padding: "0.6rem 0.9rem",
+                                    backgroundColor: "#13151c",
+                                    borderBottom: "1px solid #1a1d24",
                                   }}
                                 >
                                   <span
                                     style={{
-                                      fontSize: "0.8rem",
+                                      fontSize: "0.75rem",
                                       fontWeight: 700,
                                       color: "#58b2ee",
-                                      backgroundColor: "#1a2a3a",
-                                      padding: "0.2rem 0.75rem",
-                                      borderRadius: "6px",
-                                      border: "1px solid #58b2ee55",
-                                      letterSpacing: "0.05em",
                                     }}
                                   >
                                     {anio}
                                   </span>
                                   <span
                                     style={{
-                                      fontSize: "0.75rem",
-                                      color: "#888",
+                                      fontSize: "0.72rem",
+                                      color: "#6b7280",
                                     }}
                                   >
                                     {pagosDeEsteAnio.length} pago
-                                    {pagosDeEsteAnio.length !== 1 ? "s" : ""} ·
-                                    Total:{" "}
+                                    {pagosDeEsteAnio.length !== 1
+                                      ? "s"
+                                      : ""} ·{" "}
                                     <strong style={{ color: "#4ade80" }}>
-                                      ${totalAnio.toLocaleString()}
+                                      {formatMoney(totalAnio)}
                                     </strong>
                                   </span>
-                                  <div
-                                    style={{
-                                      flex: 1,
-                                      height: "1px",
-                                      backgroundColor: "#2a2a2a",
-                                    }}
-                                  />
                                 </div>
                               )}
-                              <div className="overflow-x-auto rounded-lg">
-                                <table className="payments-table">
-                                  <thead>
-                                    <tr>
-                                      <th>#</th>
-                                      <th>Fecha Pago</th>
-                                      <th>Monto</th>
-                                      <th>Descuento Aplicado</th>
+                              <table
+                                style={{
+                                  width: "100%",
+                                  borderCollapse: "collapse",
+                                  fontSize: "0.78rem",
+                                }}
+                              >
+                                <thead>
+                                  <tr
+                                    style={{
+                                      borderBottom: "1px solid #1a1d24",
+                                    }}
+                                  >
+                                    <th
+                                      style={{
+                                        padding: "0.5rem 0.9rem",
+                                        textAlign: "left",
+                                        color: "#4b5563",
+                                        fontWeight: 600,
+                                        fontSize: "0.68rem",
+                                        textTransform: "uppercase",
+                                        letterSpacing: "0.06em",
+                                      }}
+                                    >
+                                      #
+                                    </th>
+                                    <th
+                                      style={{
+                                        padding: "0.5rem 0.9rem",
+                                        textAlign: "left",
+                                        color: "#4b5563",
+                                        fontWeight: 600,
+                                        fontSize: "0.68rem",
+                                        textTransform: "uppercase",
+                                        letterSpacing: "0.06em",
+                                      }}
+                                    >
+                                      Fecha
+                                    </th>
+                                    <th
+                                      style={{
+                                        padding: "0.5rem 0.9rem",
+                                        textAlign: "right",
+                                        color: "#4b5563",
+                                        fontWeight: 600,
+                                        fontSize: "0.68rem",
+                                        textTransform: "uppercase",
+                                        letterSpacing: "0.06em",
+                                      }}
+                                    >
+                                      Monto
+                                    </th>
+                                    <th
+                                      style={{
+                                        padding: "0.5rem 0.9rem",
+                                        textAlign: "left",
+                                        color: "#4b5563",
+                                        fontWeight: 600,
+                                        fontSize: "0.68rem",
+                                        textTransform: "uppercase",
+                                        letterSpacing: "0.06em",
+                                      }}
+                                    >
+                                      Descuento
+                                    </th>
+
+                                    <th
+                                      style={{
+                                        padding: "0.5rem 0.9rem",
+                                        textAlign: "left",
+                                        color: "#4b5563",
+                                        fontWeight: 600,
+                                        fontSize: "0.68rem",
+                                        textTransform: "uppercase",
+                                        letterSpacing: "0.06em",
+                                      }}
+                                    >
+                                      Cobrador
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {pagosDeEsteAnio.map((pago, index) => (
+                                    <tr
+                                      key={pago.id}
+                                      style={{
+                                        borderBottom:
+                                          index < pagosDeEsteAnio.length - 1
+                                            ? "1px solid #13151c"
+                                            : "none",
+                                      }}
+                                    >
+                                      <td
+                                        style={{
+                                          padding: "0.55rem 0.9rem",
+                                          color: "#4b5563",
+                                          fontFamily: "monospace",
+                                        }}
+                                      >
+                                        {index + 1}
+                                      </td>
+                                      <td
+                                        style={{
+                                          padding: "0.55rem 0.9rem",
+                                          color: "#9ca3af",
+                                        }}
+                                      >
+                                        {formatFechaLocal(pago.fecha_pago)}
+                                      </td>
+                                      <td
+                                        style={{
+                                          padding: "0.55rem 0.9rem",
+                                          textAlign: "right",
+                                          fontFamily: "monospace",
+                                          fontWeight: 700,
+                                          color: "#4ade80",
+                                        }}
+                                      >
+                                        {formatMoney(
+                                          Number(pago.monto_recibido || 0),
+                                        )}
+                                      </td>
+                                      <td style={{ padding: "0.55rem 0.9rem" }}>
+                                        {pago.nombre_descuento ? (
+                                          <span
+                                            style={{
+                                              fontSize: "0.68rem",
+                                              backgroundColor: "#2d1a00",
+                                              color: "#fbbf24",
+                                              border: "1px solid #92400e44",
+                                              padding: "0.15rem 0.45rem",
+                                              borderRadius: "4px",
+                                            }}
+                                          >
+                                            {pago.nombre_descuento}
+                                          </span>
+                                        ) : (
+                                          <span
+                                            style={{
+                                              color: "#374151",
+                                              fontSize: "0.75rem",
+                                            }}
+                                          >
+                                            —
+                                          </span>
+                                        )}
+                                      </td>
+                                      <td
+                                        style={{
+                                          padding: "0.55rem 0.9rem",
+                                          color: "#9ca3af",
+                                        }}
+                                      >
+                                        {pago.cobrador || (
+                                          <span style={{ color: "#374151" }}>
+                                            —
+                                          </span>
+                                        )}
+                                      </td>
                                     </tr>
-                                  </thead>
-                                  <tbody>
-                                    {pagosDeEsteAnio.map((pago, index) => (
-                                      <tr key={pago.id}>
-                                        <td>{index + 1}</td>
-                                        <td>
-                                          {formatFechaLocal(pago.fecha_pago)}
-                                        </td>
-                                        <td className="text-success">
-                                          $
-                                          {Number(
-                                            pago.monto_recibido || 0,
-                                          ).toLocaleString()}
-                                        </td>
-                                        <td>
-                                          {pago.nombre_descuento ||
-                                            "Sin descuento"}
-                                        </td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              </div>
+                                  ))}
+                                </tbody>
+                              </table>
                             </div>
                           );
                         })}
@@ -1064,79 +1814,83 @@ const ContractTable: React.FC = () => {
                     )}
                   </div>
 
-                  {/* COMENTARIOS */}
-                  <div className="detail-section">
-                    <h4 className="section-title">Comentarios</h4>
-                    <div
-                      style={{
-                        backgroundColor: "#1e2028",
-                        borderRadius: "8px",
-                        padding: "1rem",
-                        border: "1px solid #2a2a2a",
-                        minHeight: "80px",
-                      }}
-                    >
-                      {pagosConComentarios.length > 0 ? (
-                        <div
+                  {/* Comentarios */}
+                  {pagosConComentarios.length > 0 && (
+                    <div>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.6rem",
+                          marginBottom: "0.75rem",
+                        }}
+                      >
+                        <MessageSquare size={13} style={{ color: "#6b7280" }} />
+                        <span
                           style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "0.75rem",
+                            fontSize: "0.75rem",
+                            fontWeight: 700,
+                            color: "#9ca3af",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.08em",
                           }}
                         >
-                          {pagosConComentarios.map((pago, index) => (
+                          Comentarios
+                        </span>
+                        <span
+                          style={{
+                            fontSize: "0.68rem",
+                            backgroundColor: "#1a1d24",
+                            color: "#6b7280",
+                            padding: "0.15rem 0.4rem",
+                            borderRadius: "4px",
+                          }}
+                        >
+                          {pagosConComentarios.length}
+                        </span>
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "0.5rem",
+                        }}
+                      >
+                        {pagosConComentarios.map((pago) => (
+                          <div
+                            key={pago.id}
+                            style={{
+                              backgroundColor: "#0a0c10",
+                              border: "1px solid #1a1d24",
+                              borderLeft: "3px solid #58b2ee",
+                              borderRadius: "8px",
+                              padding: "0.75rem 1rem",
+                            }}
+                          >
                             <div
-                              key={pago.id}
                               style={{
-                                backgroundColor: "#252831",
-                                padding: "0.75rem 1rem",
-                                borderRadius: "6px",
-                                borderLeft: "3px solid #58b2ee",
+                                fontSize: "0.7rem",
+                                color: "#58b2ee",
+                                marginBottom: "0.4rem",
                               }}
                             >
-                              <div
-                                style={{
-                                  display: "flex",
-                                  justifyContent: "space-between",
-                                  marginBottom: "0.5rem",
-                                }}
-                              >
-                                <span
-                                  style={{
-                                    fontSize: "0.75rem",
-                                    color: "#58b2ee",
-                                  }}
-                                >
-                                  Pago del {formatFechaLocal(pago.fecha_pago)}
-                                </span>
-                                <span
-                                  style={{ fontSize: "0.7rem", color: "#999" }}
-                                >
-                                  #{index + 1}
-                                </span>
-                              </div>
-                              <p style={{ margin: 0, color: "#e0e0e0" }}>
-                                {pago.comentarios}
-                              </p>
+                              Pago del {formatFechaLocal(pago.fecha_pago)}
                             </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div
-                          style={{
-                            textAlign: "center",
-                            color: "#999",
-                            padding: "1.5rem",
-                          }}
-                        >
-                          No hay comentarios registrados
-                          {modalPreYear !== "all"
-                            ? ` para ${modalPreYear}`
-                            : ""}
-                        </div>
-                      )}
+                            <p
+                              style={{
+                                margin: 0,
+                                fontSize: "0.8rem",
+                                color: "#d1d5db",
+                                lineHeight: 1.5,
+                              }}
+                            >
+                              {pago.comentarios}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>
