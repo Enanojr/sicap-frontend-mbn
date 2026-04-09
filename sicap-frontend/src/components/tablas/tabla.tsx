@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   Search,
   ChevronDown,
@@ -59,7 +59,7 @@ const statusOptions: FilterOption[] = [
 ];
 
 // ─────────────────────────────────────────────
-// Status Config
+// Status Config (definido fuera del componente para evitar re-creación)
 // ─────────────────────────────────────────────
 const statusConfig: Record<
   string,
@@ -101,17 +101,19 @@ const statusConfig: Record<
   },
 };
 
+const defaultStatusConf = {
+  bg: "#1e2028",
+  text: "#9ca3af",
+  border: "#374151",
+  icon: null,
+  dot: "#9ca3af",
+};
+
 const getStatusConf = (estatus: string) =>
-  statusConfig[estatus.trim().toLowerCase()] || {
-    bg: "#1e2028",
-    text: "#9ca3af",
-    border: "#374151",
-    icon: null,
-    dot: "#9ca3af",
-  };
+  statusConfig[estatus.trim().toLowerCase()] ?? defaultStatusConf;
 
 // ─────────────────────────────────────────────
-// Helpers
+// Helpers (fuera del componente — no se recrean)
 // ─────────────────────────────────────────────
 const formatFechaLocal = (fechaString: string): string => {
   if (!fechaString) return "—";
@@ -127,13 +129,13 @@ const formatFechaLocal = (fechaString: string): string => {
   });
 };
 
-const formatMoney = (amount: number): string =>
-  new Intl.NumberFormat("es-MX", {
-    style: "currency",
-    currency: "MXN",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
+const moneyFormatter = new Intl.NumberFormat("es-MX", {
+  style: "currency",
+  currency: "MXN",
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+});
+const formatMoney = (amount: number) => moneyFormatter.format(amount);
 
 const normalizeStreet = (value: string): string => {
   if (!value) return "";
@@ -153,9 +155,26 @@ const prettyStreet = (value: string) =>
   value.replace(/\b\w/g, (l) => l.toUpperCase());
 
 // ─────────────────────────────────────────────
-// Sub-components
+// Hook: debounce
 // ─────────────────────────────────────────────
-const StatusBadge: React.FC<{ estatus: string }> = ({ estatus }) => {
+function useDebounce<T>(value: T, delay = 300): T {
+  const [debounced, setDebounced] = useState<T>(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+  return debounced;
+}
+
+// ─────────────────────────────────────────────
+// Cache de datos: evita re-fetch innecesarios
+// ─────────────────────────────────────────────
+let cachedContracts: ContractSummary[] | null = null;
+
+// ─────────────────────────────────────────────
+// Sub-components (memoizados)
+// ─────────────────────────────────────────────
+const StatusBadge = React.memo<{ estatus: string }>(({ estatus }) => {
   const conf = getStatusConf(estatus);
   return (
     <span
@@ -179,15 +198,15 @@ const StatusBadge: React.FC<{ estatus: string }> = ({ estatus }) => {
       {estatus}
     </span>
   );
-};
+});
 
-const StatCard: React.FC<{
+const StatCard = React.memo<{
   label: string;
   value: string;
   sub?: string;
   color?: string;
   icon: React.ReactNode;
-}> = ({ label, value, sub, color = "#58b2ee", icon }) => (
+}>(({ label, value, sub, color = "#58b2ee", icon }) => (
   <div
     style={{
       backgroundColor: "#13151c",
@@ -230,7 +249,7 @@ const StatCard: React.FC<{
       style={{
         fontSize: "1.25rem",
         fontWeight: 700,
-        color: color,
+        color,
         fontVariantNumeric: "tabular-nums",
       }}
     >
@@ -238,7 +257,93 @@ const StatCard: React.FC<{
     </div>
     {sub && <div style={{ fontSize: "0.72rem", color: "#6b7280" }}>{sub}</div>}
   </div>
-);
+));
+
+// ─────────────────────────────────────────────
+// Helpers de estilos (fuera del componente)
+// ─────────────────────────────────────────────
+const dropdownStyle: React.CSSProperties = {
+  position: "absolute",
+  top: "calc(100% + 6px)",
+  left: 0,
+  minWidth: "200px",
+  backgroundColor: "#13151c",
+  border: "1px solid #252831",
+  borderRadius: "10px",
+  boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+  zIndex: 30,
+  overflow: "hidden",
+};
+
+const getDropdownItemStyle = (active: boolean): React.CSSProperties => ({
+  display: "flex",
+  alignItems: "center",
+  gap: "0.6rem",
+  padding: "0.6rem 0.9rem",
+  cursor: "pointer",
+  backgroundColor: active ? "#1e2533" : "transparent",
+  color: active ? "#58b2ee" : "#d1d5db",
+  fontSize: "0.82rem",
+  transition: "background 0.15s",
+});
+
+const getFilterButtonStyle = (active: boolean): React.CSSProperties => ({
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "0.4rem",
+  padding: "0.5rem 0.85rem",
+  backgroundColor: active ? "#1a2a3a" : "#13151c",
+  border: `1px solid ${active ? "#58b2ee55" : "#252831"}`,
+  borderRadius: "8px",
+  color: active ? "#58b2ee" : "#9ca3af",
+  fontSize: "0.8rem",
+  fontWeight: 500,
+  cursor: "pointer",
+  whiteSpace: "nowrap",
+  transition: "all 0.15s",
+});
+
+// ─────────────────────────────────────────────
+// Utilidad: calcular streetGroups (pura, sin hooks)
+// ─────────────────────────────────────────────
+type StreetGroup = {
+  key: string;
+  label: string;
+  count: number;
+  variants: string[];
+};
+
+function buildStreetGroups(contracts: ContractSummary[]): StreetGroup[] {
+  const map = new Map<
+    string,
+    { count: number; rawCount: Map<string, number> }
+  >();
+  for (const c of contracts) {
+    const raw = (c.calle || "").trim();
+    const key = normalizeStreet(raw);
+    if (!key) continue;
+    if (!map.has(key)) map.set(key, { count: 0, rawCount: new Map() });
+    const entry = map.get(key)!;
+    entry.count += 1;
+    entry.rawCount.set(raw, (entry.rawCount.get(raw) || 0) + 1);
+  }
+  const groups: StreetGroup[] = [];
+  for (const [key, entry] of map.entries()) {
+    const sortedVariants = Array.from(entry.rawCount.entries()).sort(
+      (a, b) => b[1] - a[1],
+    );
+    const labelRaw = sortedVariants[0]?.[0] || key;
+    const label = prettyStreet(normalizeStreet(labelRaw));
+    const variants = sortedVariants
+      .map(([v]) => v)
+      .filter((v) => normalizeStreet(v) !== normalizeStreet(labelRaw))
+      .slice(0, 3);
+    groups.push({ key, label, count: entry.count, variants });
+  }
+  return groups.sort(
+    (a, b) => b.count - a.count || a.label.localeCompare(b.label),
+  );
+}
 
 // ─────────────────────────────────────────────
 // Component
@@ -247,8 +352,13 @@ const ContractTable: React.FC = () => {
   const [contracts, setContracts] = useState<ContractSummary[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [streetTerm, setStreetTerm] = useState<string>("");
+
+  // Inputs con debounce — evitan filtrar en cada tecla
+  const [searchInput, setSearchInput] = useState<string>("");
+  const [streetInput, setStreetInput] = useState<string>("");
+  const searchTerm = useDebounce(searchInput, 250);
+  const streetTermDebounced = useDebounce(streetInput, 250);
+
   const [selectedStreetKey, setSelectedStreetKey] = useState<string>("");
   const [isStreetDropdownOpen, setIsStreetDropdownOpen] =
     useState<boolean>(false);
@@ -258,7 +368,7 @@ const ContractTable: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] =
     useState<boolean>(false);
-  const [selectedYear, setSelectedYear] = useState<string>("all");
+  const [selectedYear, setSelectedYear] = useState<string>("");
   const [isYearDropdownOpen, setIsYearDropdownOpen] = useState<boolean>(false);
 
   const [selectedContract, setSelectedContract] =
@@ -269,23 +379,16 @@ const ContractTable: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 15;
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [
-    searchTerm,
-    selectedFilter,
-    selectedStatus,
-    selectedYear,
-    streetTerm,
-    selectedStreetKey,
-  ]);
+  // Ref para evitar doble-fetch en StrictMode
+  const fetchedRef = useRef(false);
 
   // ── Data loading ────────────────────────────────────────────────
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
+    // Usar caché si ya se cargó antes
+    if (cachedContracts) {
+      setContracts(cachedContracts);
+      return;
+    }
     try {
       setLoading(true);
       const token = localStorage.getItem("access");
@@ -294,6 +397,7 @@ const ContractTable: React.FC = () => {
         return;
       }
       const data = await getContractData();
+      cachedContracts = data;
       setContracts(data);
     } catch (err: any) {
       const message =
@@ -301,7 +405,9 @@ const ContractTable: React.FC = () => {
           ? "Acceso prohibido. Tu sesión puede haber expirado."
           : err.response?.status === 401
             ? "No autorizado. Por favor, inicia sesión nuevamente."
-            : "Ocurrió un error al cargar los datos.";
+            : err.response?.status === 429
+              ? "Demasiadas solicitudes. Espera un momento antes de recargar."
+              : "Ocurrió un error al cargar los datos.";
       setError(message);
       Swal.fire({ icon: "error", title: "Error", text: message });
       if (err.response?.status === 401 || err.response?.status === 403) {
@@ -311,112 +417,177 @@ const ContractTable: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  // ── Year options ─────────────────────────────────────────────────
-  const yearOptions: FilterOption[] = React.useMemo(() => {
+  useEffect(() => {
+    if (fetchedRef.current) return;
+    fetchedRef.current = true;
+    loadData();
+  }, [loadData]);
+
+  // ── Year options (memoizado, depende solo de contracts) ──────────
+  const yearOptions = React.useMemo<FilterOption[]>(() => {
     const years = Array.from(
       new Set(contracts.map((c) => c.anio?.toString()).filter(Boolean)),
     ).sort((a, b) => Number(b) - Number(a));
     return years.map((y) => ({ id: `year-${y}`, label: y!, value: y! }));
   }, [contracts]);
 
+  // Setear año más reciente UNA sola vez cuando llegan datos
+  const yearInitialized = useRef(false);
   useEffect(() => {
-    if (yearOptions.length > 0 && selectedYear === "all") {
+    if (!yearInitialized.current && yearOptions.length > 0) {
       setSelectedYear(yearOptions[0].value);
+      yearInitialized.current = true;
     }
   }, [yearOptions]);
 
-  // ── Filter helpers ──────────────────────────────────────────────
-  const filterByDateRange = (contract: ContractSummary): boolean => {
-    if (selectedFilter === "all") return true;
-    if (!contract.ultimo_pago) return false;
-    const fechaLimpia = contract.ultimo_pago.includes("T")
-      ? contract.ultimo_pago.split("T")[0]
-      : contract.ultimo_pago;
-    const [year, month, day] = fechaLimpia.split("-").map(Number);
-    const lastPaymentDate = new Date(year, month - 1, day);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const diffDays = Math.ceil(
-      (today.getTime() - lastPaymentDate.getTime()) / 86400000,
-    );
-    switch (selectedFilter) {
-      case "day":
-        return diffDays <= 1;
-      case "week":
-        return diffDays <= 7;
-      case "month":
-        return diffDays <= 31;
-      case "year":
-        return diffDays <= 365;
-      default:
+  // Reset página cuando cambian filtros
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    searchTerm,
+    selectedFilter,
+    selectedStatus,
+    selectedYear,
+    streetTermDebounced,
+    selectedStreetKey,
+  ]);
+
+  // ── Street groups (calculado una sola vez por dataset) ───────────
+  const streetGroups = React.useMemo(
+    () => buildStreetGroups(contracts),
+    [contracts],
+  );
+
+  // ── Street suggestions (filtrado sobre streetGroups ya calculado) ─
+  const streetSuggestions = React.useMemo<StreetGroup[]>(() => {
+    const q = normalizeStreet(streetInput);
+    if (!q) return streetGroups.slice(0, 10);
+    return streetGroups
+      .filter((g) => g.key.includes(q) || normalizeStreet(g.label).includes(q))
+      .slice(0, 10);
+  }, [streetInput, streetGroups]);
+
+  // ── Filter helpers (funciones puras, memoizadas) ─────────────────
+  const filterByDateRange = useCallback(
+    (contract: ContractSummary): boolean => {
+      if (selectedFilter === "all") return true;
+      if (!contract.ultimo_pago) return false;
+      const fechaLimpia = contract.ultimo_pago.includes("T")
+        ? contract.ultimo_pago.split("T")[0]
+        : contract.ultimo_pago;
+      const [year, month, day] = fechaLimpia.split("-").map(Number);
+      const lastPaymentDate = new Date(year, month - 1, day);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const diffDays = Math.ceil(
+        (today.getTime() - lastPaymentDate.getTime()) / 86400000,
+      );
+      switch (selectedFilter) {
+        case "day":
+          return diffDays <= 1;
+        case "week":
+          return diffDays <= 7;
+        case "month":
+          return diffDays <= 31;
+        case "year":
+          return diffDays <= 365;
+        default:
+          return true;
+      }
+    },
+    [selectedFilter],
+  );
+
+  // ── Filtered + table rows en un solo useMemo ─────────────────────
+  const tableRows = React.useMemo<TableRow[]>(() => {
+    const lowerSearch = searchTerm.toLowerCase();
+    const normalizedStreet = normalizeStreet(streetTermDebounced);
+
+    return contracts
+      .filter((contract) => {
+        // Búsqueda por nombre/contrato
+        if (
+          lowerSearch &&
+          !contract.numero_contrato
+            .toString()
+            .toLowerCase()
+            .includes(lowerSearch) &&
+          !contract.nombre_completo.toLowerCase().includes(lowerSearch)
+        )
+          return false;
+
+        // Filtro de calle
+        const contractStreet = normalizeStreet(contract.calle || "");
+        if (selectedStreetKey) {
+          if (contractStreet !== selectedStreetKey) return false;
+        } else if (
+          normalizedStreet &&
+          !contractStreet.includes(normalizedStreet)
+        ) {
+          return false;
+        }
+
+        // Filtro de estado
+        if (
+          selectedStatus !== "all" &&
+          contract.estatus_deuda.trim().toLowerCase() !== selectedStatus
+        )
+          return false;
+
+        // Filtro de año
+        if (
+          selectedYear &&
+          selectedYear !== "all" &&
+          contract.anio?.toString() !== selectedYear
+        )
+          return false;
+
+        // Filtro de fecha
+        if (!filterByDateRange(contract)) return false;
+
         return true;
-    }
-  };
+      })
+      .map((contract) => {
+        const pagosDelAnio = (contract.pagos || []).filter(
+          (p) =>
+            !selectedYear ||
+            selectedYear === "all" ||
+            p.anio?.toString() === selectedYear,
+        );
+        const pagosTotalesFila = pagosDelAnio.reduce(
+          (sum, p) => sum + Number(p.monto_recibido || 0),
+          0,
+        );
+        return {
+          rowKey: `${contract.id}-${contract.anio}`,
+          contract,
+          anioFila: contract.anio?.toString() || "—",
+          pagosTotalesFila,
+          saldoPendienteFila: Number(contract.saldo_pendiente || 0),
+          modalYear: selectedYear || "all",
+        };
+      });
+  }, [
+    contracts,
+    searchTerm,
+    streetTermDebounced,
+    selectedStreetKey,
+    selectedStatus,
+    selectedYear,
+    filterByDateRange,
+  ]);
 
-  const filterByStatus = (contract: ContractSummary): boolean => {
-    if (selectedStatus === "all") return true;
-    return contract.estatus_deuda.trim().toLowerCase() === selectedStatus;
-  };
-
-  const filterByYear = (contract: ContractSummary): boolean => {
-    if (selectedYear === "all") return true;
-    return contract.anio?.toString() === selectedYear;
-  };
-
-  // ── Filtered contracts ──────────────────────────────────────────
-  const filteredContracts = contracts.filter((contract) => {
-    const matchesSearch =
-      contract.numero_contrato
-        .toString()
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      contract.nombre_completo.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesStreet = selectedStreetKey
-      ? normalizeStreet(contract.calle || "") === selectedStreetKey
-      : streetTerm.trim() === ""
-        ? true
-        : normalizeStreet(contract.calle || "").includes(
-            normalizeStreet(streetTerm),
-          );
-
-    return (
-      matchesSearch &&
-      matchesStreet &&
-      filterByDateRange(contract) &&
-      filterByStatus(contract) &&
-      filterByYear(contract)
-    );
-  });
-
-  // ── Table rows ──────────────────────────────────────────────────
-  const tableRows: TableRow[] = React.useMemo(() => {
-    return filteredContracts.map((contract) => {
-      const pagosDelAnio = (contract.pagos || []).filter(
-        (p) => selectedYear === "all" || p.anio?.toString() === selectedYear,
-      );
-      const pagosTotalesFila = pagosDelAnio.reduce(
-        (sum, p) => sum + Number(p.monto_recibido || 0),
-        0,
-      );
-      return {
-        rowKey: `${contract.id}-${contract.anio}`,
-        contract,
-        anioFila: contract.anio?.toString() || "—",
-        pagosTotalesFila,
-        saldoPendienteFila: Number(contract.saldo_pendiente || 0),
-        modalYear: selectedYear,
-      };
-    });
-  }, [filteredContracts, selectedYear]);
-
-  // ── Pagination ──────────────────────────────────────────────────
+  // ── Pagination ───────────────────────────────────────────────────
   const totalPages = Math.ceil(tableRows.length / itemsPerPage);
-  const currentRows = tableRows.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
+  const currentRows = React.useMemo(
+    () =>
+      tableRows.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage,
+      ),
+    [tableRows, currentPage, itemsPerPage],
   );
 
   const getFilterLabel = () =>
@@ -426,9 +597,12 @@ const ContractTable: React.FC = () => {
   const getYearLabel = () =>
     yearOptions.find((o) => o.value === selectedYear)?.label || "Año";
 
-  const goToPage = (page: number) => {
-    if (page >= 1 && page <= totalPages) setCurrentPage(page);
-  };
+  const goToPage = useCallback(
+    (page: number) => {
+      if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    },
+    [totalPages],
+  );
 
   const getPageNumbers = (): (number | string)[] => {
     const pages: (number | string)[] = [];
@@ -454,104 +628,21 @@ const ContractTable: React.FC = () => {
     return pages;
   };
 
-  // ── Street groups ───────────────────────────────────────────────
-  type StreetGroup = {
-    key: string;
-    label: string;
-    count: number;
-    variants: string[];
-  };
-
-  const streetGroups: StreetGroup[] = React.useMemo(() => {
-    const map = new Map<
-      string,
-      { count: number; rawCount: Map<string, number> }
-    >();
-    for (const c of contracts) {
-      const raw = (c.calle || "").trim();
-      const key = normalizeStreet(raw);
-      if (!key) continue;
-      if (!map.has(key)) map.set(key, { count: 0, rawCount: new Map() });
-      const entry = map.get(key)!;
-      entry.count += 1;
-      entry.rawCount.set(raw, (entry.rawCount.get(raw) || 0) + 1);
-    }
-    const groups: StreetGroup[] = [];
-    for (const [key, entry] of map.entries()) {
-      const sortedVariants = Array.from(entry.rawCount.entries()).sort(
-        (a, b) => b[1] - a[1],
-      );
-      const labelRaw = sortedVariants[0]?.[0] || key;
-      const label = prettyStreet(normalizeStreet(labelRaw));
-      const variants = sortedVariants
-        .map(([v]) => v)
-        .filter((v) => normalizeStreet(v) !== normalizeStreet(labelRaw))
-        .slice(0, 3);
-      groups.push({ key, label, count: entry.count, variants });
-    }
-    return groups.sort(
-      (a, b) => b.count - a.count || a.label.localeCompare(b.label),
-    );
-  }, [contracts]);
-
-  const streetSuggestions = React.useMemo(() => {
-    const q = normalizeStreet(streetTerm);
-    if (!q) return streetGroups.slice(0, 10);
-    return streetGroups
-      .filter((g) => g.key.includes(q) || normalizeStreet(g.label).includes(q))
-      .slice(0, 10);
-  }, [streetTerm, streetGroups]);
-
-  // ── Active filters count ─────────────────────────────────────────
   const activeFiltersCount = [
     selectedFilter !== "all",
     selectedStatus !== "all",
-    selectedYear !== "all",
-    streetTerm.trim() !== "",
-    searchTerm.trim() !== "",
+    selectedYear !== "all" && selectedYear !== "",
+    streetInput.trim() !== "",
+    searchInput.trim() !== "",
   ].filter(Boolean).length;
 
-  // ── Shared dropdown style ────────────────────────────────────────
-  const dropdownStyle: React.CSSProperties = {
-    position: "absolute",
-    top: "calc(100% + 6px)",
-    left: 0,
-    minWidth: "200px",
-    backgroundColor: "#13151c",
-    border: "1px solid #252831",
-    borderRadius: "10px",
-    boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
-    zIndex: 30,
-    overflow: "hidden",
-  };
-
-  const dropdownItemStyle = (active: boolean): React.CSSProperties => ({
-    display: "flex",
-    alignItems: "center",
-    gap: "0.6rem",
-    padding: "0.6rem 0.9rem",
-    cursor: "pointer",
-    backgroundColor: active ? "#1e2533" : "transparent",
-    color: active ? "#58b2ee" : "#d1d5db",
-    fontSize: "0.82rem",
-    transition: "background 0.15s",
-  });
-
-  const filterButtonStyle = (active: boolean): React.CSSProperties => ({
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "0.4rem",
-    padding: "0.5rem 0.85rem",
-    backgroundColor: active ? "#1a2a3a" : "#13151c",
-    border: `1px solid ${active ? "#58b2ee55" : "#252831"}`,
-    borderRadius: "8px",
-    color: active ? "#58b2ee" : "#9ca3af",
-    fontSize: "0.8rem",
-    fontWeight: 500,
-    cursor: "pointer",
-    whiteSpace: "nowrap",
-    transition: "all 0.15s",
-  });
+  const handleClearAll = useCallback(() => {
+    setSelectedFilter("all");
+    setSelectedStatus("all");
+    setStreetInput("");
+    setSelectedStreetKey("");
+    setSearchInput("");
+  }, []);
 
   // ────────────────────────────────────────────────────────────────
   // RENDER
@@ -639,7 +730,7 @@ const ContractTable: React.FC = () => {
           <div style={{ position: "relative" }}>
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              style={filterButtonStyle(selectedFilter !== "all")}
+              style={getFilterButtonStyle(selectedFilter !== "all")}
               type="button"
             >
               <Clock size={13} />
@@ -651,7 +742,7 @@ const ContractTable: React.FC = () => {
                 {filterOptions.map((opt) => (
                   <div
                     key={opt.id}
-                    style={dropdownItemStyle(selectedFilter === opt.value)}
+                    style={getDropdownItemStyle(selectedFilter === opt.value)}
                     onClick={() => {
                       setSelectedFilter(opt.value);
                       setIsDropdownOpen(false);
@@ -678,7 +769,7 @@ const ContractTable: React.FC = () => {
           <div style={{ position: "relative" }}>
             <button
               onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
-              style={filterButtonStyle(selectedStatus !== "all")}
+              style={getFilterButtonStyle(selectedStatus !== "all")}
               type="button"
             >
               <TrendingUp size={13} />
@@ -692,7 +783,7 @@ const ContractTable: React.FC = () => {
                   return (
                     <div
                       key={opt.id}
-                      style={dropdownItemStyle(selectedStatus === opt.value)}
+                      style={getDropdownItemStyle(selectedStatus === opt.value)}
                       onClick={() => {
                         setSelectedStatus(opt.value);
                         setIsStatusDropdownOpen(false);
@@ -720,7 +811,9 @@ const ContractTable: React.FC = () => {
           <div style={{ position: "relative" }}>
             <button
               onClick={() => setIsYearDropdownOpen(!isYearDropdownOpen)}
-              style={filterButtonStyle(selectedYear !== "all")}
+              style={getFilterButtonStyle(
+                !!selectedYear && selectedYear !== "all",
+              )}
               type="button"
             >
               <Calendar size={13} />
@@ -732,7 +825,7 @@ const ContractTable: React.FC = () => {
                 {yearOptions.map((opt) => (
                   <div
                     key={opt.id}
-                    style={dropdownItemStyle(selectedYear === opt.value)}
+                    style={getDropdownItemStyle(selectedYear === opt.value)}
                     onClick={() => {
                       setSelectedYear(opt.value);
                       setIsYearDropdownOpen(false);
@@ -771,9 +864,9 @@ const ContractTable: React.FC = () => {
               />
               <input
                 type="text"
-                value={streetTerm}
+                value={streetInput}
                 onChange={(e) => {
-                  setStreetTerm(e.target.value);
+                  setStreetInput(e.target.value);
                   setSelectedStreetKey("");
                   setIsStreetDropdownOpen(true);
                 }}
@@ -800,14 +893,14 @@ const ContractTable: React.FC = () => {
                       <div
                         key={g.key}
                         style={{
-                          ...dropdownItemStyle(selectedStreetKey === g.key),
+                          ...getDropdownItemStyle(selectedStreetKey === g.key),
                           flexDirection: "column",
                           alignItems: "flex-start",
                           gap: "0.2rem",
                         }}
                         onMouseDown={(e) => e.preventDefault()}
                         onClick={() => {
-                          setStreetTerm(g.label);
+                          setStreetInput(g.label);
                           setSelectedStreetKey(g.key);
                           setIsStreetDropdownOpen(false);
                         }}
@@ -836,14 +929,14 @@ const ContractTable: React.FC = () => {
                 </div>
               )}
             </div>
-            {(streetTerm.trim() !== "" || selectedStreetKey) && (
+            {(streetInput.trim() !== "" || selectedStreetKey) && (
               <button
                 type="button"
                 onClick={() => {
-                  setStreetTerm("");
+                  setStreetInput("");
                   setSelectedStreetKey("");
                 }}
-                style={{ ...filterButtonStyle(false), padding: "0.5rem" }}
+                style={{ ...getFilterButtonStyle(false), padding: "0.5rem" }}
               >
                 <X size={13} />
               </button>
@@ -865,11 +958,11 @@ const ContractTable: React.FC = () => {
             />
             <input
               type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               style={{
                 backgroundColor: "#13151c",
-                border: `1px solid ${searchTerm ? "#58b2ee55" : "#252831"}`,
+                border: `1px solid ${searchInput ? "#58b2ee55" : "#252831"}`,
                 borderRadius: "8px",
                 color: "#d1d5db",
                 fontSize: "0.8rem",
@@ -879,10 +972,10 @@ const ContractTable: React.FC = () => {
               }}
               placeholder="Contrato o nombre..."
             />
-            {searchTerm && (
+            {searchInput && (
               <button
                 type="button"
-                onClick={() => setSearchTerm("")}
+                onClick={() => setSearchInput("")}
                 style={{
                   position: "absolute",
                   right: "0.5rem",
@@ -904,15 +997,9 @@ const ContractTable: React.FC = () => {
           {activeFiltersCount > 1 && (
             <button
               type="button"
-              onClick={() => {
-                setSelectedFilter("all");
-                setSelectedStatus("all");
-                setStreetTerm("");
-                setSelectedStreetKey("");
-                setSearchTerm("");
-              }}
+              onClick={handleClearAll}
               style={{
-                ...filterButtonStyle(false),
+                ...getFilterButtonStyle(false),
                 color: "#f87171",
                 borderColor: "#7f1d1d22",
                 gap: "0.3rem",
@@ -991,7 +1078,6 @@ const ContractTable: React.FC = () => {
                     ))}
                   </tr>
                 </thead>
-
                 <tbody>
                   {currentRows.map((row) => {
                     const isHovered = hoveredRow === row.rowKey;
@@ -1009,7 +1095,6 @@ const ContractTable: React.FC = () => {
                           cursor: "default",
                         }}
                       >
-                        {/* N° Contrato */}
                         <td
                           style={{
                             padding: "0.7rem 1rem",
@@ -1030,8 +1115,6 @@ const ContractTable: React.FC = () => {
                             #{row.contract.numero_contrato}
                           </span>
                         </td>
-
-                        {/* Nombre */}
                         <td
                           style={{
                             padding: "0.7rem 1rem",
@@ -1051,8 +1134,6 @@ const ContractTable: React.FC = () => {
                             {row.contract.nombre_completo}
                           </div>
                         </td>
-
-                        {/* Calle */}
                         <td
                           style={{
                             padding: "0.7rem 1rem",
@@ -1078,8 +1159,6 @@ const ContractTable: React.FC = () => {
                             {row.contract.calle || "—"}
                           </div>
                         </td>
-
-                        {/* Año */}
                         <td
                           style={{
                             padding: "0.7rem 1rem",
@@ -1090,8 +1169,6 @@ const ContractTable: React.FC = () => {
                         >
                           {row.anioFila}
                         </td>
-
-                        {/* Total pagado */}
                         <td
                           style={{
                             padding: "0.7rem 1rem",
@@ -1113,8 +1190,6 @@ const ContractTable: React.FC = () => {
                             {formatMoney(row.pagosTotalesFila)}
                           </span>
                         </td>
-
-                        {/* Total restante */}
                         <td
                           style={{
                             padding: "0.7rem 1rem",
@@ -1136,8 +1211,6 @@ const ContractTable: React.FC = () => {
                             {formatMoney(row.saldoPendienteFila)}
                           </span>
                         </td>
-
-                        {/* Estatus */}
                         <td
                           style={{
                             padding: "0.7rem 1rem",
@@ -1146,8 +1219,6 @@ const ContractTable: React.FC = () => {
                         >
                           <StatusBadge estatus={row.contract.estatus_deuda} />
                         </td>
-
-                        {/* Acción */}
                         <td
                           style={{
                             padding: "0.7rem 1rem",
@@ -1309,9 +1380,7 @@ const ContractTable: React.FC = () => {
         )}
       </div>
 
-      {/* ────────────────────────────────────────────────────────────
-          MODAL
-      ──────────────────────────────────────────────────────────── */}
+      {/* ── MODAL ──────────────────────────────────────────────────── */}
       {selectedContract &&
         (() => {
           const allPagos = selectedContract.pagos || [];
@@ -1341,7 +1410,6 @@ const ContractTable: React.FC = () => {
             (sum, p) => sum + Number(p.monto_recibido || 0),
             0,
           );
-
           const fechaInicioFiltrada = pagosOrdenados.length
             ? pagosOrdenados[0].fecha_pago
             : "";
@@ -1505,7 +1573,6 @@ const ContractTable: React.FC = () => {
                     gap: "1.25rem",
                   }}
                 >
-                  {/* Stat Cards */}
                   <div
                     style={{
                       display: "grid",
@@ -1597,7 +1664,6 @@ const ContractTable: React.FC = () => {
                             (sum, p) => sum + Number(p.monto_recibido || 0),
                             0,
                           );
-
                           return (
                             <div
                               key={anio}
@@ -1635,9 +1701,7 @@ const ContractTable: React.FC = () => {
                                     }}
                                   >
                                     {pagosDeEsteAnio.length} pago
-                                    {pagosDeEsteAnio.length !== 1
-                                      ? "s"
-                                      : ""} ·{" "}
+                                    {pagosDeEsteAnio.length !== 1 ? "s" : ""} ·{" "}
                                     <strong style={{ color: "#4ade80" }}>
                                       {formatMoney(totalAnio)}
                                     </strong>
@@ -1657,72 +1721,28 @@ const ContractTable: React.FC = () => {
                                       borderBottom: "1px solid #1a1d24",
                                     }}
                                   >
-                                    <th
-                                      style={{
-                                        padding: "0.5rem 0.9rem",
-                                        textAlign: "left",
-                                        color: "#4b5563",
-                                        fontWeight: 600,
-                                        fontSize: "0.68rem",
-                                        textTransform: "uppercase",
-                                        letterSpacing: "0.06em",
-                                      }}
-                                    >
-                                      #
-                                    </th>
-                                    <th
-                                      style={{
-                                        padding: "0.5rem 0.9rem",
-                                        textAlign: "left",
-                                        color: "#4b5563",
-                                        fontWeight: 600,
-                                        fontSize: "0.68rem",
-                                        textTransform: "uppercase",
-                                        letterSpacing: "0.06em",
-                                      }}
-                                    >
-                                      Fecha
-                                    </th>
-                                    <th
-                                      style={{
-                                        padding: "0.5rem 0.9rem",
-                                        textAlign: "right",
-                                        color: "#4b5563",
-                                        fontWeight: 600,
-                                        fontSize: "0.68rem",
-                                        textTransform: "uppercase",
-                                        letterSpacing: "0.06em",
-                                      }}
-                                    >
-                                      Monto
-                                    </th>
-                                    <th
-                                      style={{
-                                        padding: "0.5rem 0.9rem",
-                                        textAlign: "left",
-                                        color: "#4b5563",
-                                        fontWeight: 600,
-                                        fontSize: "0.68rem",
-                                        textTransform: "uppercase",
-                                        letterSpacing: "0.06em",
-                                      }}
-                                    >
-                                      Descuento
-                                    </th>
-
-                                    <th
-                                      style={{
-                                        padding: "0.5rem 0.9rem",
-                                        textAlign: "left",
-                                        color: "#4b5563",
-                                        fontWeight: 600,
-                                        fontSize: "0.68rem",
-                                        textTransform: "uppercase",
-                                        letterSpacing: "0.06em",
-                                      }}
-                                    >
-                                      Cobrador
-                                    </th>
+                                    {[
+                                      "#",
+                                      "Fecha",
+                                      "Monto",
+                                      "Descuento",
+                                      "Cobrador",
+                                    ].map((h, i) => (
+                                      <th
+                                        key={i}
+                                        style={{
+                                          padding: "0.5rem 0.9rem",
+                                          textAlign: i === 2 ? "right" : "left",
+                                          color: "#4b5563",
+                                          fontWeight: 600,
+                                          fontSize: "0.68rem",
+                                          textTransform: "uppercase",
+                                          letterSpacing: "0.06em",
+                                        }}
+                                      >
+                                        {h}
+                                      </th>
+                                    ))}
                                   </tr>
                                 </thead>
                                 <tbody>
