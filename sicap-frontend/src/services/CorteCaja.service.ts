@@ -7,7 +7,7 @@ const API_URL = "/api/corte/generar/";
 export interface CorteCajaRequest {
   fecha_inicio: string;
   fecha_fin: string;
-  cobrador_id: number; // <-- NUEVO
+  cobrador_id: number | null; // <-- Permite null para corte general
 }
 
 export interface Movimiento {
@@ -21,7 +21,7 @@ export interface Movimiento {
 export interface CorteInfo {
   folio_corte: number;
   fecha_generacion: string;
-  cobrador_id_id: number;
+  cobrador_id_id: number | null; // <-- MODIFICACIÓN: Ahora acepta null según lo que responde tu API
   fecha_inicio: string;
   fecha_fin: string;
   total_pagos_normales: number;
@@ -55,11 +55,18 @@ export const generarCorteCaja = async (corteData: CorteCajaRequest) => {
       };
     }
 
-    const response = await api.post(API_URL, {
+    // MODIFICACIÓN: Construimos el payload de forma dinámica.
+    // Así, si cobrador_id es null, no lo mandamos en el JSON (igual que en tu captura).
+    const payload: Record<string, any> = {
       fecha_inicio: corteData.fecha_inicio,
       fecha_fin: corteData.fecha_fin,
-      cobrador_id: corteData.cobrador_id, // <-- NUEVO
-    }, {
+    };
+
+    if (corteData.cobrador_id !== null) {
+      payload.cobrador_id = corteData.cobrador_id;
+    }
+
+    const response = await api.post(API_URL, payload, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
