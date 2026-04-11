@@ -53,12 +53,10 @@ const Reporte: React.FC = () => {
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
   const [downloadingGeneral, setDownloadingGeneral] = useState(false);
 
-  // ── Selector global para reporte general ───────────────────────────────
   const [selectedGeneralYear, setSelectedGeneralYear] =
     useState<number>(currentYear);
   const [availableYears, setAvailableYears] = useState<number[]>([currentYear]);
 
-  // ── Selector por fila, como Estado de Cuenta ───────────────────────────
   const [selectedYearById, setSelectedYearById] = useState<
     Record<number, number | "">
   >({});
@@ -128,7 +126,6 @@ const Reporte: React.FC = () => {
     downloadBlobFile(blob, fileName);
   };
 
-  // ── Cargar años disponibles por cobrador ───────────────────────────────
   const loadYearsForCobrador = async (id: number): Promise<number[]> => {
     try {
       if (yearsById[id]?.length) return yearsById[id];
@@ -439,52 +436,87 @@ const Reporte: React.FC = () => {
       ),
     },
   ];
-
   return (
     <div className="reporte-tabla-wrapper">
-      <div className="reporte-tabla-btn-general">
-        <select
-          value={selectedGeneralYear}
-          onChange={(e) => setSelectedGeneralYear(Number(e.target.value))}
-          className="reporte-year-select"
-          style={{
-            marginRight: "12px",
-            padding: "6px 12px",
-            borderRadius: "6px",
-            border: "1px solid #334155",
-            backgroundColor: "#1e293b",
-            color: "#e5e7eb",
-            fontSize: "14px",
-            cursor: "pointer",
-          }}
-        >
-          {availableYears.map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          ))}
-        </select>
+      <div className="reporte-general-card">
+        <div className="reporte-general-card__info">
+          <span className="reporte-general-card__badge">
+            Reporte consolidado
+          </span>
+          <h2 className="reporte-general-card__title">
+            Descarga general por año
+          </h2>
+          <p className="reporte-general-card__text">
+            Genera un PDF general con el resumen de pagos registrados para todos
+            los cobradores en el año seleccionado.
+          </p>
+        </div>
 
-        <button
-          type="button"
-          className="estado-download-btn"
-          onClick={handleDownloadGeneral}
-          disabled={downloadingGeneral}
-        >
-          <Download size={16} />
-          {downloadingGeneral ? "Generando general..." : "Descargar general"}
-        </button>
+        <div className="reporte-general-card__actions">
+          <div className="reporte-year-field">
+            <label
+              htmlFor="general-year-select"
+              className="reporte-year-field__label"
+            >
+              <CalendarDays size={16} />
+              <span>Año del reporte</span>
+            </label>
+
+            <select
+              id="general-year-select"
+              value={selectedGeneralYear}
+              onChange={(e) => setSelectedGeneralYear(Number(e.target.value))}
+              className="reporte-year-select"
+            >
+              {availableYears.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <button
+            type="button"
+            className="reporte-general-download-btn"
+            onClick={handleDownloadGeneral}
+            disabled={downloadingGeneral}
+          >
+            <Download size={18} />
+            <span>
+              {downloadingGeneral
+                ? "Generando general..."
+                : "Descargar reporte general"}
+            </span>
+          </button>
+        </div>
       </div>
 
-      <ReusableTable<Row>
-        key={refreshKey}
-        columns={columns}
-        fetchData={fetchData}
-        searchableFields={["nombre_completo", "usuario_texto"]}
-        itemsPerPage={10}
-        showActions={false}
-        title="Cobradores Registrados"
-      />
+      <div className="reporte-table-card">
+        <div className="reporte-table-card__header">
+          <div>
+            <span className="reporte-table-card__eyebrow">Listado</span>
+            <h3 className="reporte-table-card__title">
+              Cobradores registrados
+            </h3>
+            <p className="reporte-table-card__subtitle">
+              Selecciona el año por cobrador o descarga el resumen general.
+            </p>
+          </div>
+        </div>
+
+        <div className="reporte-table-card__body">
+          <ReusableTable<Row>
+            key={refreshKey}
+            columns={columns}
+            fetchData={fetchData}
+            searchableFields={["nombre_completo", "usuario_texto"]}
+            itemsPerPage={10}
+            showActions={false}
+            title="Cobradores Registrados"
+          />
+        </div>
+      </div>
     </div>
   );
 };
