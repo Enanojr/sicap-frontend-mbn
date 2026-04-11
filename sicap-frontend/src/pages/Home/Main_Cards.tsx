@@ -2,7 +2,14 @@ import { useNavigate } from "react-router-dom";
 import { WaterServiceCard } from "../../components/cards/card";
 import { DashboardStats } from "../../components/dashboard/DashboardStats";
 import "../../styles/styles.css";
-import { Users, Search, CreditCard, Newspaper } from "lucide-react";
+import {
+  Users,
+  Search,
+  Newspaper,
+  FileChartColumn,
+  Archive,
+  Banknote,
+} from "lucide-react";
 
 // Componente para el header de la página principal
 const MainHeader = () => (
@@ -30,6 +37,7 @@ function Main_Card() {
   const handleEstadoCuenta = () => navigate("/estadocuenta");
   const handleCargos = () => navigate("/cargos");
   const handleCorteCaja = () => navigate("/corte-caja");
+  const handleReportes = () => navigate("/reportes");
 
   const cards = [
     {
@@ -37,17 +45,17 @@ function Main_Card() {
       description: "Consulta los pagos que ha realizado el cuentahabiente.",
       icon: Search,
       ctaText: "Consultar",
-      gradientColors: ["#4ecdc4", "#2c9fb9"] as [string, string],
-      waterDropColor: "rgba(78, 205, 196, 0.6)",
+      gradientColors: ["#06b6d4", "#2563eb"] as [string, string],
+      waterDropColor: "rgba(6, 182, 212, 0.30)",
       onClick: handleConsult,
     },
     {
       title: "Pagos",
       description: "Realiza el cobro de agua de los cuentahabientes.",
-      icon: CreditCard,
+      icon: Banknote,
       ctaText: "Pagar",
-      gradientColors: ["#ff6b6b", "#d63031"] as [string, string],
-      waterDropColor: "rgba(255, 107, 107, 0.6)",
+      gradientColors: ["#ef4444", "#b91c1c"] as [string, string],
+      waterDropColor: "rgba(239, 68, 68, 0.30)",
       onClick: handlePayment,
     },
     {
@@ -56,8 +64,8 @@ function Main_Card() {
         "Registra nuevos cuentahabientes o consulta los ya existentes",
       icon: Users,
       ctaText: "Registrar",
-      gradientColors: ["#9c27b0", "#7b1fa2"] as [string, string],
-      waterDropColor: "rgba(156, 39, 176, 0.6)",
+      gradientColors: ["#a855f7", "#6d28d9"] as [string, string],
+      waterDropColor: "rgba(168, 85, 247, 0.30)",
       onClick: handleCuentahabientes,
     },
     {
@@ -65,28 +73,37 @@ function Main_Card() {
       description: "Crea o consulta el estado de cuenta de los cuentahabiente",
       icon: Newspaper,
       ctaText: "Crear",
-      gradientColors: ["#5e35b1", "#4527a0"] as [string, string],
-      waterDropColor: "rgba(94, 53, 177, 0.6)",
+      gradientColors: ["#6366f1", "#3730a3"] as [string, string],
+      waterDropColor: "rgba(99, 102, 241, 0.30)",
       onClick: handleEstadoCuenta,
     },
     {
       title: "Cargos a Cuentahabientes",
       description: "Crea o consulta los cargos de los cuentahabientes",
-      icon: CreditCard,
+      icon: Banknote,
       ctaText: "Pagar",
-      gradientColors: ["#f1a707", "#f1a707"] as [string, string],
-      waterDropColor: "rgba(241, 167, 7, 0.6)",
+      gradientColors: ["#f59e0b", "#d97706"] as [string, string],
+      waterDropColor: "rgba(245, 158, 11, 0.30)",
       onClick: handleCargos,
     },
     {
       title: "Corte de Caja",
       description: "Genera el corte de caja para un rango de fechas específico",
-      icon: CreditCard,
+      icon: Archive,
       ctaText: "Generar",
-      gradientColors: ["#00c853", "#009624"] as [string, string],
-      waterDropColor: "rgba(0, 200, 83, 0.6)",
+      gradientColors: ["#10b981", "#047857"] as [string, string],
+      waterDropColor: "rgba(16, 185, 129, 0.30)",
       onClick: handleCorteCaja,
-    }
+    },
+    {
+      title: "Reportes",
+      description: "Genera reportes sobre la información de tú plataforma",
+      icon: FileChartColumn,
+      ctaText: "Generar",
+      gradientColors: ["#0f766e", "#134e4a"] as [string, string],
+      waterDropColor: "rgba(15, 118, 110, 0.30)",
+      onClick: handleReportes,
+    },
   ];
 
   return (
