@@ -1,7 +1,6 @@
 import React from "react";
 import FormularioEgresos from "./formulario_egresos";
 import HistoricoEgresos from "./tabla_egresos";
-import HistoricoIngresos from "./tabla_ingresos";
 import "../../styles/styles.css";
 
 const TesoreriaDashboard: React.FC = () => {
@@ -15,10 +14,6 @@ const TesoreriaDashboard: React.FC = () => {
         <section className="cm-dashboard-tables">
           <div className="cm-dashboard-table-card">
             <HistoricoEgresos />
-          </div>
-
-          <div className="cm-dashboard-table-card">
-            <HistoricoIngresos />
           </div>
         </section>
       </div>
