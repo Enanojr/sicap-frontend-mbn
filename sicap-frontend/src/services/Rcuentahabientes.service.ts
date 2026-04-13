@@ -3,12 +3,16 @@ import api from "../api_axios";
 const API_URL = "/cuentahabientes/";
 
 export interface CuentahabienteBase {
-  numero_contrato: number;
+  numero_contrato?: number;
   nombres: string;
   ap: string;
   am: string;
-  calle: string;
-  numero: number | string;
+
+  calle_fk: number;
+
+  calle?: string;
+
+  numero: number | string | null;
   telefono: string;
   colonia: number;
   servicio: number;
@@ -187,7 +191,6 @@ export const getCuentahabientes = async (
     }
 
     const endpoint = url ?? API_URL;
-
     const response = await api.get(endpoint);
 
     return {
@@ -218,33 +221,24 @@ export const getCuentahabientesList = async (): Promise<
   CuentahabienteResponse[]
 > => {
   let allResults: CuentahabienteResponse[] = [];
-  let nextUrl: string | null = API_URL; // Empezamos por la primera página
+  let nextUrl: string | null = API_URL;
 
   try {
     while (nextUrl) {
-      // Usamos getCuentahabientes pero le pasamos la URL específica (nextUrl)
-      // Nota: getCuentahabientes ya maneja la lógica de token y errores
       const response = await getCuentahabientes(nextUrl);
 
       if (!response.success || !response.data) {
-        break; // Si falla algo, nos detenemos y devolvemos lo que tengamos
+        break;
       }
 
-      // Agregamos los resultados de esta página al array acumulador
-      const pageResults = response.data.results;
-      allResults = [...allResults, ...pageResults];
-
-      // Actualizamos nextUrl. Si es null, el while termina.
-      // IMPORTANTE: A veces Django devuelve la URL absoluta (http://...) y axios
-      // suele preferir relativas si tienes baseURL configurada.
-      // Si tu API devuelve la URL completa, esto funcionará bien.
+      allResults = [...allResults, ...response.data.results];
       nextUrl = response.data.next;
     }
 
     return allResults;
   } catch (error) {
     console.error("Error obteniendo lista completa:", error);
-    return []; // En caso de error fatal, devolvemos array vacío
+    return [];
   }
 };
 

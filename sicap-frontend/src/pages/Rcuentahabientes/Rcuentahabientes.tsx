@@ -12,6 +12,7 @@ import {
 
 import { getColonias } from "../../services/Rcolonias.service";
 import { getAllServicios } from "../../services/servicios.service";
+import { getCalles } from "../../services/calle.service";
 
 import Swal from "sweetalert2";
 
@@ -35,6 +36,7 @@ const FormularioCuentahabientes: React.FC<Props> = ({
 
   const [coloniaOptions, setColoniaOptions] = useState<SelectOption[]>([]);
   const [servicioOptions, setServicioOptions] = useState<SelectOption[]>([]);
+  const [calleOptions, setCalleOptions] = useState<SelectOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -47,16 +49,20 @@ const FormularioCuentahabientes: React.FC<Props> = ({
           didOpen: () => Swal.showLoading(),
         });
 
-        const [colResp, servResp] = await Promise.all([
+        const [colResp, servResp, callesResp] = await Promise.all([
           getColonias(),
           getAllServicios(),
+          getCalles(),
         ]);
 
         let coloniasRaw: any[] = [];
-        if ((colResp as any)?.data?.results)
+        if ((colResp as any)?.data?.results) {
           coloniasRaw = (colResp as any).data.results;
-        else if ((colResp as any)?.data) coloniasRaw = (colResp as any).data;
-        else if (Array.isArray(colResp)) coloniasRaw = colResp;
+        } else if ((colResp as any)?.data) {
+          coloniasRaw = (colResp as any).data;
+        } else if (Array.isArray(colResp)) {
+          coloniasRaw = colResp;
+        }
 
         setColoniaOptions(
           coloniasRaw.map((c: any) => ({
@@ -66,14 +72,32 @@ const FormularioCuentahabientes: React.FC<Props> = ({
         );
 
         let serviciosRaw: any[] = [];
-        if ((servResp as any)?.results)
+        if ((servResp as any)?.results) {
           serviciosRaw = (servResp as any).results;
-        else if (Array.isArray(servResp)) serviciosRaw = servResp;
+        } else if (Array.isArray(servResp)) {
+          serviciosRaw = servResp;
+        }
 
         setServicioOptions(
           serviciosRaw.map((s: any) => ({
             value: s.id_tipo_servicio.toString(),
             label: s.nombre,
+          })),
+        );
+
+        let callesRaw: any[] = [];
+        if ((callesResp as any)?.data?.results) {
+          callesRaw = (callesResp as any).data.results;
+        } else if ((callesResp as any)?.data) {
+          callesRaw = (callesResp as any).data;
+        } else if (Array.isArray(callesResp)) {
+          callesRaw = callesResp;
+        }
+
+        setCalleOptions(
+          callesRaw.map((c: any) => ({
+            value: c.id_calle.toString(),
+            label: c.nombre_calle,
           })),
         );
 
@@ -91,9 +115,7 @@ const FormularioCuentahabientes: React.FC<Props> = ({
 
   const validateNumeroCasa = (v: any) => {
     const value = String(v ?? "").trim();
-
     if (!value) return null;
-
     return null;
   };
 
@@ -113,8 +135,10 @@ const FormularioCuentahabientes: React.FC<Props> = ({
     const value = String(v ?? "")
       .trim()
       .toLowerCase();
+
     if (value === "" || value === "s/n") return null;
     if (/^\d{10}$/.test(value)) return null;
+
     return "Debe ser un número de 10 dígitos o 'S/N'";
   };
 
@@ -180,7 +204,7 @@ const FormularioCuentahabientes: React.FC<Props> = ({
         label: "Número de Casa",
         type: "text",
         icon: Home,
-        required: true,
+        required: false,
         placeholder: "Escribe número de casa o S/N",
         defaultValue: cuentahabienteToEdit?.numero ?? "",
         validation: validateNumeroCasa,
@@ -190,7 +214,7 @@ const FormularioCuentahabientes: React.FC<Props> = ({
         label: "Teléfono",
         type: "tel",
         icon: Phone,
-        required: true,
+        required: false,
         placeholder: "Escribe teléfono o S/N",
         defaultValue: cuentahabienteToEdit?.telefono ?? "",
         validation: validateTelefono,
@@ -216,34 +240,49 @@ const FormularioCuentahabientes: React.FC<Props> = ({
           (cuentahabienteToEdit as any)?.servicio?.toString?.() ?? "",
       },
       {
-        name: "calle",
+        name: "calle_fk",
         label: "Calle",
-        type: "text",
+        type: "select",
         icon: Home,
         required: true,
-        defaultValue: cuentahabienteToEdit?.calle ?? "",
+        options: calleOptions,
+        defaultValue:
+          (cuentahabienteToEdit as any)?.calle_fk?.toString?.() ?? "",
         validation: validateRequired,
       },
     ],
 
     onSubmit: async (data) => {
+      const calleSeleccionada = calleOptions.find(
+        (c) => c.value === String(data.calle_fk ?? ""),
+      );
+
       const payload: any = {
-        nombres: String(data.nombres ?? ""),
-        ap: String(data.ap ?? ""),
-        am: String(data.am ?? ""),
-        calle: String(data.calle ?? ""),
-        numero: data.numero ? String(data.numero) : null,
-        telefono: String(data.telefono ?? ""),
+        nombres: String(data.nombres ?? "").trim(),
+        ap: String(data.ap ?? "").trim(),
+        am: String(data.am ?? "").trim(),
+
+        // importante: enviar el FK real
+        calle_fk: data.calle_fk ? Number(data.calle_fk) : null,
+
+        // opcional: lo mando también por compatibilidad con tu backend actual
+        calle: calleSeleccionada?.label ?? "",
+
+        numero:
+          data.numero === undefined ||
+          data.numero === null ||
+          String(data.numero).trim() === ""
+            ? null
+            : String(data.numero).trim(),
+
+        telefono: String(data.telefono ?? "").trim(),
         colonia: data.colonia ? Number(data.colonia) : null,
         servicio: data.servicio ? Number(data.servicio) : null,
       };
 
       if (isEditMode) {
         payload.numero_contrato = Number(data.numero_contrato);
-      }
 
-      // ─────────────── EDIT ───────────────
-      if (isEditMode) {
         Swal.fire({
           title: "Actualizando...",
           allowOutsideClick: false,
@@ -276,7 +315,6 @@ const FormularioCuentahabientes: React.FC<Props> = ({
         return;
       }
 
-      // ─────────────── CREATE ──────────────
       const toma = await Swal.fire({
         icon: "question",
         title: "Nueva toma",
@@ -323,9 +361,7 @@ const FormularioCuentahabientes: React.FC<Props> = ({
             title: "Contrato ya registrado",
             html: `
               <div style="text-align:left">
-                <p>
-                  El contrato ya se encuentra registrado.
-                </p>
+                <p>El contrato ya se encuentra registrado.</p>
               </div>
             `,
             confirmButtonColor: "#58b2ee",
