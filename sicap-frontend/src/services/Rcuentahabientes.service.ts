@@ -3,12 +3,16 @@ import api from "../api_axios";
 const API_URL = "/cuentahabientes/";
 
 export interface CuentahabienteBase {
-  numero_contrato: number;
+  numero_contrato?: number;
   nombres: string;
   ap: string;
   am: string;
-  calle: string;
-  numero: number | string;
+
+  calle_fk: number;
+
+  calle?: string;
+
+  numero: number | string | null;
   telefono: string;
   colonia: number;
   servicio: number;
@@ -187,7 +191,6 @@ export const getCuentahabientes = async (
     }
 
     const endpoint = url ?? API_URL;
-
     const response = await api.get(endpoint);
 
     return {
@@ -224,34 +227,25 @@ export const getCuentahabientesList = async (
     results: CuentahabienteResponse[];
   }>
 > => {
-  try {
-    // Construir la URL con el parámetro de paginación
-    const paginatedUrl = `${API_URL}?page=${page}`;
-    
-    // Reutilizar la función getCuentahabientes que ya tienes arriba
-    // la cual ya maneja los tokens y los errores correctamente.
-    const response = await getCuentahabientes(paginatedUrl);
+  let allResults: CuentahabienteResponse[] = [];
+  let nextUrl: string | null = API_URL;
 
-    if (!response.success || !response.data) {
-       return {
-         success: false,
-         errors: response.errors || { general: "Error al cargar la página." }
-       };
+  try {
+    while (nextUrl) {
+      const response = await getCuentahabientes(nextUrl);
+
+      if (!response.success || !response.data) {
+        break;
+      }
+
+      allResults = [...allResults, ...response.data.results];
+      nextUrl = response.data.next;
     }
 
-    // Retornar la estructura completa (incluyendo next y previous)
-    // para poder armar la paginación en el frontend
-    return {
-      success: true,
-      data: response.data,
-    };
-
+    return allResults;
   } catch (error) {
-    console.error("Error obteniendo la página de cuentahabientes:", error);
-    return {
-      success: false,
-      errors: { general: "Error fatal al solicitar los datos paginados." }
-    };
+    console.error("Error obteniendo lista completa:", error);
+    return [];
   }
 };
 
