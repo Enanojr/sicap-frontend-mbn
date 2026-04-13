@@ -1,6 +1,6 @@
 import { registerUser } from "../../services/Rcobradores.service";
 import Swal from "sweetalert2";
-import { User, Mail, Lock, UserPlus, Users } from "lucide-react";
+import { User, Mail, Lock, UserPlus } from "lucide-react";
 
 import FormularioReutilizable from "../../components/forms/form";
 import type { FormConfig } from "../../components/forms/form";

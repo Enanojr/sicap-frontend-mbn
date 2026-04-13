@@ -12,6 +12,7 @@ import {
 import { getCuentahabientes } from "../../services/Rcuentahabientes.service";
 import { getEstadoCuentaDetalleById } from "../../services/Estado_cuenta.service";
 import { getEstadoCuentaResumenById } from "../../services/estado_cuenta_resumen";
+import { getVistaCargosById } from "../../services/estado_cuenta_cargos";
 import EstadoCuentaPDF from "../../pages/Estado_Cuenta/EstadoCuentaPDF";
 
 type Row = {
@@ -74,10 +75,7 @@ export default function EstadoCuentaPage() {
     try {
       if (yearsById[id]?.length) return yearsById[id];
 
-      setLoadingYearsById((prev) => ({
-        ...prev,
-        [id]: true,
-      }));
+      setLoadingYearsById((prev) => ({ ...prev, [id]: true }));
 
       const resumenRows = await getEstadoCuentaResumenById(id);
 
@@ -89,10 +87,7 @@ export default function EstadoCuentaPage() {
         ),
       ].sort((a, b) => b - a);
 
-      setYearsById((prev) => ({
-        ...prev,
-        [id]: years,
-      }));
+      setYearsById((prev) => ({ ...prev, [id]: years }));
 
       if (years.length > 0) {
         setSelectedYearById((prev) => ({
@@ -100,10 +95,7 @@ export default function EstadoCuentaPage() {
           [id]: prev[id] ?? years[0],
         }));
       } else {
-        setSelectedYearById((prev) => ({
-          ...prev,
-          [id]: "",
-        }));
+        setSelectedYearById((prev) => ({ ...prev, [id]: "" }));
       }
 
       return years;
@@ -116,10 +108,7 @@ export default function EstadoCuentaPage() {
       });
       return [];
     } finally {
-      setLoadingYearsById((prev) => ({
-        ...prev,
-        [id]: false,
-      }));
+      setLoadingYearsById((prev) => ({ ...prev, [id]: false }));
     }
   };
 
@@ -189,11 +178,7 @@ export default function EstadoCuentaPage() {
     if (!result.isConfirmed || !result.value) return null;
 
     const year = Number(result.value);
-
-    setSelectedYearById((prev) => ({
-      ...prev,
-      [id]: year,
-    }));
+    setSelectedYearById((prev) => ({ ...prev, [id]: year }));
 
     return year;
   };
@@ -214,9 +199,11 @@ export default function EstadoCuentaPage() {
         color: "#e5e7eb",
       });
 
-      const [detalleRows, resumenRows] = await Promise.all([
+      // ── Se agregan los cargos a la llamada paralela ──────────────────
+      const [detalleRows, resumenRows, cargosRows] = await Promise.all([
         getEstadoCuentaDetalleById(id_cuentahabiente),
         getEstadoCuentaResumenById(id_cuentahabiente),
+        getVistaCargosById(id_cuentahabiente), // ← NUEVO
       ]);
 
       const detalleDelAnio = (detalleRows || []).filter(
@@ -254,6 +241,17 @@ export default function EstadoCuentaPage() {
         return;
       }
 
+      // ── Filtramos cargos por el año seleccionado ─────────────────────
+      const cargosDelAnio = (cargosRows || [])
+        .filter((c) => Number(c.anio_cargo) === Number(anioSeleccionado))
+        .map((c) => ({
+          tipo_cargo_nombre: c.tipo_cargo_nombre,
+          cargo_fecha: c.cargo_fecha,
+          anio_cargo: c.anio_cargo,
+          saldo_restante_cargo: Number(c.saldo_restante_cargo || 0),
+          cargo_activo: c.cargo_activo,
+        }));
+
       const data = {
         numero_contrato:
           resumenDelAnio?.numero_contrato ?? base?.numero_contrato ?? 0,
@@ -271,6 +269,7 @@ export default function EstadoCuentaPage() {
           tipo_movimiento: r.tipo_movimiento,
           monto_recibido: Number(r.monto_recibido || 0),
         })),
+        cargos: cargosDelAnio, // ← NUEVO: se pasa al PDF
       };
 
       const blob = await pdf(<EstadoCuentaPDF data={data} />).toBlob();
@@ -357,9 +356,7 @@ export default function EstadoCuentaPage() {
               }
 
               const pickedYear = await openYearPicker(id);
-
               if (pickedYear === null) return;
-
               handleDownloadPDF(id, pickedYear);
             }}
             disabled={downloadingId === id}

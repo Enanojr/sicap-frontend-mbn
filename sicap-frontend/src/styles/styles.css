@@ -5316,6 +5316,1868 @@ input[type="number"]::-webkit-inner-spin-button {
   .reporte-tabla-wrapper {
     max-width: 100%;
   }
+/*--------------------------- grupos------------------------*/
+
+  .reporte-tabla-btn-general {
+    position: static;
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+  }
+}
+
+.reporte-general-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding: 22px 24px;
+  border-radius: 18px;
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  background: linear-gradient(135deg, #0f172a 0%, #162033 45%, #1e293b 100%);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.28);
+}
+
+.reporte-general-card__info {
+  flex: 1;
+  min-width: 280px;
+}
+
+.reporte-general-card__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  margin-bottom: 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: #7dd3fc;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.reporte-general-card__title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.reporte-general-card__text {
+  margin: 8px 0 0;
+  max-width: 700px;
+  color: #cbd5e1;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.reporte-general-card__actions {
+  display: flex;
+  align-items: end;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.reporte-year-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 180px;
+}
+
+.reporte-year-field__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.reporte-year-select {
+  min-width: 180px;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid #334155;
+  outline: none;
+  background: #0f172a;
+  color: #f8fafc;
+  font-size: 14px;
+  font-weight: 600;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.reporte-year-select:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
+}
+
+.reporte-general-download-btn {
+  height: 44px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.25);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+  white-space: nowrap;
+}
+
+.reporte-general-download-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 24px rgba(37, 99, 235, 0.35);
+}
+
+.reporte-general-download-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 768px) {
+  .reporte-general-card {
+    padding: 18px;
+  }
+
+  .reporte-general-card__title {
+    font-size: 20px;
+  }
+
+  .reporte-general-card__actions {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .reporte-year-field {
+    width: 100%;
+  }
+
+  .reporte-year-select,
+  .reporte-general-download-btn {
+    width: 100%;
+  }
+}
+
+.reporte-tabla-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ========= CARD SUPERIOR ========= */
+.reporte-general-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 22px 24px;
+  border-radius: 18px;
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  background: linear-gradient(135deg, #0f172a 0%, #162033 45%, #1e293b 100%);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.28);
+}
+
+.reporte-general-card__info {
+  flex: 1;
+  min-width: 280px;
+}
+
+.reporte-general-card__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  margin-bottom: 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: #7dd3fc;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.reporte-general-card__title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.reporte-general-card__text {
+  margin: 8px 0 0;
+  max-width: 700px;
+  color: #cbd5e1;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.reporte-general-card__actions {
+  display: flex;
+  align-items: end;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.reporte-year-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 180px;
+}
+
+.reporte-year-field__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.reporte-year-select {
+  min-width: 180px;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid #334155;
+  outline: none;
+  background: #0f172a;
+  color: #f8fafc;
+  font-size: 14px;
+  font-weight: 600;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.reporte-year-select:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
+.grupos-form-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+}
+
+.reporte-general-download-btn {
+  height: 44px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.25);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+  white-space: nowrap;
+}
+
+.reporte-general-download-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 24px rgba(37, 99, 235, 0.35);
+}
+
+.reporte-general-download-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+.grupos-date-input {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 0.85rem;
+}
+
+/* ========= CARD TABLA ========= */
+.reporte-table-card {
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: linear-gradient(180deg, #111827 0%, #0f172a 100%);
+  box-shadow: 0 14px 34px rgba(2, 6, 23, 0.24);
+}
+
+.reporte-table-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 22px 24px 16px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  background: linear-gradient(
+    180deg,
+    rgba(30, 41, 59, 0.68) 0%,
+    rgba(15, 23, 42, 0.25) 100%
+  );
+}
+
+.reporte-table-card__eyebrow {
+  display: inline-block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #38bdf8;
+}
+
+.reporte-table-card__title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.reporte-table-card__subtitle {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
+.reporte-table-card__body {
+  padding: 18px;
+}
+
+/* ========= BOTONES DE FILA ========= */
+.estado-year-trigger {
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  background: #0f172a;
+  color: #e2e8f0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    all 0.2s ease,
+    transform 0.15s ease;
+}
+
+.estado-year-trigger:hover:not(:disabled) {
+  border-color: #38bdf8;
+  color: #f8fafc;
+  background: #162033;
+  transform: translateY(-1px);
+}
+
+.estado-year-trigger:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.estado-download-btn {
+  height: 40px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    opacity 0.18s ease;
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+}
+
+.estado-download-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 22px rgba(37, 99, 235, 0.32);
+}
+
+.estado-download-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ========= ESTILO GENÉRICO PARA LA TABLA ========= */
+/* Esto funciona bien si ReusableTable renderiza <table> real */
+.reporte-table-card table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+}
+
+.reporte-table-card thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 14px 16px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 800;
+  color: #cbd5e1;
+  background: #1e293b;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.reporte-table-card tbody td {
+  padding: 14px 16px;
+  font-size: 14px;
+  color: #e5e7eb;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  background: rgba(15, 23, 42, 0.78);
+  vertical-align: middle;
+}
+
+.reporte-table-card tbody tr {
+  transition:
+    transform 0.16s ease,
+    background-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.reporte-table-card tbody tr:hover td {
+  background: rgba(30, 41, 59, 0.96);
+}
+
+.reporte-table-card tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ========= BUSCADOR / CONTROLES SI ReusableTable LOS RENDERIZA ========= */
+.reporte-table-card input[type="text"],
+.reporte-table-card input[type="search"],
+.reporte-table-card select {
+  border-radius: 12px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #f8fafc;
+  min-height: 42px;
+  padding: 0 14px;
+  font-size: 14px;
+}
+
+.reporte-table-card input[type="text"]:focus,
+.reporte-table-card input[type="search"]:focus,
+.reporte-table-card select:focus {
+  outline: none;
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.16);
+}
+
+/* ========= PAGINACIÓN GENÉRICA ========= */
+.reporte-table-card button {
+  transition: all 0.18s ease;
+}
+
+@media (max-width: 768px) {
+  .reporte-general-card {
+    padding: 18px;
+  }
+
+  .reporte-general-card__title {
+    font-size: 20px;
+  }
+
+  .reporte-general-card__actions {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .reporte-year-field {
+    width: 100%;
+  }
+
+  .reporte-year-select,
+  .reporte-general-download-btn {
+    width: 100%;
+  }
+
+  .reporte-table-card__header {
+    padding: 18px 18px 14px;
+  }
+
+  .reporte-table-card__body {
+    padding: 12px;
+  }
+
+  .reporte-table-card thead th,
+  .reporte-table-card tbody td {
+    padding: 12px 10px;
+    font-size: 13px;
+  }
+}
+
+/*----MEJORAS A GRUPOS ESTILOS ----*/
+
+.grupos-table-square,
+.grupos-table-square table,
+.grupos-table-square thead,
+.grupos-table-square tbody {
+  border-radius: 0 !important;
+}
+
+.grupos-modal-overlay {
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+.grupos-modal-content {
+  width: min(1100px, calc(100vw - 24px));
+  max-height: calc(100vh - 24px);
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.grupos-modal-header,
+.grupos-modal-body,
+.grupos-modal-actions,
+.grupos-detail-section,
+.grupos-form-grid,
+.grupos-form-field {
+  min-width: 0;
+}
+
+.grupos-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.grupos-form-input,
+.grupos-date-input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  min-height: 52px;
+}
+
+.contracts-table-wrapper {
+  overflow-x: auto;
+}
+
+.contracts-table th,
+.contracts-table td {
+  vertical-align: middle;
+}
+
+@media (max-width: 992px) {
+  .grupos-modal-content {
+    width: min(100%, calc(100vw - 20px));
+  }
+}
+
+@media (max-width: 768px) {
+  .grupos-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .grupos-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .grupos-modal-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .grupos-modal-actions button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .contracts-page-container {
+    padding: 0.75rem !important;
+  }
+
+  .contracts-card {
+    padding: 1rem !important;
+  }
+}
+
+/*--------------------------------------------Egresos--------------------------------------------*/
+
+:root {
+  --egresos-card-width: 960px;
+  --egresos-card-bg: linear-gradient(180deg, #10151c 0%, #0c1118 100%);
+  --egresos-card-bg-soft: #151b24;
+  --egresos-card-head: linear-gradient(180deg, #18203a 0%, #161d33 100%);
+  --egresos-card-border: rgba(255, 255, 255, 0.06);
+  --egresos-card-shadow: 0 18px 40px rgba(0, 0, 0, 0.42);
+  --egresos-blue: #58b2ee;
+  --egresos-orange: #d48a1f;
+}
+
+/* =========================
+   CONTENEDOR GENERAL
+========================= */
+
+.cm-egresos-module {
+  width: 100%;
+  padding-top: 0;
+}
+
+.cm-egresos-module .cm-container {
+  width: 100%;
+  min-height: auto !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.cm-egresos-shell {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 16px 32px;
+  box-sizing: border-box;
+}
+
+.cm-egresos-stack {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+
+.cm-egresos-form-wrap,
+.cm-egresos-table-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* =========================
+   FORMULARIO | WRAPPERS
+========================= */
+
+.cm-egresos-form-wrap .cm-container,
+.cm-egresos-form-wrap .cm-top-section,
+.cm-egresos-form-wrap .cm-top-section-egreso {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  gap: 0 !important;
+  min-height: auto !important;
+  box-sizing: border-box;
+}
+
+.cm-egresos-form-wrap .cm-page-title {
+  display: none !important;
+}
+
+.cm-egresos-form-wrap .cm-card,
+.cm-egresos-form-wrap .cm-form-card,
+.cm-egresos-form-wrap .cm-egreso-mode,
+.cm-egresos-form-wrap .cm-egreso-wide {
+  width: 100% !important;
+  max-width: var(--egresos-card-width) !important;
+  min-width: 0 !important;
+  margin: 0 auto !important;
+  box-sizing: border-box !important;
+  flex: 0 0 auto !important;
+}
+
+/* =========================
+   FORMULARIO | CARD
+========================= */
+
+.cm-egresos-form-wrap .cm-card.cm-form-card {
+  background: var(--egresos-card-bg) !important;
+  border: 1px solid var(--egresos-card-border) !important;
+  box-shadow: var(--egresos-card-shadow) !important;
+  border-radius: 20px !important;
+  padding: 28px 24px !important;
+}
+
+.cm-egresos-form-wrap .cm-card.cm-form-card.cm-egreso-mode {
+  border-top: 4px solid var(--egresos-orange) !important;
+}
+
+.cm-egresos-form-wrap .cm-form-card h3 {
+  color: #ffffff !important;
+  text-align: center !important;
+  margin-top: 0 !important;
+  margin-bottom: 22px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
+  padding-bottom: 14px !important;
+  font-size: 1.85rem !important;
+  line-height: 1.2 !important;
+  font-weight: 700 !important;
+}
+
+/* =========================
+   FORMULARIO | GRID Y CAMPOS
+========================= */
+
+.cm-egresos-form-wrap .cm-form-row {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px !important;
+  margin-bottom: 14px !important;
+}
+
+.cm-egresos-form-wrap .cm-form-row .cm-form-group {
+  min-width: 0 !important;
+}
+
+.cm-egresos-form-wrap .cm-form-group {
+  margin-bottom: 14px !important;
+}
+
+.cm-egresos-form-wrap .cm-form-group label {
+  display: block !important;
+  margin-bottom: 8px !important;
+  color: #f3f4f6 !important;
+  font-weight: 600 !important;
+  font-size: 0.92rem !important;
+}
+
+.cm-egresos-form-wrap .cm-container input,
+.cm-egresos-form-wrap .cm-container select,
+.cm-egresos-form-wrap .cm-container textarea,
+.cm-egresos-form-wrap .cm-input-select {
+  width: 100% !important;
+  min-height: 46px !important;
+  padding: 12px 14px !important;
+  background-color: #2d2d2d !important;
+  border: 1px solid #444 !important;
+  border-radius: 8px !important;
+  color: #ffffff !important;
+  font-size: 0.95rem !important;
+  box-sizing: border-box !important;
+}
+
+.cm-egresos-form-wrap .cm-container input:focus,
+.cm-egresos-form-wrap .cm-container select:focus,
+.cm-egresos-form-wrap .cm-container textarea:focus,
+.cm-egresos-form-wrap .cm-input-select:focus {
+  outline: none !important;
+  border-color: var(--egresos-blue) !important;
+  box-shadow: 0 0 0 3px rgba(88, 178, 238, 0.12) !important;
+  background-color: #333 !important;
+}
+
+.cm-egresos-form-wrap .cm-container input::placeholder,
+.cm-egresos-form-wrap .cm-container textarea::placeholder {
+  color: #8b95a7 !important;
+  opacity: 1;
+}
+
+.cm-egresos-form-wrap .cm-input-money {
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+}
+
+/* =========================
+   PRESUPUESTO
+========================= */
+
+.cm-egresos-form-wrap .cm-presupuesto-inline {
+  width: 100% !important;
+  min-height: 44px !important;
+  padding: 12px 14px !important;
+  background: linear-gradient(180deg, #2f2f31 0%, #2a2a2c 100%) !important;
+  border: 1px solid #474747 !important;
+  border-radius: 8px !important;
+  color: #fff !important;
+  font-size: 0.95rem !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-wrap: wrap !important;
+  box-sizing: border-box !important;
+}
+
+.cm-egresos-form-wrap .cm-presupuesto-base {
+  color: #7f8c8d !important;
+  text-decoration: line-through !important;
+}
+
+.cm-egresos-form-wrap .cm-presupuesto-descuento {
+  color: #e74c3c !important;
+  font-weight: 700 !important;
+}
+
+.cm-egresos-form-wrap .cm-presupuesto-restante {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+}
+
+.cm-egresos-form-wrap .cm-presupuesto-negative {
+  color: #dc2626 !important;
+  font-weight: 800 !important;
+}
+
+/* =========================
+   DROPZONE
+========================= */
+
+.cm-egresos-form-wrap .cm-upload-dropzone {
+  width: 100% !important;
+  min-height: 160px !important;
+  padding: 22px !important;
+  border: 1.5px dashed rgba(212, 138, 31, 0.45) !important;
+  border-radius: 18px !important;
+  background: linear-gradient(145deg, #0b0f14, #10151c) !important;
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+  transition: all 0.25s ease !important;
+}
+
+.cm-egresos-form-wrap .cm-upload-dropzone:hover {
+  transform: translateY(-2px) !important;
+  border-color: rgba(212, 138, 31, 0.75) !important;
+  box-shadow:
+    0 14px 28px rgba(0, 0, 0, 0.32),
+    0 0 0 3px rgba(212, 138, 31, 0.08) !important;
+}
+
+.cm-egresos-form-wrap .cm-upload-dropzone-active {
+  border-color: var(--egresos-orange) !important;
+  background: linear-gradient(145deg, #121820, #161d25) !important;
+  box-shadow:
+    0 16px 30px rgba(0, 0, 0, 0.34),
+    0 0 0 4px rgba(212, 138, 31, 0.12) !important;
+}
+
+.cm-egresos-form-wrap .cm-upload-dropzone-content {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  max-width: 420px !important;
+  width: 100% !important;
+}
+
+.cm-egresos-form-wrap .cm-upload-dropzone-icon {
+  width: 54px !important;
+  height: 54px !important;
+  border-radius: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(212, 138, 31, 0.15) !important;
+  color: #f4b04a !important;
+  font-size: 26px !important;
+  font-weight: 700 !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22) !important;
+  line-height: 1 !important;
+}
+
+.cm-egresos-form-wrap .cm-upload-dropzone-title {
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  line-height: 1.4 !important;
+}
+
+.cm-egresos-form-wrap .cm-upload-dropzone-subtitle {
+  font-size: 0.88rem !important;
+  color: rgba(255, 255, 255, 0.76) !important;
+  line-height: 1.5 !important;
+}
+
+.cm-egresos-form-wrap .cm-upload-dropzone-link {
+  color: #f4b04a !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+}
+
+.cm-egresos-form-wrap .cm-upload-dropzone-link:hover {
+  text-decoration: underline !important;
+}
+
+/* =========================
+   TARJETAS DE ARCHIVOS
+========================= */
+
+.cm-egresos-form-wrap .cm-files-list {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+  gap: 14px !important;
+  margin-top: 8px !important;
+}
+
+.cm-egresos-form-wrap .cm-file-card {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  justify-items: center !important;
+  text-align: center !important;
+  gap: 14px !important;
+  align-items: center !important;
+  width: 100% !important;
+  padding: 14px !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: linear-gradient(180deg, #171d26 0%, #111720 100%) !important;
+  box-shadow:
+    0 14px 30px rgba(0, 0, 0, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03) !important;
+  box-sizing: border-box !important;
+}
+
+.cm-egresos-form-wrap .cm-file-preview {
+  width: 110px !important;
+  height: 110px !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  background: linear-gradient(180deg, #202734 0%, #1a2230 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.cm-egresos-form-wrap .cm-file-image {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+}
+
+.cm-egresos-form-wrap .cm-file-pdf {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 16px !important;
+  background:
+    radial-gradient(circle at top, rgba(212, 138, 31, 0.22), transparent 60%),
+    linear-gradient(180deg, #221718 0%, #161012 100%) !important;
+  color: #ff5a5f !important;
+  font-size: 1.55rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.08em !important;
+}
+
+.cm-egresos-form-wrap .cm-file-info {
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  align-items: center !important;
+  text-align: center !important;
+}
+
+.cm-egresos-form-wrap .cm-file-name {
+  display: block !important;
+  min-width: 0 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+  font-size: 0.96rem !important;
+  font-weight: 700 !important;
+  color: #f8fafc !important;
+  line-height: 1.35 !important;
+  text-align: center !important;
+}
+
+.cm-egresos-form-wrap .cm-file-size {
+  display: inline-flex !important;
+  align-items: center !important;
+  width: fit-content !important;
+  padding: 4px 10px !important;
+  border-radius: 999px !important;
+  background: rgba(88, 178, 238, 0.12) !important;
+  color: #8fd1ff !important;
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+}
+
+.cm-egresos-form-wrap .cm-file-actions {
+  grid-column: 1 / -1 !important;
+  display: flex !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin-top: 4px !important;
+}
+
+.cm-egresos-form-wrap .cm-file-action-btn,
+.cm-egresos-form-wrap .cm-file-remove-btn {
+  appearance: none !important;
+  border: none !important;
+  outline: none !important;
+  min-width: 108px !important;
+  height: 40px !important;
+  padding: 0 14px !important;
+  border-radius: 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 0.88rem !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background-color 0.18s ease,
+    border-color 0.18s ease !important;
+}
+
+.cm-egresos-form-wrap .cm-file-action-btn {
+  background: linear-gradient(180deg, #58b2ee 0%, #2f91d5 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 18px rgba(47, 145, 213, 0.22) !important;
+}
+
+.cm-egresos-form-wrap .cm-file-action-btn:hover {
+  transform: translateY(-1px) !important;
+  background: linear-gradient(180deg, #69bef7 0%, #3498db 100%) !important;
+}
+
+.cm-egresos-form-wrap .cm-file-remove-btn {
+  background: rgba(239, 68, 68, 0.12) !important;
+  color: #ff8c8c !important;
+  border: 1px solid rgba(239, 68, 68, 0.22) !important;
+}
+
+.cm-egresos-form-wrap .cm-file-remove-btn:hover {
+  transform: translateY(-1px) !important;
+  background: rgba(239, 68, 68, 0.18) !important;
+  border-color: rgba(239, 68, 68, 0.34) !important;
+}
+
+/* =========================
+   BOTONES DEL FORMULARIO
+========================= */
+
+.cm-egresos-form-wrap .cm-egreso-actions {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  margin-top: 12px !important;
+}
+
+.cm-egresos-form-wrap .cm-egreso-actions .cm-btn,
+.cm-egresos-form-wrap .cm-egreso-actions .cm-btn-secondary,
+.cm-egresos-form-wrap .cm-egreso-actions .cm-btn-warning {
+  width: 100% !important;
+  min-height: 44px !important;
+  border-radius: 8px !important;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+}
+
+.cm-egresos-form-wrap .cm-egreso-actions .cm-btn-secondary {
+  background: #d8dde3 !important;
+  color: #42526b !important;
+  border: none !important;
+}
+
+.cm-egresos-form-wrap .cm-egreso-actions .cm-btn-secondary:hover {
+  background: #c8cfd7 !important;
+}
+
+.cm-egresos-form-wrap .cm-egreso-actions .cm-btn-warning {
+  background: var(--egresos-orange) !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+.cm-egresos-form-wrap .cm-egreso-actions .cm-btn-warning:hover {
+  background: #bb7614 !important;
+}
+
+/* =========================
+   TABLA | CARD
+========================= */
+
+.cm-egresos-table-wrap .egresos-card {
+  width: 100% !important;
+  max-width: var(--egresos-card-width) !important;
+  margin: 0 auto !important;
+  background: var(--egresos-card-bg) !important;
+  border: 1px solid var(--egresos-card-border) !important;
+  box-shadow: var(--egresos-card-shadow) !important;
+  border-radius: 20px !important;
+  padding: 28px 24px 22px !important;
+  box-sizing: border-box !important;
+}
+
+.cm-egresos-table-wrap .egresos-card-header {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin-bottom: 20px !important;
+}
+
+.cm-egresos-table-wrap .egresos-card-title {
+  width: 100%;
+  margin: 0 auto !important;
+  text-align: center !important;
+  display: block;
+  color: var(--egresos-blue) !important;
+  font-size: 1.85rem !important;
+  line-height: 1.2 !important;
+  font-weight: 700 !important;
+}
+
+.cm-egresos-table-wrap .egresos-card-divider {
+  width: 110px !important;
+  height: 4px !important;
+  margin: 12px auto 0 !important;
+  border-radius: 999px !important;
+  background: var(--egresos-blue) !important;
+}
+
+/* =========================
+   TABLA | TOOLBAR
+========================= */
+
+.cm-egresos-table-wrap .egresos-toolbar {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-end !important;
+  gap: 16px !important;
+  flex-wrap: wrap !important;
+  margin-bottom: 18px !important;
+}
+
+.cm-egresos-table-wrap .egresos-summary {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  min-width: 140px;
+}
+
+.cm-egresos-table-wrap .egresos-summary-label {
+  color: #cbd5e1 !important;
+  font-size: 0.9rem !important;
+}
+
+.cm-egresos-table-wrap .egresos-summary-value {
+  color: #ffffff !important;
+  font-size: 1.2rem !important;
+  font-weight: 800 !important;
+}
+
+.cm-egresos-table-wrap .egresos-search {
+  flex: 1 1 300px !important;
+  max-width: 340px !important;
+  min-width: 240px !important;
+  margin-left: auto !important;
+}
+
+.cm-egresos-table-wrap .egresos-search input {
+  width: 100% !important;
+  min-height: 46px !important;
+  padding: 0 14px !important;
+  background: #2d3139 !important;
+  border: 1px solid #3a3f48 !important;
+  border-radius: 10px !important;
+  color: #ffffff !important;
+  box-sizing: border-box !important;
+}
+
+.cm-egresos-table-wrap .egresos-search input:focus {
+  border-color: var(--egresos-blue) !important;
+  box-shadow: 0 0 0 3px rgba(88, 178, 238, 0.12) !important;
+}
+
+.cm-egresos-table-wrap .egresos-search input::placeholder {
+  color: #8b95a7 !important;
+}
+
+/* =========================
+   ESTADO VACÍO / CARGANDO
+========================= */
+
+.cm-egresos-table-wrap .egresos-empty-state {
+  width: 100%;
+  min-height: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 16px;
+  margin-top: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  background: linear-gradient(180deg, #161d26 0%, #111720 100%);
+  color: #e5e7eb;
+  text-align: center;
+  font-style: italic;
+  box-sizing: border-box;
+}
+
+/* =========================
+   TABLA | DESKTOP
+========================= */
+
+.cm-egresos-table-wrap .egresos-table-container {
+  width: 100% !important;
+  overflow-x: auto !important;
+  border-radius: 12px !important;
+  background: var(--egresos-card-bg-soft) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.cm-egresos-table-wrap .egresos-table {
+  width: 100% !important;
+  min-width: 720px !important;
+  border-collapse: collapse !important;
+}
+.cm-egresos-table-wrap .egresos-table thead tr {
+  background: var(--egresos-card-head) !important;
+}
+
+.cm-egresos-table-wrap .egresos-table th {
+  padding: 1rem !important;
+  text-align: left !important;
+  color: var(--egresos-blue) !important;
+  font-weight: 700 !important;
+  font-size: 0.8rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+}
+
+.cm-egresos-table-wrap .egresos-table td {
+  padding: 1rem !important;
+  color: #e5e7eb !important;
+  border-bottom: 1px solid #2a2f39 !important;
+  vertical-align: middle !important;
+}
+
+.cm-egresos-table-wrap .egresos-table tbody tr:hover {
+  background: rgba(88, 178, 238, 0.08) !important;
+}
+
+.cm-egresos-table-wrap .egresos-table-amount {
+  font-weight: 800 !important;
+  color: #ffffff !important;
+}
+
+.cm-egresos-table-wrap .egresos-btn-view {
+  background-color: var(--egresos-blue) !important;
+  border: none !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 8px !important;
+  color: #ffffff !important;
+  font-size: 0.9rem !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+}
+
+.cm-egresos-table-wrap .egresos-btn-view:hover {
+  background-color: #2f91d5 !important;
+}
+
+.cm-egresos-table-wrap .egresos-pagination {
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+  margin-top: 16px !important;
+  padding-top: 14px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+.cm-egresos-table-wrap .egresos-pagination-btn {
+  background: #2d3139 !important;
+  color: #dbe4ef !important;
+  border: 1px solid #3a3f48 !important;
+  border-radius: 8px !important;
+  min-width: 92px !important;
+  padding: 0.55rem 0.95rem !important;
+}
+
+.cm-egresos-table-wrap .egresos-pagination-btn:hover:not(:disabled) {
+  background: var(--egresos-blue) !important;
+  color: #ffffff !important;
+  border-color: var(--egresos-blue) !important;
+}
+
+.cm-egresos-table-wrap .egresos-pagination-btn:disabled {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+}
+
+.cm-egresos-table-wrap .egresos-pagination-info {
+  color: #cbd5e1 !important;
+  font-size: 0.85rem !important;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 992px) {
+  :root {
+    --egresos-card-width: 100%;
+  }
+
+  .cm-egresos-shell {
+    padding: 0 14px 28px;
+  }
+}
+
+@media (max-width: 768px) {
+  .cm-egresos-shell {
+    padding: 0 10px 22px;
+  }
+
+  .cm-egresos-stack {
+    gap: 22px;
+  }
+
+  /* FORMULARIO */
+  .cm-egresos-form-wrap .cm-card.cm-form-card,
+  .cm-egresos-table-wrap .egresos-card {
+    padding: 18px 14px !important;
+  }
+
+  .cm-egresos-form-wrap .cm-form-card h3,
+  .cm-egresos-table-wrap .egresos-card-title {
+    font-size: 1.55rem !important;
+  }
+
+  .cm-egresos-form-wrap .cm-form-row {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .cm-egresos-form-wrap .cm-upload-dropzone {
+    min-height: 145px !important;
+    padding: 18px !important;
+  }
+
+  .cm-egresos-form-wrap .cm-upload-dropzone-title {
+    font-size: 0.95rem !important;
+  }
+
+  .cm-egresos-form-wrap .cm-upload-dropzone-subtitle {
+    font-size: 0.82rem !important;
+  }
+
+  .cm-egresos-form-wrap .cm-files-list {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .cm-egresos-form-wrap .cm-file-preview {
+    width: 88px !important;
+    height: 88px !important;
+  }
+
+  .cm-egresos-form-wrap .cm-file-actions {
+    flex-wrap: wrap !important;
+  }
+
+  .cm-egresos-form-wrap .cm-file-action-btn,
+  .cm-egresos-form-wrap .cm-file-remove-btn {
+    flex: 1 1 calc(50% - 5px) !important;
+    min-width: 0 !important;
+  }
+
+  /* TABLA | CARD */
+  .cm-egresos-table-wrap .egresos-card-divider {
+    width: 90px !important;
+  }
+
+  /* TABLA | TOOLBAR — fix del espacio */
+  .cm-egresos-table-wrap .egresos-toolbar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .cm-egresos-table-wrap .egresos-summary {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: 12px !important;
+    padding: 12px 14px !important;
+  }
+
+  .cm-egresos-table-wrap .egresos-summary-label {
+    font-size: 0.82rem !important;
+  }
+
+  .cm-egresos-table-wrap .egresos-summary-value {
+    font-size: 1.08rem !important;
+  }
+
+  /* FIX PRINCIPAL: elimina el flex que estiraba el search a 300px */
+  .cm-egresos-table-wrap .egresos-search {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin-left: 0 !important;
+  }
+
+  .cm-egresos-table-wrap .egresos-search input {
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    font-size: 0.92rem !important;
+  }
+
+  /* TABLA | CONTAINER */
+  .cm-egresos-table-wrap .egresos-table-container {
+    overflow: visible !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  /* TABLA | TABLE */
+  .cm-egresos-table-wrap .egresos-table {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    border-collapse: collapse !important;
+    table-layout: fixed !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* TABLA | THEAD */
+  .cm-egresos-table-wrap .egresos-table thead {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+    position: absolute !important;
+  }
+
+  /* TABLA | TBODY */
+  .cm-egresos-table-wrap .egresos-table tbody {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* TABLA | FILAS */
+  .cm-egresos-table-wrap .egresos-table tbody tr {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: linear-gradient(180deg, #161d26 0%, #111720 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22) !important;
+    overflow: hidden !important;
+  }
+
+  /* TABLA | CELDAS */
+  .cm-egresos-table-wrap .egresos-table td {
+    display: grid !important;
+    grid-template-columns: 108px minmax(0, 1fr) !important;
+    align-items: start !important;
+    gap: 12px !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 10px 14px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    text-align: left !important;
+    box-sizing: border-box !important;
+  }
+
+  .cm-egresos-table-wrap .egresos-table td:last-child {
+    border-bottom: none !important;
+  }
+
+  .cm-egresos-table-wrap .egresos-table td::before {
+    content: attr(data-label) !important;
+    display: block !important;
+    color: var(--egresos-blue) !important;
+    font-weight: 700 !important;
+    font-size: 0.74rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    line-height: 1.3 !important;
+  }
+
+  .cm-egresos-table-wrap .egresos-table-amount {
+    font-size: 0.96rem !important;
+    font-weight: 800 !important;
+    text-align: right !important;
+  }
+
+  .cm-egresos-table-wrap .egresos-btn-view {
+    min-width: 92px !important;
+    justify-self: end !important;
+  }
+
+  /* ESTADO VACÍO */
+  .cm-egresos-table-wrap .egresos-empty-state {
+    min-height: 72px;
+    padding: 16px 12px;
+    font-size: 0.95rem;
+  }
+
+  /* PAGINACIÓN */
+  .cm-egresos-table-wrap .egresos-pagination {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    margin-top: 14px !important;
+  }
+
+  .cm-egresos-table-wrap .egresos-pagination-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .cm-egresos-table-wrap .egresos-pagination-info {
+    text-align: center !important;
+    font-size: 0.82rem !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .cm-egresos-shell {
+    padding: 0 8px 18px;
+  }
+
+  .cm-egresos-form-wrap .cm-card.cm-form-card,
+  .cm-egresos-table-wrap .egresos-card {
+    padding: 16px 12px !important;
+  }
+
+  .cm-egresos-form-wrap .cm-form-card h3,
+  .cm-egresos-table-wrap .egresos-card-title {
+    font-size: 1.35rem !important;
+  }
+
+  .cm-egresos-form-wrap .cm-files-list {
+    grid-template-columns: 1fr !important;
+  }
+
+  .cm-egresos-form-wrap .cm-file-preview {
+    width: 100% !important;
+    height: 120px !important;
+  }
+
+  .cm-egresos-form-wrap .cm-file-actions {
+    flex-direction: column !important;
+  }
+
+  .cm-egresos-form-wrap .cm-file-action-btn,
+  .cm-egresos-form-wrap .cm-file-remove-btn {
+    width: 100% !important;
+  }
+
+  .cm-egresos-form-wrap .cm-presupuesto-inline {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .cm-egresos-table-wrap .egresos-table td {
+    grid-template-columns: 96px minmax(0, 1fr) !important;
+    padding: 9px 12px !important;
+  }
+
+  .cm-egresos-table-wrap .egresos-table td::before {
+    font-size: 0.7rem !important;
+  }
+}
+
+/*estado de cuenta*/
+
+.estado-year-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid rgba(96, 165, 250, 0.35);
+  border-radius: 999px;
+  background: linear-gradient(
+    135deg,
+    rgba(37, 99, 235, 0.22),
+    rgba(56, 189, 248, 0.18)
+  );
+  color: #e0f2fe;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 122px;
+  justify-content: center;
+  box-shadow: 0 8px 22px rgba(2, 6, 23, 0.18);
+}
+
+.estado-year-chip:hover {
+  transform: translateY(-1px);
+  border-color: rgba(96, 165, 250, 0.6);
+  background: linear-gradient(
+    135deg,
+    rgba(37, 99, 235, 0.3),
+    rgba(56, 189, 248, 0.24)
+  );
+}
+
+.estado-year-chip:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.estado-year-popup {
+  border-radius: 22px !important;
+  border: 1px solid rgba(56, 189, 248, 0.18) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45) !important;
+}
+
+.estado-year-popup-title {
+  font-size: 1.45rem !important;
+  font-weight: 700 !important;
+}
+
+.estado-year-confirm,
+.estado-year-cancel {
+  border-radius: 12px !important;
+  padding: 10px 18px !important;
+  font-weight: 600 !important;
+}
+
+.swal2-radio {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 12px;
+  margin: 1.4rem 0 0.6rem 0 !important;
+  text-align: left;
+}
+
+.swal2-radio label {
+  margin: 0 !important;
+  padding: 14px 16px !important;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(30, 41, 59, 0.75);
+  color: #f8fafc !important;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.swal2-radio label:hover {
+  border-color: rgba(56, 189, 248, 0.5);
+  background: rgba(15, 23, 42, 0.95);
+}
+
+.swal2-radio input:checked + span,
+.swal2-radio label:has(input:checked) {
+  border-color: #38bdf8 !important;
+  background: rgba(14, 116, 144, 0.22) !important;
+  color: #bae6fd !important;
+}
+
+.estado-year-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 130px;
+  padding: 10px 14px;
+  border: 1px solid rgba(96, 165, 250, 0.28);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.9);
+  color: #e2e8f0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.estado-year-trigger:hover {
+  border-color: rgba(56, 189, 248, 0.55);
+  background: rgba(30, 41, 59, 1);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.estado-year-trigger:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.estado-year-modal {
+  width: 430px !important;
+  max-width: calc(100vw - 32px) !important;
+  padding: 1.6rem 1.4rem 1.25rem !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(56, 189, 248, 0.18) !important;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35) !important;
+  overflow: hidden !important;
+}
+
+.estado-year-modal .swal2-title {
+  margin: 0 0 1rem 0 !important;
+  font-size: 1.95rem !important;
+  font-weight: 700 !important;
+  line-height: 1.15 !important;
+  color: #f8fafc !important;
+}
+
+.estado-year-modal .swal2-html-container {
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+.estado-year-modal .swal2-select.estado-year-select {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 0.9rem 1rem !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(56, 189, 248, 0.45) !important;
+  background: #0b1530 !important;
+  color: #e5e7eb !important;
+  font-size: 1rem !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.08) !important;
+}
+
+.estado-year-modal .swal2-select.estado-year-select:focus {
+  border-color: rgba(56, 189, 248, 0.7) !important;
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.14) !important;
+}
+
+.estado-year-actions {
+  width: 100% !important;
+  margin: 1.25rem 0 0 0 !important;
+  gap: 12px !important;
+  justify-content: center !important;
+}
+
+.estado-year-confirm-btn,
+.estado-year-cancel-btn {
+  min-width: 104px !important;
+  border-radius: 12px !important;
+  padding: 10px 18px !important;
+  font-weight: 700 !important;
+  margin: 0 !important;
+}
+
+@media (max-width: 768px) {
+  .estado-year-modal {
+    width: calc(100vw - 24px) !important;
+    padding: 1.25rem 1rem 1rem !important;
+  }
+
+  .estado-year-modal .swal2-title {
+    font-size: 1.55rem !important;
+  }
+
+  .estado-year-modal .swal2-select.estado-year-select {
+    font-size: 0.95rem !important;
+    padding: 0.82rem 0.9rem !important;
+  }
+
+  .estado-year-confirm-btn,
+  .estado-year-cancel-btn {
+    min-width: 96px !important;
+    padding: 9px 14px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .estado-year-trigger {
+    min-width: 110px;
+    padding: 9px 12px;
+    font-size: 0.86rem;
+  }
+
+  .estado-year-modal {
+    width: calc(100% - 32px) !important;
+  }
+}
+
+/*reporte de cobradores*/
+
+.reporte-tabla-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 760px; /* ajústalo al ancho real de tu tabla/card */
+  margin: 0 auto;
+}
+
+.reporte-tabla-btn-general {
+  position: absolute;
+  top: 48px;
+  right: 24px;
+  z-index: 30;
+}
+
+.reporte-tabla-btn-general .estado-download-btn {
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .reporte-tabla-wrapper {
+    max-width: 100%;
+  }
 
   .reporte-tabla-btn-general {
     position: static;
