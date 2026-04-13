@@ -34,10 +34,7 @@ import HistoricoEgresos from "../pages/tesoreria/tabla_egresos";
 import HistoricoIngresos from "../pages/tesoreria/tabla_ingresos";
 import TesoreriaDashboard from "../pages/tesoreria/main_egresos";
 import Grupos from "../pages/grupos/grupo";
-<<<<<<< Updated upstream
 import Reporte from "../pages/reportes/reportes";
-=======
->>>>>>> Stashed changes
 
 const Rutas = [
   // Ruta #1: Login (pública)
@@ -170,13 +167,10 @@ const Rutas = [
             path: "/calles",
             element: <CallesPage />,
           },
-<<<<<<< Updated upstream
           {
             path: "/reportes",
             element: <Reporte />,
           },
-=======
->>>>>>> Stashed changes
         ],
       },
     ],

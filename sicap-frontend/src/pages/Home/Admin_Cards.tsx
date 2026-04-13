@@ -4,28 +4,19 @@ import "../../styles/styles.css";
 import {
   UserCog,
   UserSquare,
-<<<<<<< Updated upstream
-  MapPin,
-  Home,
-  Banknote,
-=======
   //MapPin,
   //Home,
->>>>>>> Stashed changes
-  Clipboard,
+  Banknote,
+  //Clipboard,
   Drill,
   Stamp,
   Percent,
-  Wrench,
+  //Wrench,
   Settings,
   //TrendingUp,
   //Users,
-<<<<<<< Updated upstream
-  UsersRound,
-  Milestone,
-=======
   //UsersRound,
->>>>>>> Stashed changes
+  //Milestone,
 } from "lucide-react";
 
 // Componente para las tarjetas de estadísticas
@@ -88,11 +79,7 @@ function Admin_Cards() {
       waterDropColor: "rgba(42, 157, 143, 0.35)",
       onClick: handleCobradores,
     },
-<<<<<<< Updated upstream
     /* {
-=======
-    /*{
->>>>>>> Stashed changes
       title: "Registro de Sectores",
       description: "Registra nuevos sectores en el sistema.",
       icon: MapPin,
@@ -149,11 +136,7 @@ function Admin_Cards() {
     {
       title: "Cierre anual",
       description: "Sección de cierre de cuentas anual.",
-<<<<<<< Updated upstream
       icon: Stamp,
-=======
-      icon: Wrench,
->>>>>>> Stashed changes
       ctaText: "Cerrar Cuenta",
       gradientColors: ["#8d99ae", "#2b2d42"] as [string, string],
       waterDropColor: "rgba(141, 153, 174, 0.35)",
@@ -171,11 +154,7 @@ function Admin_Cards() {
     {
       title: "Gestión de Calles",
       description: "Administra y organiza las calles del sistema.",
-<<<<<<< Updated upstream
       icon: Milestone,
-=======
-      icon: UsersRound,
->>>>>>> Stashed changes
       ctaText: "Administrar Calles",
       gradientColors: ["#f72585", "#b5179e"] as [string, string],
       waterDropColor: "rgba(247, 37, 133, 0.35)",
