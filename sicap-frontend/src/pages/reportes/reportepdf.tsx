@@ -40,6 +40,7 @@ type CobradorGroup = {
 
 interface Props {
   rows: EstadoCuentaNewDetalleRow[];
+  anio?: number;
 }
 
 const money = (n: number) =>
@@ -519,9 +520,12 @@ const styles = StyleSheet.create({
   },
 });
 
-const getReportTitle = () => "Reporte de pagos por cobrador";
+const getReportTitle = (anio?: number) =>
+  anio
+    ? `Reporte de pagos por cobrador — ${anio}`
+    : "Reporte de pagos por cobrador";
 
-export default function EstadoCuentaCobradoresPDF({ rows }: Props) {
+export default function EstadoCuentaCobradoresPDF({ rows, anio }: Props) {
   const footerDate = new Date().toLocaleDateString("es-MX");
   const cobradores = groupRows(rows);
 
@@ -544,7 +548,7 @@ export default function EstadoCuentaCobradoresPDF({ rows }: Props) {
             </View>
 
             <View style={styles.infoCard}>
-              <Text style={styles.infoTitle}>{getReportTitle()}</Text>
+              <Text style={styles.infoTitle}>{getReportTitle(anio)}</Text>
               <View style={styles.infoRow}>
                 <Text style={styles.label}>Fecha de emisión</Text>
                 <Text style={styles.value}>{footerDate}</Text>
@@ -593,7 +597,15 @@ export default function EstadoCuentaCobradoresPDF({ rows }: Props) {
             </View>
 
             <View style={styles.infoCard}>
-              <Text style={styles.infoTitle}>{getReportTitle()}</Text>
+              <Text style={styles.infoTitle}>{getReportTitle(anio)}</Text>
+
+              {/* Año destacado */}
+              {anio && (
+                <View style={styles.infoRow}>
+                  <Text style={styles.label}>Año del reporte</Text>
+                  <Text style={styles.value}>{anio}</Text>
+                </View>
+              )}
 
               <View style={styles.infoRow}>
                 <Text style={styles.label}>Cobrador</Text>

@@ -14,18 +14,10 @@ import type { EstadoCuentaNewDetalleRow } from "../../services/reporte_cobradore
 
 interface Props {
   rows: EstadoCuentaNewDetalleRow[];
+  anio?: number;
 }
 
-/**
- * true  = cada cobrador empieza en una hoja nueva
- * false = aprovecha espacio y solo salta cuando ya no cabe
- */
 const ONE_COBRADOR_PER_PAGE = false;
-
-/**
- * Reserva espacio para que no quede “viudo” el encabezado del cobrador.
- * Si no hay suficiente espacio disponible, manda el bloque a la siguiente página.
- */
 const COBRADOR_MIN_PRESENCE_AHEAD = 155;
 
 const money = (n: number) =>
@@ -176,7 +168,6 @@ const styles = StyleSheet.create({
     objectFit: "contain",
   },
 
-  // Header fijo
   headerRow: {
     position: "absolute",
     top: 18,
@@ -234,7 +225,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 
-  // Resumen general
   globalRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -280,14 +270,11 @@ const styles = StyleSheet.create({
     color: "#c2410c",
   },
 
-  // Bloque por cobrador
   cobradorSection: {
     marginBottom: 14,
   },
 
-  topLockedBlock: {
-    // Este bloque se mantiene junto
-  },
+  topLockedBlock: {},
 
   sectionHeader: {
     backgroundColor: "#103f6f",
@@ -567,7 +554,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function EstadoCuentaGeneralPDF({ rows }: Props) {
+export default function EstadoCuentaGeneralPDF({ rows, anio }: Props) {
   const footerDate = new Date().toLocaleDateString("es-MX");
   const resumen = buildResumen(rows);
 
@@ -578,6 +565,10 @@ export default function EstadoCuentaGeneralPDF({ rows }: Props) {
     (s, c) => s + c.total_cuentahabientes,
     0,
   );
+
+  const reportTitle = anio
+    ? `Resumen general de cobradores — ${anio}`
+    : "Resumen general de cobradores";
 
   return (
     <Document>
@@ -595,7 +586,15 @@ export default function EstadoCuentaGeneralPDF({ rows }: Props) {
           </View>
 
           <View style={styles.infoCard}>
-            <Text style={styles.infoTitle}>Resumen general de cobradores</Text>
+            <Text style={styles.infoTitle}>{reportTitle}</Text>
+
+            {/* Año destacado */}
+            {anio && (
+              <View style={styles.infoRow}>
+                <Text style={styles.label}>Año del reporte</Text>
+                <Text style={styles.value}>{anio}</Text>
+              </View>
+            )}
 
             <View style={styles.infoRow}>
               <Text style={styles.label}>Total de cobradores</Text>
@@ -648,7 +647,6 @@ export default function EstadoCuentaGeneralPDF({ rows }: Props) {
                 break={ONE_COBRADOR_PER_PAGE && index > 0}
                 minPresenceAhead={COBRADOR_MIN_PRESENCE_AHEAD}
               >
-                {/* Este bloque se mantiene junto */}
                 <View style={styles.topLockedBlock} wrap={false}>
                   <View style={styles.sectionHeader}>
                     <Text style={styles.sectionHeaderName}>
@@ -698,7 +696,6 @@ export default function EstadoCuentaGeneralPDF({ rows }: Props) {
                   </View>
                 </View>
 
-                {/* Estas filas sí pueden continuar en la siguiente página */}
                 <View style={styles.detailRowsBox}>
                   {cobrador.cuentahabientes.length === 0 ? (
                     <View style={styles.noDataRow}>

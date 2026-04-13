@@ -59,69 +59,16 @@ const statusOptions: FilterOption[] = [
 ];
 
 // ─────────────────────────────────────────────
+// Cache y refs de módulo
+// ─────────────────────────────────────────────
+let cachedContracts: ContractSummary[] | null = null;
+
+// ─────────────────────────────────────────────
 // Status Config
 // ─────────────────────────────────────────────
 const statusConfig: Record<
   string,
-  {
-    bg: string;
-    text: string;
-    border: string;
-    icon: React.ReactNode;
-    dot: string;
-  }
-> = {
-  pagado: {
-    bg: "#0d2e1a",
-    text: "#4ade80",
-    border: "#166534",
-    icon: <CheckCircle2 size={11} />,
-    dot: "#4ade80",
-  },
-  corriente: {
-    bg: "#0d1f2e",
-    text: "#38bdf8",
-    border: "#0c4a6e",
-    icon: <Clock3 size={11} />,
-    dot: "#38bdf8",
-  },
-  rezagado: {
-    bg: "#2d1a00",
-    text: "#fbbf24",
-    border: "#92400e",
-    icon: <AlertCircle size={11} />,
-    dot: "#fbbf24",
-  },
-  adeudo: {
-    bg: "#2d0a0a",
-    text: "#f87171",
-    border: "#7f1d1d",
-    icon: <Ban size={11} />,
-    dot: "#f87171",
-  },
-};
-
-const getStatusConf = (estatus: string) =>
-  statusConfig[estatus.trim().toLowerCase()] || {
-    bg: "#1e2028",
-    text: "#9ca3af",
-    border: "#374151",
-    icon: null,
-    dot: "#9ca3af",
-  };
-
-// ─────────────────────────────────────────────
-// Helpers
-// ─────────────────────────────────────────────
-const statusConfig: Record<
-  string,
-  {
-    bg: string;
-    text: string;
-    border: string;
-    icon: React.ReactNode;
-    dot: string;
-  }
+  { bg: string; text: string; border: string; icon: React.ReactNode; dot: string }
 > = {
   pagado: {
     bg: "#0d2e1a",
@@ -165,7 +112,19 @@ const getStatusConf = (estatus: string) =>
   statusConfig[estatus.trim().toLowerCase()] ?? defaultStatusConf;
 
 // ─────────────────────────────────────────────
-// Helpers (fuera del componente — no se recrean)
+// Hooks
+// ─────────────────────────────────────────────
+function useDebounce<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState<T>(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+  return debounced;
+}
+
+// ─────────────────────────────────────────────
+// Helpers (fuera del componente)
 // ─────────────────────────────────────────────
 const formatFechaLocal = (fechaString: string): string => {
   if (!fechaString) return "—";
@@ -203,8 +162,30 @@ const normalizeStreet = (value: string): string => {
     .trim();
 };
 
-const prettyStreet = (value: string) =>
-  value.replace(/\b\w/g, (l) => l.toUpperCase());
+interface StreetGroup {
+  key: string;
+  label: string;
+  variants: string[];
+}
+
+const buildStreetGroups = (contracts: ContractSummary[]): StreetGroup[] => {
+  const map = new Map<string, Set<string>>();
+  for (const c of contracts) {
+    if (!c.calle) continue;
+    const key = normalizeStreet(c.calle);
+    if (!key) continue;
+    if (!map.has(key)) map.set(key, new Set());
+    map.get(key)!.add(c.calle.trim());
+  }
+  return Array.from(map.entries())
+    .map(([key, variants]) => {
+      const variantList = Array.from(variants);
+      const label =
+        variantList[0].replace(/\b\w/g, (l) => l.toUpperCase()) || key;
+      return { key, label, variants: variantList.slice(1) };
+    })
+    .sort((a, b) => a.label.localeCompare(b.label));
+};
 
 // ─────────────────────────────────────────────
 // Sub-components
@@ -309,42 +290,26 @@ const ContractTable: React.FC = () => {
   const streetTermDebounced = useDebounce(streetInput, 250);
 
   const [selectedStreetKey, setSelectedStreetKey] = useState<string>("");
-  const [isStreetDropdownOpen, setIsStreetDropdownOpen] =
-    useState<boolean>(false);
+  const [isStreetDropdownOpen, setIsStreetDropdownOpen] = useState<boolean>(false);
 
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
-  const [isStatusDropdownOpen, setIsStatusDropdownOpen] =
-    useState<boolean>(false);
+  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState<boolean>(false);
   const [selectedYear, setSelectedYear] = useState<string>("");
   const [isYearDropdownOpen, setIsYearDropdownOpen] = useState<boolean>(false);
 
-  const [selectedContract, setSelectedContract] =
-    useState<ContractSummary | null>(null);
+  const [selectedContract, setSelectedContract] = useState<ContractSummary | null>(null);
   const [modalPreYear, setModalPreYear] = useState<string>("all");
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
 
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 15;
 
-  // Ref para evitar doble-fetch en StrictMode
-  const fetchedRef = useRef(false);
+  const yearInitialized = useRef(false);
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [
-    searchTerm,
-    selectedFilter,
-    selectedStatus,
-    selectedYear,
-    streetTerm,
-    selectedStreetKey,
-  ]);
-
-  // ── Data loading ────────────────────────────────────────────────
+  // ── Data loading ──────────────────────────────────────────────
   const loadData = useCallback(async () => {
-    // Usar caché si ya se cargó antes
     if (cachedContracts) {
       setContracts(cachedContracts);
       return;
@@ -379,7 +344,11 @@ const ContractTable: React.FC = () => {
     }
   }, []);
 
-  // ── Year options ─────────────────────────────────────────────────
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  // ── Year options ──────────────────────────────────────────────
   const yearOptions: FilterOption[] = React.useMemo(() => {
     const years = Array.from(
       new Set(contracts.map((c) => c.anio?.toString()).filter(Boolean)),
@@ -394,7 +363,7 @@ const ContractTable: React.FC = () => {
     }
   }, [yearOptions]);
 
-  // Reset página cuando cambian filtros
+  // ── Reset página cuando cambian filtros ───────────────────────
   useEffect(() => {
     setCurrentPage(1);
   }, [
@@ -406,18 +375,13 @@ const ContractTable: React.FC = () => {
     selectedStreetKey,
   ]);
 
-  // ── Street groups (calculado una sola vez por dataset) ───────────
+  // ── Street groups ─────────────────────────────────────────────
   const streetGroups = React.useMemo(
     () => buildStreetGroups(contracts),
     [contracts],
   );
 
-  const filterByYear = (contract: ContractSummary): boolean => {
-    if (selectedYear === "all") return true;
-    return contract.anio?.toString() === selectedYear;
-  };
-
-  // ── Filter helpers (funciones puras, memoizadas) ─────────────────
+  // ── Filter helpers ────────────────────────────────────────────
   const filterByDateRange = useCallback(
     (contract: ContractSummary): boolean => {
       if (selectedFilter === "all") return true;
@@ -433,59 +397,44 @@ const ContractTable: React.FC = () => {
         (today.getTime() - lastPaymentDate.getTime()) / 86400000,
       );
       switch (selectedFilter) {
-        case "day":
-          return diffDays <= 1;
-        case "week":
-          return diffDays <= 7;
-        case "month":
-          return diffDays <= 31;
-        case "year":
-          return diffDays <= 365;
-        default:
-          return true;
+        case "day":   return diffDays <= 1;
+        case "week":  return diffDays <= 7;
+        case "month": return diffDays <= 31;
+        case "year":  return diffDays <= 365;
+        default:      return true;
       }
     },
     [selectedFilter],
   );
 
-  // ── Filtered + table rows en un solo useMemo ─────────────────────
+  // ── Table rows (filtrado + mapeo en un solo useMemo) ──────────
   const tableRows = React.useMemo<TableRow[]>(() => {
     const lowerSearch = searchTerm.toLowerCase();
     const normalizedStreet = normalizeStreet(streetTermDebounced);
 
     return contracts
       .filter((contract) => {
-        // Búsqueda por nombre/contrato
+        // Búsqueda por nombre / contrato
         if (
           lowerSearch &&
-          !contract.numero_contrato
-            .toString()
-            .toLowerCase()
-            .includes(lowerSearch) &&
+          !contract.numero_contrato.toString().toLowerCase().includes(lowerSearch) &&
           !contract.nombre_completo.toLowerCase().includes(lowerSearch)
         )
           return false;
 
-  // ── Table rows ──────────────────────────────────────────────────
-  const tableRows: TableRow[] = React.useMemo(() => {
-    return filteredContracts.map((contract) => {
-      const pagosDelAnio = (contract.pagos || []).filter(
-        (p) => selectedYear === "all" || p.anio?.toString() === selectedYear,
-      );
-      const pagosTotalesFila = pagosDelAnio.reduce(
-        (sum, p) => sum + Number(p.monto_recibido || 0),
-        0,
-      );
-      return {
-        rowKey: `${contract.id}-${contract.anio}`,
-        contract,
-        anioFila: contract.anio?.toString() || "—",
-        pagosTotalesFila,
-        saldoPendienteFila: Number(contract.saldo_pendiente || 0),
-        modalYear: selectedYear,
-      };
-    });
-  }, [filteredContracts, selectedYear]);
+        // Filtro de calle
+        if (selectedStreetKey) {
+          if (normalizeStreet(contract.calle || "") !== selectedStreetKey) return false;
+        } else if (normalizedStreet) {
+          if (!normalizeStreet(contract.calle || "").includes(normalizedStreet)) return false;
+        }
+
+        // Filtro de estado
+        if (
+          selectedStatus !== "all" &&
+          contract.estatus_deuda.trim().toLowerCase() !== selectedStatus
+        )
+          return false;
 
         // Filtro de año
         if (
@@ -530,7 +479,7 @@ const ContractTable: React.FC = () => {
     filterByDateRange,
   ]);
 
-  // ── Pagination ───────────────────────────────────────────────────
+  // ── Pagination ────────────────────────────────────────────────
   const totalPages = Math.ceil(tableRows.length / itemsPerPage);
   const currentRows = React.useMemo(
     () =>
@@ -596,23 +545,14 @@ const ContractTable: React.FC = () => {
   }, []);
 
   const streetSuggestions = React.useMemo(() => {
-    const q = normalizeStreet(streetTerm);
+    const q = normalizeStreet(streetTermDebounced);
     if (!q) return streetGroups.slice(0, 10);
     return streetGroups
       .filter((g) => g.key.includes(q) || normalizeStreet(g.label).includes(q))
       .slice(0, 10);
-  }, [streetTerm, streetGroups]);
+  }, [streetTermDebounced, streetGroups]);
 
-  // ── Active filters count ─────────────────────────────────────────
-  const activeFiltersCount = [
-    selectedFilter !== "all",
-    selectedStatus !== "all",
-    selectedYear !== "all",
-    streetTerm.trim() !== "",
-    searchTerm.trim() !== "",
-  ].filter(Boolean).length;
-
-  // ── Shared dropdown style ────────────────────────────────────────
+  // ── Shared dropdown style ─────────────────────────────────────
   const dropdownStyle: React.CSSProperties = {
     position: "absolute",
     top: "calc(100% + 6px)",
@@ -654,16 +594,16 @@ const ContractTable: React.FC = () => {
     transition: "all 0.15s",
   });
 
-  // ────────────────────────────────────────────────────────────────
+  // ────────────────────────────────────────────────────────────
   // RENDER
-  // ────────────────────────────────────────────────────────────────
+  // ────────────────────────────────────────────────────────────
   return (
     <div className="contracts-page-container">
       <div
         className="contracts-card"
         style={{ backgroundColor: "#0d0f14", border: "1px solid #1a1d24" }}
       >
-        {/* ── HEADER ──────────────────────────────────────────────── */}
+        {/* ── HEADER ─────────────────────────────────────────── */}
         <div style={{ padding: "1.5rem 1.75rem 0" }}>
           <div
             style={{
@@ -726,7 +666,7 @@ const ContractTable: React.FC = () => {
           />
         </div>
 
-        {/* ── TOOLBAR ─────────────────────────────────────────────── */}
+        {/* ── TOOLBAR ────────────────────────────────────────── */}
         <div
           style={{
             padding: "0 1.75rem 1rem",
@@ -908,7 +848,7 @@ const ContractTable: React.FC = () => {
                         }}
                         onMouseDown={(e) => e.preventDefault()}
                         onClick={() => {
-                          setStreetTerm(g.label);
+                          setStreetInput(g.label);
                           setSelectedStreetKey(g.key);
                           setIsStreetDropdownOpen(false);
                         }}
@@ -966,11 +906,11 @@ const ContractTable: React.FC = () => {
             />
             <input
               type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               style={{
                 backgroundColor: "#13151c",
-                border: `1px solid ${searchTerm ? "#58b2ee55" : "#252831"}`,
+                border: `1px solid ${searchInput ? "#58b2ee55" : "#252831"}`,
                 borderRadius: "8px",
                 color: "#d1d5db",
                 fontSize: "0.8rem",
@@ -980,10 +920,10 @@ const ContractTable: React.FC = () => {
               }}
               placeholder="Contrato o nombre..."
             />
-            {searchTerm && (
+            {searchInput && (
               <button
                 type="button"
-                onClick={() => setSearchTerm("")}
+                onClick={() => setSearchInput("")}
                 style={{
                   position: "absolute",
                   right: "0.5rem",
@@ -1005,13 +945,7 @@ const ContractTable: React.FC = () => {
           {activeFiltersCount > 1 && (
             <button
               type="button"
-              onClick={() => {
-                setSelectedFilter("all");
-                setSelectedStatus("all");
-                setStreetTerm("");
-                setSelectedStreetKey("");
-                setSearchTerm("");
-              }}
+              onClick={handleClearAll}
               style={{
                 ...filterButtonStyle(false),
                 color: "#f87171",
@@ -1047,7 +981,7 @@ const ContractTable: React.FC = () => {
 
         {!loading && !error && (
           <>
-            {/* ── TABLE ───────────────────────────────────────────── */}
+            {/* ── TABLE ──────────────────────────────────────── */}
             <div style={{ overflowX: "auto" }}>
               <table
                 style={{
@@ -1310,7 +1244,7 @@ const ContractTable: React.FC = () => {
               )}
             </div>
 
-            {/* ── PAGINATION ──────────────────────────────────────── */}
+            {/* ── PAGINATION ─────────────────────────────────── */}
             {tableRows.length > 0 && (
               <div
                 style={{
@@ -1410,9 +1344,9 @@ const ContractTable: React.FC = () => {
         )}
       </div>
 
-      {/* ────────────────────────────────────────────────────────────
+      {/* ──────────────────────────────────────────────────────────
           MODAL
-      ──────────────────────────────────────────────────────────── */}
+      ────────────────────────────────────────────────────────── */}
       {selectedContract &&
         (() => {
           const allPagos = selectedContract.pagos || [];
@@ -1734,9 +1668,7 @@ const ContractTable: React.FC = () => {
                                     }}
                                   >
                                     {pagosDeEsteAnio.length} pago
-                                    {pagosDeEsteAnio.length !== 1
-                                      ? "s"
-                                      : ""} ·{" "}
+                                    {pagosDeEsteAnio.length !== 1 ? "s" : ""} ·{" "}
                                     <strong style={{ color: "#4ade80" }}>
                                       {formatMoney(totalAnio)}
                                     </strong>
@@ -1756,72 +1688,25 @@ const ContractTable: React.FC = () => {
                                       borderBottom: "1px solid #1a1d24",
                                     }}
                                   >
-                                    <th
-                                      style={{
-                                        padding: "0.5rem 0.9rem",
-                                        textAlign: "left",
-                                        color: "#4b5563",
-                                        fontWeight: 600,
-                                        fontSize: "0.68rem",
-                                        textTransform: "uppercase",
-                                        letterSpacing: "0.06em",
-                                      }}
-                                    >
-                                      #
-                                    </th>
-                                    <th
-                                      style={{
-                                        padding: "0.5rem 0.9rem",
-                                        textAlign: "left",
-                                        color: "#4b5563",
-                                        fontWeight: 600,
-                                        fontSize: "0.68rem",
-                                        textTransform: "uppercase",
-                                        letterSpacing: "0.06em",
-                                      }}
-                                    >
-                                      Fecha
-                                    </th>
-                                    <th
-                                      style={{
-                                        padding: "0.5rem 0.9rem",
-                                        textAlign: "right",
-                                        color: "#4b5563",
-                                        fontWeight: 600,
-                                        fontSize: "0.68rem",
-                                        textTransform: "uppercase",
-                                        letterSpacing: "0.06em",
-                                      }}
-                                    >
-                                      Monto
-                                    </th>
-                                    <th
-                                      style={{
-                                        padding: "0.5rem 0.9rem",
-                                        textAlign: "left",
-                                        color: "#4b5563",
-                                        fontWeight: 600,
-                                        fontSize: "0.68rem",
-                                        textTransform: "uppercase",
-                                        letterSpacing: "0.06em",
-                                      }}
-                                    >
-                                      Descuento
-                                    </th>
-
-                                    <th
-                                      style={{
-                                        padding: "0.5rem 0.9rem",
-                                        textAlign: "left",
-                                        color: "#4b5563",
-                                        fontWeight: 600,
-                                        fontSize: "0.68rem",
-                                        textTransform: "uppercase",
-                                        letterSpacing: "0.06em",
-                                      }}
-                                    >
-                                      Cobrador
-                                    </th>
+                                    {["#", "Fecha", "Monto", "Descuento", "Cobrador"].map(
+                                      (h, i) => (
+                                        <th
+                                          key={i}
+                                          style={{
+                                            padding: "0.5rem 0.9rem",
+                                            textAlign:
+                                              i === 2 ? "right" : "left",
+                                            color: "#4b5563",
+                                            fontWeight: 600,
+                                            fontSize: "0.68rem",
+                                            textTransform: "uppercase",
+                                            letterSpacing: "0.06em",
+                                          }}
+                                        >
+                                          {h}
+                                        </th>
+                                      ),
+                                    )}
                                   </tr>
                                 </thead>
                                 <tbody>

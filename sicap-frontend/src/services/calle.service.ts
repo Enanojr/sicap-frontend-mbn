@@ -1,40 +1,16 @@
 import api from "../api_axios";
 
-const API_URL = "/equipos/";
+const API_URL = "/calles/";
 
-export interface CalleDetalle {
+export interface CalleResponse {
   id_calle: number;
   nombre_calle: string;
-}
-
-export interface CobradorGrupo {
-  id_cobrador: number;
-  nombre?: string;
-  apellidos?: string;
-  nombre_completo?: string;
-  telefono?: string;
-  fecha_ingreso?: string | null;
-}
-
-export interface GrupoResponse {
-  id_equipo: number;
-  nombre_equipo: string;
-  calle: number;
-  calle_detalle?: CalleDetalle;
-  fecha_asignacion: string;
-  fecha_termino?: string | null;
   activo?: boolean | string | number;
-  cobradores?: CobradorGrupo[];
 }
 
-export interface GrupoPayload {
-  nombre_equipo: string;
-  calle: number;
-  fecha_asignacion: string;
-  fecha_termino?: string | null;
+export interface CallePayload {
+  nombre_calle: string;
   activo?: boolean;
-  cobradores_ids: number[];
-  fecha_ingreso_cobradores: string;
 }
 
 export interface ApiResult<T> {
@@ -45,9 +21,9 @@ export interface ApiResult<T> {
 
 const getAdminToken = (): string | null => localStorage.getItem("access");
 
-export const getGrupos = async (
+export const getCalles = async (
   url?: string,
-): Promise<ApiResult<GrupoResponse[] | any>> => {
+): Promise<ApiResult<CalleResponse[] | any>> => {
   try {
     const token = getAdminToken();
     if (!token) {
@@ -59,17 +35,17 @@ export const getGrupos = async (
 
     return { success: true, data: response.data };
   } catch (error: any) {
-    console.error("Error en getGrupos:", error);
+    console.error("Error en getCalles:", error);
     return {
       success: false,
-      errors: error.response?.data ?? { general: "Error al obtener grupos." },
+      errors: error.response?.data ?? { general: "Error al obtener calles." },
     };
   }
 };
 
-export const getGrupoById = async (
+export const getCalleById = async (
   id: number,
-): Promise<ApiResult<GrupoResponse>> => {
+): Promise<ApiResult<CalleResponse>> => {
   try {
     const token = getAdminToken();
     if (!token) {
@@ -79,17 +55,17 @@ export const getGrupoById = async (
     const response = await api.get(`${API_URL}${id}/`);
     return { success: true, data: response.data };
   } catch (error: any) {
-    console.error("Error en getGrupoById:", error);
+    console.error("Error en getCalleById:", error);
     return {
       success: false,
-      errors: error.response?.data ?? { general: "Error al obtener el grupo." },
+      errors: error.response?.data ?? { general: "Error al obtener la calle." },
     };
   }
 };
 
-export const createGrupo = async (
-  payload: GrupoPayload,
-): Promise<ApiResult<GrupoResponse>> => {
+export const createCalle = async (
+  payload: CallePayload,
+): Promise<ApiResult<CalleResponse>> => {
   try {
     const token = getAdminToken();
     if (!token) {
@@ -99,18 +75,18 @@ export const createGrupo = async (
     const response = await api.post(API_URL, payload);
     return { success: true, data: response.data };
   } catch (error: any) {
-    console.error("Error en createGrupo:", error);
+    console.error("Error en createCalle:", error);
     return {
       success: false,
-      errors: error.response?.data ?? { general: "Error al crear el grupo." },
+      errors: error.response?.data ?? { general: "Error al crear la calle." },
     };
   }
 };
 
-export const updateGrupo = async (
+export const updateCalle = async (
   id: number,
-  payload: Partial<GrupoPayload>,
-): Promise<ApiResult<GrupoResponse>> => {
+  payload: Partial<CallePayload>,
+): Promise<ApiResult<CalleResponse>> => {
   try {
     const token = getAdminToken();
     if (!token) {
@@ -120,17 +96,17 @@ export const updateGrupo = async (
     const response = await api.put(`${API_URL}${id}/`, payload);
     return { success: true, data: response.data };
   } catch (error: any) {
-    console.error("Error en updateGrupo:", error);
+    console.error("Error en updateCalle:", error);
     return {
       success: false,
       errors: error.response?.data ?? {
-        general: "Error al actualizar el grupo.",
+        general: "Error al actualizar la calle.",
       },
     };
   }
 };
 
-export const deleteGrupo = async (id: number): Promise<ApiResult<null>> => {
+export const deleteCalle = async (id: number): Promise<ApiResult<null>> => {
   try {
     const token = getAdminToken();
     if (!token) {
@@ -140,11 +116,11 @@ export const deleteGrupo = async (id: number): Promise<ApiResult<null>> => {
     await api.delete(`${API_URL}${id}/`);
     return { success: true, data: null };
   } catch (error: any) {
-    console.error("Error en deleteGrupo:", error);
+    console.error("Error en deleteCalle:", error);
     return {
       success: false,
       errors: error.response?.data ?? {
-        general: "Error al eliminar el grupo.",
+        general: "Error al eliminar la calle.",
       },
     };
   }

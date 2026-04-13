@@ -4,10 +4,10 @@ import "../../styles/styles.css";
 import {
   UserCog,
   UserSquare,
-  //MapPin,
-  //Home,
+  MapPin,
+  Home,
   Banknote,
-  //Clipboard,
+  Clipboard,
   Drill,
   Stamp,
   Percent,
@@ -15,8 +15,8 @@ import {
   Settings,
   //TrendingUp,
   //Users,
-  //UsersRound,
-  //Milestone,
+  UsersRound,
+  Milestone,
 } from "lucide-react";
 
 // Componente para las tarjetas de estadísticas
@@ -85,8 +85,8 @@ function Admin_Cards() {
       gradientColors: ["#ff9800", "#f57c00"] as [string, string],
       waterDropColor: "rgba(255, 152, 0, 0.6)",
       onClick: handleSector,
-    },
-    {
+    }, 
+    /*{
       title: "Registro de Colonias",
       description: "Registra nuevas colonias en el sistema.",
       icon: Home,
@@ -103,7 +103,7 @@ function Admin_Cards() {
       gradientColors: ["#f44336", "#d32f2f"] as [string, string],
       waterDropColor: "rgba(244, 67, 54, 0.6)",
       onClick: handleAsignacion,
-    },
+    },*/
     {
       title: "Registro de Descuentos",
       description: "Registra nuevos descuentos para los cuentahabientes.",
