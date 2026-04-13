@@ -4,15 +4,19 @@ import "../../styles/styles.css";
 import {
   UserCog,
   UserSquare,
-  //MapPin,
-  //Home,
+  MapPin,
+  Home,
+  Banknote,
   Clipboard,
+  Drill,
+  Stamp,
   Percent,
   Wrench,
   Settings,
   //TrendingUp,
   //Users,
-  //UsersRound,
+  UsersRound,
+  Milestone,
 } from "lucide-react";
 
 // Componente para las tarjetas de estadísticas
@@ -114,7 +118,7 @@ function Admin_Cards() {
     {
       title: "Registro de Servicios",
       description: "Registra nuevos tipos de servicio en el sistema.",
-      icon: Wrench,
+      icon: Drill,
       ctaText: "Registrar Servicio",
       gradientColors: ["#c77d00", "#a05a00"] as [string, string],
       waterDropColor: "rgba(199, 125, 0, 0.35)",
@@ -123,7 +127,7 @@ function Admin_Cards() {
     {
       title: "Registro de cargos",
       description: "Registra nuevos cargos en el sistema.",
-      icon: Clipboard,
+      icon: Banknote,
       ctaText: "Registrar Cargo",
       gradientColors: ["#00b4d8", "#0077b6"] as [string, string],
       waterDropColor: "rgba(0, 180, 216, 0.35)",
@@ -132,7 +136,7 @@ function Admin_Cards() {
     {
       title: "Cierre anual",
       description: "Sección de cierre de cuentas anual.",
-      icon: Wrench,
+      icon: Stamp,
       ctaText: "Cerrar Cuenta",
       gradientColors: ["#8d99ae", "#2b2d42"] as [string, string],
       waterDropColor: "rgba(141, 153, 174, 0.35)",
@@ -150,7 +154,7 @@ function Admin_Cards() {
     {
       title: "Gestión de Calles",
       description: "Administra y organiza las calles del sistema.",
-      icon: UsersRound,
+      icon: Milestone,
       ctaText: "Administrar Calles",
       gradientColors: ["#f72585", "#b5179e"] as [string, string],
       waterDropColor: "rgba(247, 37, 133, 0.35)",
