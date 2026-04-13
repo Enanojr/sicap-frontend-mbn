@@ -28,6 +28,15 @@ import CorteSenior from "../pages/CorteSenior/CorteSenior";
 //Test
 
 import Tesoreria_Cards from "../pages/Home/Tesorero_Cards";
+import EgresosManager from "../pages/tesoreria/formulario_egresos";
+import HistoricoEgresos from "../pages/tesoreria/tabla_egresos";
+import HistoricoIngresos from "../pages/tesoreria/tabla_ingresos";
+import TesoreriaDashboard from "../pages/tesoreria/main_egresos";
+import Grupos from "../pages/grupos/grupo";
+<<<<<<< Updated upstream
+import Reporte from "../pages/reportes/reportes";
+=======
+>>>>>>> Stashed changes
 
 const Rutas = [
   // Ruta #1: Login (pública)
@@ -136,6 +145,37 @@ const Rutas = [
             path: "/corte-senior",
             element: <CorteSenior />,
           },
+          {
+            path: "/egresos",
+            element: <EgresosManager />,
+          },
+          {
+            path: "/tabla_egresos",
+            element: <HistoricoEgresos />,
+          },
+          {
+            path: "/tabla_ingresos",
+            element: <HistoricoIngresos />,
+          },
+          {
+            path: "/main_egresos",
+            element: <TesoreriaDashboard />,
+          },
+          {
+            path: "/grupos",
+            element: <Grupos />,
+          },
+          {
+            path: "/calles",
+            element: <CallesPage />,
+          },
+<<<<<<< Updated upstream
+          {
+            path: "/reportes",
+            element: <Reporte />,
+          },
+=======
+>>>>>>> Stashed changes
         ],
       },
     ],

@@ -4,14 +4,28 @@ import "../../styles/styles.css";
 import {
   UserCog,
   UserSquare,
+<<<<<<< Updated upstream
   MapPin,
   Home,
+  Banknote,
+=======
+  //MapPin,
+  //Home,
+>>>>>>> Stashed changes
   Clipboard,
+  Drill,
+  Stamp,
   Percent,
   Wrench,
   Settings,
   //TrendingUp,
   //Users,
+<<<<<<< Updated upstream
+  UsersRound,
+  Milestone,
+=======
+  //UsersRound,
+>>>>>>> Stashed changes
 } from "lucide-react";
 
 // Componente para las tarjetas de estadísticas
@@ -72,7 +86,11 @@ function Admin_Cards() {
       waterDropColor: "rgba(76, 175, 80, 0.6)",
       onClick: handleCobradores,
     },
-    {
+<<<<<<< Updated upstream
+    /* {
+=======
+    /*{
+>>>>>>> Stashed changes
       title: "Registro de Sectores",
       description: "Registra nuevos sectores en el sistema.",
       icon: MapPin,
@@ -111,7 +129,7 @@ function Admin_Cards() {
     {
       title: "Registro de Servicios",
       description: "Registra nuevos tipos de servicio en el sistema.",
-      icon: Wrench,
+      icon: Drill,
       ctaText: "Registrar Servicio",
       gradientColors: ["#795548", "#5d4037"] as [string, string],
       waterDropColor: "rgba(121, 85, 72, 0.6)",
@@ -120,7 +138,7 @@ function Admin_Cards() {
     {
       title: "Registro de cargos",
       description: "Registra nuevos cargos en el sistema.",
-      icon: Clipboard,
+      icon: Banknote,
       ctaText: "Registrar Cargo",
       gradientColors: ["#51bbbb", "#51bbbb"] as [string, string],
       waterDropColor: "rgba(129, 118, 56, 0.6)",
@@ -128,13 +146,39 @@ function Admin_Cards() {
     },
     {
       title: "Cierre anual",
-      description: "Seccion de cierre de cuentas anual.",
+      description: "Sección de cierre de cuentas anual.",
+<<<<<<< Updated upstream
+      icon: Stamp,
+=======
       icon: Wrench,
+>>>>>>> Stashed changes
       ctaText: "Cerrar Cuenta",
       gradientColors: ["#a7a546", "#979639"] as [string, string],
       waterDropColor: "rgba(129, 118, 56, 0.6)",
       onClick: handleCierreAnual,
     },
+    /*{
+      title: "Gestión de Grupos",
+      description: "Administra y organiza los grupos del sistema.",
+      icon: UsersRound,
+      ctaText: "Administrar Grupos",
+      gradientColors: ["#7209b7", "#560bad"] as [string, string],
+      waterDropColor: "rgba(114, 9, 183, 0.35)",
+      onClick: handleGrupos,
+    },
+    {
+      title: "Gestión de Calles",
+      description: "Administra y organiza las calles del sistema.",
+<<<<<<< Updated upstream
+      icon: Milestone,
+=======
+      icon: UsersRound,
+>>>>>>> Stashed changes
+      ctaText: "Administrar Calles",
+      gradientColors: ["#f72585", "#b5179e"] as [string, string],
+      waterDropColor: "rgba(247, 37, 133, 0.35)",
+      onClick: handleCalles,
+    },*/
   ];
 
   return (
