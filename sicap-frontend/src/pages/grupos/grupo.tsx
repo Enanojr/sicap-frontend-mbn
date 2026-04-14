@@ -64,6 +64,9 @@ interface GrupoPayload {
   activo: boolean;
   id_calle: number;
   id_cobrador: number;
+  calle: any;
+  cobradores_ids: number[];
+  fecha_ingreso_cobradores: string;
 }
 
 interface FormState {
@@ -483,6 +486,9 @@ const GruposTable: React.FC = () => {
     activo: formData.activo,
     id_calle: Number(formData.id_calle),
     id_cobrador: Number(formData.id_cobrador),
+    calle: null,
+    cobradores_ids: [],
+    fecha_ingreso_cobradores: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
