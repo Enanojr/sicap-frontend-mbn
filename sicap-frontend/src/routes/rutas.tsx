@@ -35,6 +35,8 @@ import TesoreriaDashboard from "../pages/tesoreria/main_egresos";
 import Grupos from "../pages/grupos/grupo";
 import Reporte from "../pages/reportes/reportes";
 import CallesPage from "../pages/Principal_Form_Table/callespage";
+import Menu_reporte from "../pages/reportes/menu_reporte";
+import ReporteCalles from "../pages/reportes/reportepage_calles";
 
 const Rutas = [
   // Ruta #1: Login (pública)
@@ -167,6 +169,14 @@ const Rutas = [
           {
             path: "/reportes",
             element: <Reporte />,
+          },
+          {
+            path: "/Menu_reporte",
+            element: <Menu_reporte />,
+          },
+          {
+            path: "/reporteCalle",
+            element: <ReporteCalles />,
           },
         ],
       },
