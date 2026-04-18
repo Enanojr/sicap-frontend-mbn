@@ -17,8 +17,10 @@ interface Props {
   anio?: number;
 }
 
-const ONE_COBRADOR_PER_PAGE = false;
-const COBRADOR_MIN_PRESENCE_AHEAD = 155;
+const ONE_CALLE_PER_PAGE = false;
+const CALLE_MIN_PRESENCE_AHEAD = 140;
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
 const money = (n: number) =>
   `$${Number(n || 0).toLocaleString("es-MX", {
@@ -26,122 +28,128 @@ const money = (n: number) =>
     maximumFractionDigits: 2,
   })}`;
 
-const normalizeText = (value?: string | null) =>
-  String(value ?? "")
-    .trim()
-    .toLowerCase();
+// ── Tipos de agrupación ──────────────────────────────────────────────────────
 
-const isCargoPayment = (
-  tipoMovimiento?: string | null,
-  detalle?: string | null,
-) => {
-  const tipo = normalizeText(tipoMovimiento);
-  const det = normalizeText(detalle);
-  return tipo.includes("cargo") || det.includes("cargo");
+type ResumenCobrador = {
+  nombre_cobrador: string;
+  total_recaudado: number;
+  total_pagos: number;
 };
 
 type ResumenCuentahabiente = {
   nombre: string;
+  numero_contrato: string | number;
   total_recaudado: number;
-  total_pagos_normales: number;
-  total_pagos_cargos: number;
   total_pagos: number;
+  cobradores: ResumenCobrador[];
 };
 
-type ResumenCobrador = {
-  id_cobrador: number;
-  nombre_cobrador: string;
+type ResumenCalle = {
+  nombre_calle: string;
   total_recaudado: number;
-  total_pagos_normales: number;
-  total_pagos_cargos: number;
-  total_cuentahabientes: number;
   total_pagos: number;
+  total_cuentahabientes: number;
   cuentahabientes: ResumenCuentahabiente[];
 };
 
-const buildResumen = (rows: EstadoCuentaNewDetalleRow[]): ResumenCobrador[] => {
-  const cobradoresMap = new Map<
-    number,
+// ── Construcción del resumen ─────────────────────────────────────────────────
+
+const buildResumen = (rows: EstadoCuentaNewDetalleRow[]): ResumenCalle[] => {
+  const calleMap = new Map<
+    string,
     {
-      id_cobrador: number;
-      nombre_cobrador: string;
+      nombre_calle: string;
       total_recaudado: number;
-      total_pagos_normales: number;
-      total_pagos_cargos: number;
       total_pagos: number;
-      cuentahabientesMap: Map<string, ResumenCuentahabiente>;
+      cuentahabientesMap: Map<
+        string,
+        {
+          nombre: string;
+          numero_contrato: string | number;
+          total_recaudado: number;
+          total_pagos: number;
+          cobradoresMap: Map<
+            string,
+            {
+              nombre_cobrador: string;
+              total_recaudado: number;
+              total_pagos: number;
+            }
+          >;
+        }
+      >;
     }
   >();
 
   rows.forEach((row) => {
-    const id = Number(row.id_cobrador || 0);
-    const nombreCobrador = row.nombre_cobrador?.trim() || "Sin nombre";
+    const calle = (row.calle || "Sin calle").trim();
+    const cuentahabiente = (row.nombre_cuentahabiente || "Sin nombre").trim();
+    const cobrador = (row.nombre_cobrador || "Sin cobrador").trim();
     const monto = Number(row.monto_recibido || 0);
-    const nombreCuentahabiente =
-      row.nombre_cuentahabiente?.trim() || "Sin nombre";
-    const cargo = isCargoPayment(row.tipo_movimiento, row.detalle_movimiento);
+    const contrato = row.numero_contrato;
 
-    if (!cobradoresMap.has(id)) {
-      cobradoresMap.set(id, {
-        id_cobrador: id,
-        nombre_cobrador: nombreCobrador,
+    if (!calleMap.has(calle)) {
+      calleMap.set(calle, {
+        nombre_calle: calle,
         total_recaudado: 0,
-        total_pagos_normales: 0,
-        total_pagos_cargos: 0,
         total_pagos: 0,
-        cuentahabientesMap: new Map<string, ResumenCuentahabiente>(),
+        cuentahabientesMap: new Map(),
       });
     }
 
-    const cobrador = cobradoresMap.get(id)!;
+    const calleData = calleMap.get(calle)!;
+    calleData.total_recaudado += monto;
+    calleData.total_pagos += 1;
 
-    cobrador.total_recaudado += monto;
-    cobrador.total_pagos += 1;
-
-    if (cargo) {
-      cobrador.total_pagos_cargos += monto;
-    } else {
-      cobrador.total_pagos_normales += monto;
+    if (!calleData.cuentahabientesMap.has(cuentahabiente)) {
+      calleData.cuentahabientesMap.set(cuentahabiente, {
+        nombre: cuentahabiente,
+        numero_contrato: contrato,
+        total_recaudado: 0,
+        total_pagos: 0,
+        cobradoresMap: new Map(),
+      });
     }
 
-    if (!cobrador.cuentahabientesMap.has(nombreCuentahabiente)) {
-      cobrador.cuentahabientesMap.set(nombreCuentahabiente, {
-        nombre: nombreCuentahabiente,
+    const cuentaData = calleData.cuentahabientesMap.get(cuentahabiente)!;
+    cuentaData.total_recaudado += monto;
+    cuentaData.total_pagos += 1;
+
+    if (!cuentaData.cobradoresMap.has(cobrador)) {
+      cuentaData.cobradoresMap.set(cobrador, {
+        nombre_cobrador: cobrador,
         total_recaudado: 0,
-        total_pagos_normales: 0,
-        total_pagos_cargos: 0,
         total_pagos: 0,
       });
     }
 
-    const cuenta = cobrador.cuentahabientesMap.get(nombreCuentahabiente)!;
-    cuenta.total_recaudado += monto;
-    cuenta.total_pagos += 1;
-
-    if (cargo) {
-      cuenta.total_pagos_cargos += monto;
-    } else {
-      cuenta.total_pagos_normales += monto;
-    }
+    const cobradorData = cuentaData.cobradoresMap.get(cobrador)!;
+    cobradorData.total_recaudado += monto;
+    cobradorData.total_pagos += 1;
   });
 
-  return Array.from(cobradoresMap.values())
+  return Array.from(calleMap.values())
     .map((c) => ({
-      id_cobrador: c.id_cobrador,
-      nombre_cobrador: c.nombre_cobrador,
+      nombre_calle: c.nombre_calle,
       total_recaudado: c.total_recaudado,
-      total_pagos_normales: c.total_pagos_normales,
-      total_pagos_cargos: c.total_pagos_cargos,
       total_pagos: c.total_pagos,
       total_cuentahabientes: c.cuentahabientesMap.size,
-      cuentahabientes: Array.from(c.cuentahabientesMap.values()).sort((a, b) =>
-        a.nombre.localeCompare(b.nombre, "es-MX"),
-      ),
+      cuentahabientes: Array.from(c.cuentahabientesMap.values())
+        .map((cu) => ({
+          nombre: cu.nombre,
+          numero_contrato: cu.numero_contrato,
+          total_recaudado: cu.total_recaudado,
+          total_pagos: cu.total_pagos,
+          cobradores: Array.from(cu.cobradoresMap.values()).sort((a, b) =>
+            a.nombre_cobrador.localeCompare(b.nombre_cobrador, "es-MX"),
+          ),
+        }))
+        .sort((a, b) => a.nombre.localeCompare(b.nombre, "es-MX")),
     }))
-    .sort((a, b) =>
-      a.nombre_cobrador.localeCompare(b.nombre_cobrador, "es-MX"),
-    );
+    .sort((a, b) => a.nombre_calle.localeCompare(b.nombre_calle, "es-MX"));
 };
+
+// ── Estilos ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   page: {
@@ -168,6 +176,7 @@ const styles = StyleSheet.create({
     objectFit: "contain",
   },
 
+  // Encabezado fijo
   headerRow: {
     position: "absolute",
     top: 18,
@@ -176,21 +185,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  leftBrand: {
-    width: "27%",
-    paddingRight: 10,
-  },
-  logo: {
-    width: 66,
-    height: 66,
-    objectFit: "contain",
-    marginBottom: 4,
-  },
-  brandText: {
-    fontSize: 6.4,
-    color: "#334155",
-    lineHeight: 1.25,
-  },
+  leftBrand: { width: "27%", paddingRight: 10 },
+  logo: { width: 66, height: 66, objectFit: "contain", marginBottom: 4 },
+  brandText: { fontSize: 6.4, color: "#334155", lineHeight: 1.25 },
 
   infoCard: {
     width: "71%",
@@ -215,16 +212,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 4,
   },
-  label: {
-    fontSize: 8,
-    color: "#64748b",
-  },
-  value: {
-    fontSize: 8,
-    color: "#0f172a",
-    fontWeight: "bold",
-  },
+  label: { fontSize: 8, color: "#64748b" },
+  value: { fontSize: 8, color: "#0f172a", fontWeight: "bold" },
 
+  // Tarjetas globales
   globalRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -254,27 +245,11 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     marginBottom: 4,
   },
-  globalValuePrimary: {
-    fontSize: 13,
-    fontWeight: "bold",
-    color: "#123e6b",
-  },
-  globalValueGreen: {
-    fontSize: 13,
-    fontWeight: "bold",
-    color: "#15803d",
-  },
-  globalValueOrange: {
-    fontSize: 13,
-    fontWeight: "bold",
-    color: "#c2410c",
-  },
+  globalValuePrimary: { fontSize: 13, fontWeight: "bold", color: "#123e6b" },
+  globalValueSecondary: { fontSize: 13, fontWeight: "bold", color: "#0f172a" },
 
-  cobradorSection: {
-    marginBottom: 14,
-  },
-
-  topLockedBlock: {},
+  // Sección por calle
+  calleSection: { marginBottom: 14 },
 
   sectionHeader: {
     backgroundColor: "#103f6f",
@@ -291,16 +266,15 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: "bold",
     color: "#ffffff",
-    lineHeight: 1.2,
   },
   sectionHeaderMeta: {
     width: "40%",
     fontSize: 7.2,
     color: "#dbeafe",
     textAlign: "right",
-    lineHeight: 1.2,
   },
 
+  // Fila de resumen de la calle
   summaryRow: {
     flexDirection: "row",
     borderLeftWidth: 1,
@@ -316,7 +290,6 @@ const styles = StyleSheet.create({
     paddingVertical: 9,
     paddingHorizontal: 8,
     alignItems: "center",
-    justifyContent: "center",
     borderRightWidth: 1,
     borderRightColor: "#e2e8f0",
   },
@@ -325,7 +298,6 @@ const styles = StyleSheet.create({
     paddingVertical: 9,
     paddingHorizontal: 8,
     alignItems: "center",
-    justifyContent: "center",
   },
   summaryLabel: {
     fontSize: 6.4,
@@ -334,26 +306,14 @@ const styles = StyleSheet.create({
     marginBottom: 3,
     textAlign: "center",
   },
-  summaryValueBlue: {
-    fontSize: 10,
-    fontWeight: "bold",
-    color: "#123e6b",
-  },
-  summaryValueGreen: {
-    fontSize: 10,
-    fontWeight: "bold",
-    color: "#15803d",
-  },
-  summaryValueOrange: {
-    fontSize: 10,
-    fontWeight: "bold",
-    color: "#c2410c",
-  },
+  summaryValueBlue: { fontSize: 10, fontWeight: "bold", color: "#123e6b" },
+  summaryValueGray: { fontSize: 10, fontWeight: "bold", color: "#334155" },
 
+  // Cabecera tabla cuentahabientes
   detailTitleBox: {
     paddingHorizontal: 12,
-    paddingTop: 8,
-    paddingBottom: 7,
+    paddingTop: 7,
+    paddingBottom: 6,
     backgroundColor: "#ffffff",
     borderLeftWidth: 1,
     borderRightWidth: 1,
@@ -365,7 +325,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#475569",
     textTransform: "uppercase",
-    letterSpacing: 0.3,
   },
 
   tableHead: {
@@ -383,38 +342,36 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   headName: {
-    width: "40%",
+    width: "34%",
+    fontSize: 6.7,
+    fontWeight: "bold",
+    color: "#123e6b",
+    textTransform: "uppercase",
+  },
+  headContrato: {
+    width: "16%",
+    fontSize: 6.7,
+    fontWeight: "bold",
+    color: "#123e6b",
+    textTransform: "uppercase",
+  },
+  headCobrador: {
+    width: "28%",
     fontSize: 6.7,
     fontWeight: "bold",
     color: "#123e6b",
     textTransform: "uppercase",
   },
   headPagos: {
-    width: "10%",
+    width: "8%",
     fontSize: 6.7,
     fontWeight: "bold",
     color: "#123e6b",
     textTransform: "uppercase",
     textAlign: "center",
   },
-  headNormales: {
-    width: "17%",
-    fontSize: 6.7,
-    fontWeight: "bold",
-    color: "#123e6b",
-    textTransform: "uppercase",
-    textAlign: "right",
-  },
-  headCargos: {
-    width: "15%",
-    fontSize: 6.7,
-    fontWeight: "bold",
-    color: "#123e6b",
-    textTransform: "uppercase",
-    textAlign: "right",
-  },
   headTotal: {
-    width: "18%",
+    width: "14%",
     fontSize: 6.7,
     fontWeight: "bold",
     color: "#123e6b",
@@ -422,6 +379,7 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
 
+  // Filas de detalle
   detailRowsBox: {
     borderLeftWidth: 1,
     borderRightWidth: 1,
@@ -433,10 +391,9 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 8,
     overflow: "hidden",
   },
-
   detailRow: {
     flexDirection: "row",
-    paddingVertical: 6,
+    paddingVertical: 5,
     paddingHorizontal: 8,
     borderBottomWidth: 1,
     borderBottomColor: "#edf2f7",
@@ -444,39 +401,34 @@ const styles = StyleSheet.create({
   },
   detailRowAlt: {
     flexDirection: "row",
-    paddingVertical: 6,
+    paddingVertical: 5,
     paddingHorizontal: 8,
     borderBottomWidth: 1,
     borderBottomColor: "#edf2f7",
     backgroundColor: "#fafcff",
   },
-
-  cellName: {
-    width: "40%",
-    fontSize: 7.2,
-    color: "#0f172a",
-    lineHeight: 1.2,
+  // Sub-fila de cobrador dentro del cuentahabiente
+  cobradorSubRow: {
+    flexDirection: "row",
+    paddingVertical: 3,
+    paddingLeft: 16,
+    paddingRight: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f5f9",
+    backgroundColor: "#f8fbff",
   },
+
+  cellName: { width: "34%", fontSize: 7.2, color: "#0f172a", lineHeight: 1.2 },
+  cellContrato: { width: "16%", fontSize: 7.2, color: "#334155" },
+  cellCobrador: { width: "28%", fontSize: 6.8, color: "#475569" },
   cellPagos: {
-    width: "10%",
+    width: "8%",
     fontSize: 7.2,
     color: "#334155",
     textAlign: "center",
   },
-  cellNormales: {
-    width: "17%",
-    fontSize: 7.2,
-    color: "#15803d",
-    textAlign: "right",
-  },
-  cellCargos: {
-    width: "15%",
-    fontSize: 7.2,
-    color: "#c2410c",
-    textAlign: "right",
-  },
   cellTotal: {
-    width: "18%",
+    width: "14%",
     fontSize: 7.2,
     color: "#123e6b",
     textAlign: "right",
@@ -488,12 +440,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     backgroundColor: "#ffffff",
   },
-  noDataText: {
-    fontSize: 7.4,
-    color: "#64748b",
-    textAlign: "center",
-  },
+  noDataText: { fontSize: 7.4, color: "#64748b", textAlign: "center" },
 
+  // Gran total
   grandTotalBox: {
     marginTop: 4,
     borderWidth: 1.3,
@@ -506,14 +455,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  grandTotalLeft: {
-    width: "68%",
-  },
-  grandTotalTitle: {
-    fontSize: 9.5,
-    fontWeight: "bold",
-    color: "#123e6b",
-  },
+  grandTotalLeft: { width: "68%" },
+  grandTotalTitle: { fontSize: 9.5, fontWeight: "bold", color: "#123e6b" },
   grandTotalSub: {
     marginTop: 3,
     fontSize: 7.2,
@@ -536,11 +479,7 @@ const styles = StyleSheet.create({
     padding: 24,
     alignItems: "center",
   },
-  emptyText: {
-    fontSize: 10,
-    color: "#64748b",
-    textAlign: "center",
-  },
+  emptyText: { fontSize: 10, color: "#64748b", textAlign: "center" },
 
   footer: {
     position: "absolute",
@@ -554,29 +493,32 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function EstadoCuentaGeneralPDF({ rows, anio }: Props) {
+// ── Componente ───────────────────────────────────────────────────────────────
+
+export default function EstadoCuentaGeneralCallesPDF({ rows, anio }: Props) {
   const footerDate = new Date().toLocaleDateString("es-MX");
   const resumen = buildResumen(rows);
 
   const granTotal = resumen.reduce((s, c) => s + c.total_recaudado, 0);
-  const granNormales = resumen.reduce((s, c) => s + c.total_pagos_normales, 0);
-  const granCargos = resumen.reduce((s, c) => s + c.total_pagos_cargos, 0);
+  const granPagos = resumen.reduce((s, c) => s + c.total_pagos, 0);
   const totalCuentahabientes = resumen.reduce(
     (s, c) => s + c.total_cuentahabientes,
     0,
   );
 
   const reportTitle = anio
-    ? `Resumen general de cobradores — ${anio}`
-    : "Resumen general de cobradores";
+    ? `Resumen general de calles — ${anio}`
+    : "Resumen general de calles";
 
   return (
     <Document>
       <Page size="LETTER" style={styles.page} wrap>
+        {/* Marca de agua */}
         <View style={styles.watermark} fixed>
           <Image src={WatermarkLogo} style={styles.watermarkImg} />
         </View>
 
+        {/* Encabezado fijo */}
         <View style={styles.headerRow} fixed>
           <View style={styles.leftBrand}>
             <Image src={Logo} style={styles.logo} />
@@ -588,7 +530,6 @@ export default function EstadoCuentaGeneralPDF({ rows, anio }: Props) {
           <View style={styles.infoCard}>
             <Text style={styles.infoTitle}>{reportTitle}</Text>
 
-            {/* Año destacado */}
             {anio && (
               <View style={styles.infoRow}>
                 <Text style={styles.label}>Año del reporte</Text>
@@ -597,7 +538,7 @@ export default function EstadoCuentaGeneralPDF({ rows, anio }: Props) {
             )}
 
             <View style={styles.infoRow}>
-              <Text style={styles.label}>Total de cobradores</Text>
+              <Text style={styles.label}>Total de calles</Text>
               <Text style={styles.value}>{resumen.length}</Text>
             </View>
 
@@ -613,27 +554,25 @@ export default function EstadoCuentaGeneralPDF({ rows, anio }: Props) {
           </View>
         </View>
 
+        {/* Tarjetas globales */}
         {resumen.length > 0 && (
           <View style={styles.globalRow} wrap={false}>
             <View style={styles.globalCardPrimary}>
               <Text style={styles.globalLabel}>Gran total recaudado</Text>
               <Text style={styles.globalValuePrimary}>{money(granTotal)}</Text>
             </View>
-
             <View style={styles.globalCard}>
-              <Text style={styles.globalLabel}>
-                Cobros por servicio de agua
-              </Text>
-              <Text style={styles.globalValueGreen}>{money(granNormales)}</Text>
+              <Text style={styles.globalLabel}>Total de cobros</Text>
+              <Text style={styles.globalValueSecondary}>{granPagos}</Text>
             </View>
-
             <View style={styles.globalCard}>
-              <Text style={styles.globalLabel}>Cobros por otros conceptos</Text>
-              <Text style={styles.globalValueOrange}>{money(granCargos)}</Text>
+              <Text style={styles.globalLabel}>Calles con actividad</Text>
+              <Text style={styles.globalValueSecondary}>{resumen.length}</Text>
             </View>
           </View>
         )}
 
+        {/* Contenido */}
         {resumen.length === 0 ? (
           <View style={styles.emptyBox}>
             <Text style={styles.emptyText}>
@@ -642,99 +581,133 @@ export default function EstadoCuentaGeneralPDF({ rows, anio }: Props) {
           </View>
         ) : (
           <>
-            {resumen.map((cobrador, index) => (
+            {resumen.map((calle, index) => (
               <View
-                key={cobrador.id_cobrador}
-                style={styles.cobradorSection}
-                break={ONE_COBRADOR_PER_PAGE && index > 0}
-                minPresenceAhead={COBRADOR_MIN_PRESENCE_AHEAD}
+                key={calle.nombre_calle}
+                style={styles.calleSection}
+                break={ONE_CALLE_PER_PAGE && index > 0}
+                minPresenceAhead={CALLE_MIN_PRESENCE_AHEAD}
               >
-                <View style={styles.topLockedBlock} wrap={false}>
+                {/* Encabezado de la calle */}
+                <View wrap={false}>
                   <View style={styles.sectionHeader}>
                     <Text style={styles.sectionHeaderName}>
-                      {cobrador.nombre_cobrador}
+                      {calle.nombre_calle}
                     </Text>
                     <Text style={styles.sectionHeaderMeta}>
-                      {cobrador.total_cuentahabientes} cuentahabientes •{" "}
-                      {cobrador.total_pagos} pagos
+                      {calle.total_cuentahabientes} cuentahabientes •{" "}
+                      {calle.total_pagos} pagos
                     </Text>
                   </View>
 
+                  {/* Resumen numérico de la calle */}
                   <View style={styles.summaryRow}>
                     <View style={styles.summaryCell}>
                       <Text style={styles.summaryLabel}>Total recaudado</Text>
                       <Text style={styles.summaryValueBlue}>
-                        {money(cobrador.total_recaudado)}
+                        {money(calle.total_recaudado)}
                       </Text>
                     </View>
-
                     <View style={styles.summaryCell}>
-                      <Text style={styles.summaryLabel}>
-                        Cobros por servicio de agua
-                      </Text>
-                      <Text style={styles.summaryValueGreen}>
-                        {money(cobrador.total_pagos_normales)}
+                      <Text style={styles.summaryLabel}>Cuentahabientes</Text>
+                      <Text style={styles.summaryValueGray}>
+                        {calle.total_cuentahabientes}
                       </Text>
                     </View>
-
                     <View style={styles.summaryCellLast}>
-                      <Text style={styles.summaryLabel}>
-                        Cobros por otros conceptos
-                      </Text>
-                      <Text style={styles.summaryValueOrange}>
-                        {money(cobrador.total_pagos_cargos)}
+                      <Text style={styles.summaryLabel}>Total cobros</Text>
+                      <Text style={styles.summaryValueGray}>
+                        {calle.total_pagos}
                       </Text>
                     </View>
                   </View>
 
+                  {/* Título tabla */}
                   <View style={styles.detailTitleBox}>
                     <Text style={styles.detailTitle}>
-                      Detalle de recaudación por cuentahabiente
+                      Cuentahabientes y cobradores
                     </Text>
                   </View>
 
+                  {/* Cabecera tabla */}
                   <View style={styles.tableHead}>
                     <Text style={styles.headName}>Cuentahabiente</Text>
-                    <Text style={styles.headPagos}>Cobros</Text>
-                    <Text style={styles.headNormales}>
-                      Por servicio de agua
-                    </Text>
-                    <Text style={styles.headCargos}>Cargos</Text>
+                    <Text style={styles.headContrato}>Contrato</Text>
+                    <Text style={styles.headCobrador}>Cobrador</Text>
+                    <Text style={styles.headPagos}>Pagos</Text>
                     <Text style={styles.headTotal}>Total</Text>
                   </View>
                 </View>
 
+                {/* Filas de cuentahabientes */}
                 <View style={styles.detailRowsBox}>
-                  {cobrador.cuentahabientes.length === 0 ? (
+                  {calle.cuentahabientes.length === 0 ? (
                     <View style={styles.noDataRow}>
                       <Text style={styles.noDataText}>
-                        No hay cuentahabientes registrados para este cobrador.
+                        No hay cuentahabientes registrados para esta calle.
                       </Text>
                     </View>
                   ) : (
-                    cobrador.cuentahabientes.map((cuenta, rowIndex) => (
+                    calle.cuentahabientes.map((cuenta, rowIndex) => (
                       <View
-                        key={`${cobrador.id_cobrador}-${cuenta.nombre}-${rowIndex}`}
-                        style={
-                          rowIndex % 2 === 0
-                            ? styles.detailRow
-                            : styles.detailRowAlt
-                        }
-                        wrap={false}
+                        key={`${calle.nombre_calle}-${cuenta.nombre}-${rowIndex}`}
                       >
-                        <Text style={styles.cellName}>{cuenta.nombre}</Text>
-                        <Text style={styles.cellPagos}>
-                          {cuenta.total_pagos}
-                        </Text>
-                        <Text style={styles.cellNormales}>
-                          {money(cuenta.total_pagos_normales)}
-                        </Text>
-                        <Text style={styles.cellCargos}>
-                          {money(cuenta.total_pagos_cargos)}
-                        </Text>
-                        <Text style={styles.cellTotal}>
-                          {money(cuenta.total_recaudado)}
-                        </Text>
+                        {/* Fila principal del cuentahabiente (primera sub-fila = primer cobrador) */}
+                        {cuenta.cobradores.length === 0 ? (
+                          <View
+                            style={
+                              rowIndex % 2 === 0
+                                ? styles.detailRow
+                                : styles.detailRowAlt
+                            }
+                            wrap={false}
+                          >
+                            <Text style={styles.cellName}>{cuenta.nombre}</Text>
+                            <Text style={styles.cellContrato}>
+                              {cuenta.numero_contrato || "—"}
+                            </Text>
+                            <Text style={styles.cellCobrador}>—</Text>
+                            <Text style={styles.cellPagos}>
+                              {cuenta.total_pagos}
+                            </Text>
+                            <Text style={styles.cellTotal}>
+                              {money(cuenta.total_recaudado)}
+                            </Text>
+                          </View>
+                        ) : (
+                          cuenta.cobradores.map((cobrador, ci) => (
+                            <View
+                              key={`${cuenta.nombre}-${cobrador.nombre_cobrador}-${ci}`}
+                              style={
+                                ci === 0
+                                  ? rowIndex % 2 === 0
+                                    ? styles.detailRow
+                                    : styles.detailRowAlt
+                                  : styles.cobradorSubRow
+                              }
+                              wrap={false}
+                            >
+                              {/* Solo el primer cobrador muestra nombre y contrato del cuentahabiente */}
+                              <Text style={styles.cellName}>
+                                {ci === 0 ? cuenta.nombre : ""}
+                              </Text>
+                              <Text style={styles.cellContrato}>
+                                {ci === 0
+                                  ? String(cuenta.numero_contrato || "—")
+                                  : ""}
+                              </Text>
+                              <Text style={styles.cellCobrador}>
+                                {cobrador.nombre_cobrador}
+                              </Text>
+                              <Text style={styles.cellPagos}>
+                                {cobrador.total_pagos}
+                              </Text>
+                              <Text style={styles.cellTotal}>
+                                {money(cobrador.total_recaudado)}
+                              </Text>
+                            </View>
+                          ))
+                        )}
                       </View>
                     ))
                   )}
@@ -742,20 +715,21 @@ export default function EstadoCuentaGeneralPDF({ rows, anio }: Props) {
               </View>
             ))}
 
+            {/* Gran total */}
             <View style={styles.grandTotalBox} wrap={false}>
               <View style={styles.grandTotalLeft}>
                 <Text style={styles.grandTotalTitle}>Gran total recaudado</Text>
                 <Text style={styles.grandTotalSub}>
-                  Cobros por servicio de agua: {money(granNormales)} • Cobros
-                  por otros conceptos: {money(granCargos)}
+                  {resumen.length} calles • {totalCuentahabientes}{" "}
+                  cuentahabientes • {granPagos} pagos registrados
                 </Text>
               </View>
-
               <Text style={styles.grandTotalValue}>{money(granTotal)}</Text>
             </View>
           </>
         )}
 
+        {/* Pie de página fijo */}
         <View style={styles.footer} fixed>
           <Text>Guadalupe Hidalgo Acuamanala, C.P. 90860</Text>
           <Text
