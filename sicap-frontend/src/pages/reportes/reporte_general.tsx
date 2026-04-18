@@ -621,12 +621,14 @@ export default function EstadoCuentaGeneralPDF({ rows, anio }: Props) {
             </View>
 
             <View style={styles.globalCard}>
-              <Text style={styles.globalLabel}>Pagos normales</Text>
+              <Text style={styles.globalLabel}>
+                Cobros por servicio de agua
+              </Text>
               <Text style={styles.globalValueGreen}>{money(granNormales)}</Text>
             </View>
 
             <View style={styles.globalCard}>
-              <Text style={styles.globalLabel}>Pagos de cargos</Text>
+              <Text style={styles.globalLabel}>Cobros por otros conceptos</Text>
               <Text style={styles.globalValueOrange}>{money(granCargos)}</Text>
             </View>
           </View>
@@ -667,14 +669,18 @@ export default function EstadoCuentaGeneralPDF({ rows, anio }: Props) {
                     </View>
 
                     <View style={styles.summaryCell}>
-                      <Text style={styles.summaryLabel}>Pagos normales</Text>
+                      <Text style={styles.summaryLabel}>
+                        Cobros por servicio de agua
+                      </Text>
                       <Text style={styles.summaryValueGreen}>
                         {money(cobrador.total_pagos_normales)}
                       </Text>
                     </View>
 
                     <View style={styles.summaryCellLast}>
-                      <Text style={styles.summaryLabel}>Pagos de cargos</Text>
+                      <Text style={styles.summaryLabel}>
+                        Cobros por otros conceptos
+                      </Text>
                       <Text style={styles.summaryValueOrange}>
                         {money(cobrador.total_pagos_cargos)}
                       </Text>
