@@ -18,8 +18,6 @@ interface Props {
   nombreCalle: string;
 }
 
-// ── Tipos ────────────────────────────────────────────────────────────────────
-
 type PagoGroup = {
   fecha_pago: string | null;
   tipo_movimiento: string | null;
@@ -45,8 +43,6 @@ type CuentahabienteGroup = {
   total_recaudado: number;
 };
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
 const money = (n: number) =>
   `$${Number(n || 0).toLocaleString("es-MX", {
     minimumFractionDigits: 2,
@@ -67,8 +63,6 @@ const formatFechaLocal = (fecha?: string | null) => {
 
 const sortByFechaAsc = (a?: string | null, b?: string | null) =>
   (a ? new Date(a).getTime() : 0) - (b ? new Date(b).getTime() : 0);
-
-// ── Agrupación ───────────────────────────────────────────────────────────────
 
 const groupRows = (
   rows: EstadoCuentaNewDetalleRow[],
@@ -148,12 +142,9 @@ const groupRows = (
     );
 };
 
-// ── Estilos ──────────────────────────────────────────────────────────────────
-
 const AZUL_OSCURO = "#0b2e52";
 const AZUL_MED = "#1a4b7a";
 const AZUL_SUAVE = "#2d6ca8";
-
 const AZUL_PALO = "#eff6ff";
 const GRIS_BORDE = "#d1d9e3";
 const GRIS_BG = "#f8fafc";
@@ -174,7 +165,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
   },
 
-  // ── Marca de agua ──
   watermark: {
     position: "absolute",
     left: 0,
@@ -190,7 +180,6 @@ const styles = StyleSheet.create({
     objectFit: "contain",
   },
 
-  // ── Banda de hero superior ──
   heroBand: {
     backgroundColor: AZUL_OSCURO,
     paddingTop: 22,
@@ -201,10 +190,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     marginBottom: 0,
   },
-  heroLeft: {
-    flexDirection: "column",
-    flex: 1,
-  },
+  heroLeft: { flexDirection: "column", flex: 1 },
   heroTagline: {
     fontSize: 7.5,
     color: "#93c5fd",
@@ -225,10 +211,7 @@ const styles = StyleSheet.create({
     lineHeight: 1.15,
     marginBottom: 10,
   },
-  heroMetaRow: {
-    flexDirection: "row",
-    gap: 18,
-  },
+  heroMetaRow: { flexDirection: "row", gap: 18 },
   heroMetaPill: {
     flexDirection: "row",
     alignItems: "center",
@@ -238,10 +221,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginRight: 8,
   },
-  heroMetaText: {
-    fontSize: 8,
-    color: "#bfdbfe",
-  },
+  heroMetaText: { fontSize: 8, color: "#bfdbfe" },
   heroMetaValue: {
     fontSize: 8,
     fontWeight: "bold",
@@ -267,7 +247,6 @@ const styles = StyleSheet.create({
     lineHeight: 1.4,
   },
 
-  // ── Banda de totales bajo el hero ──
   statsBand: {
     backgroundColor: AZUL_MED,
     paddingVertical: 12,
@@ -276,10 +255,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 18,
   },
-  statItem: {
-    alignItems: "center",
-    flex: 1,
-  },
+  statItem: { alignItems: "center", flex: 1 },
   statDivider: {
     width: 1,
     backgroundColor: "rgba(255,255,255,0.18)",
@@ -292,23 +268,11 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     letterSpacing: 0.5,
   },
-  statValue: {
-    fontSize: 13,
-    fontWeight: "bold",
-    color: "#ffffff",
-  },
-  statValueAccent: {
-    fontSize: 13,
-    fontWeight: "bold",
-    color: "#7dd3fc",
-  },
+  statValue: { fontSize: 13, fontWeight: "bold", color: "#ffffff" },
+  statValueAccent: { fontSize: 13, fontWeight: "bold", color: "#7dd3fc" },
 
-  // ── Contenedor del cuerpo ──
-  body: {
-    paddingHorizontal: 22,
-  },
+  body: { paddingHorizontal: 22 },
 
-  // ── Título de sección ──
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -322,18 +286,9 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     marginRight: 8,
   },
-  sectionTitle: {
-    fontSize: 10,
-    fontWeight: "bold",
-    color: AZUL_OSCURO,
-  },
-  sectionCount: {
-    fontSize: 8,
-    color: TEXTO_HINT,
-    marginLeft: 6,
-  },
+  sectionTitle: { fontSize: 10, fontWeight: "bold", color: AZUL_OSCURO },
+  sectionCount: { fontSize: 8, color: TEXTO_HINT, marginLeft: 6 },
 
-  // ── Tarjeta de cuentahabiente ──
   accountCard: {
     borderWidth: 1,
     borderColor: GRIS_BORDE,
@@ -342,8 +297,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     backgroundColor: "#ffffff",
   },
-
-  // Cabecera de la tarjeta
   accountCardHeader: {
     backgroundColor: "#f0f4f8",
     borderBottomWidth: 1,
@@ -354,9 +307,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "flex-start",
   },
-  accountCardHeaderLeft: {
-    flex: 1,
-  },
+  accountCardHeaderLeft: { flex: 1 },
   accountIndex: {
     fontSize: 7,
     color: AZUL_SUAVE,
@@ -365,26 +316,15 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
-  accountName: {
-    fontSize: 11,
-    fontWeight: "bold",
-    color: AZUL_OSCURO,
-  },
-  accountCardHeaderRight: {
-    alignItems: "flex-end",
-  },
-  accountTotalLabel: {
-    fontSize: 7,
-    color: TEXTO_HINT,
-    marginBottom: 2,
-  },
+  accountName: { fontSize: 11, fontWeight: "bold", color: AZUL_OSCURO },
+  accountCardHeaderRight: { alignItems: "flex-end" },
+  accountTotalLabel: { fontSize: 7, color: TEXTO_HINT, marginBottom: 2 },
   accountTotalValue: {
     fontSize: 13,
     fontWeight: "bold",
     color: AZUL_SUAVE,
   },
 
-  // Meta del cuentahabiente (grid 2 cols)
   accountMeta: {
     paddingVertical: 8,
     paddingHorizontal: 12,
@@ -393,32 +333,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#edf2f7",
   },
-  accountMetaItem: {
-    width: "50%",
-    marginBottom: 4,
-  },
-  accountMetaLabel: {
-    fontSize: 7,
-    color: TEXTO_HINT,
-    marginBottom: 1,
-  },
-  accountMetaValue: {
-    fontSize: 8,
-    color: TEXTO_PRIM,
-    fontWeight: "bold",
-  },
-  accountMetaValueRed: {
-    fontSize: 8,
-    color: ROJO,
-    fontWeight: "bold",
-  },
-  accountMetaValueGreen: {
-    fontSize: 8,
-    color: VERDE,
-    fontWeight: "bold",
-  },
+  accountMetaItem: { width: "50%", marginBottom: 4 },
+  accountMetaLabel: { fontSize: 7, color: TEXTO_HINT, marginBottom: 1 },
+  accountMetaValue: { fontSize: 8, color: TEXTO_PRIM, fontWeight: "bold" },
+  accountMetaValueRed: { fontSize: 8, color: ROJO, fontWeight: "bold" },
+  accountMetaValueGreen: { fontSize: 8, color: VERDE, fontWeight: "bold" },
 
-  // ── Sub-bloque del cobrador ──
   cobradorWrap: {
     paddingHorizontal: 12,
     paddingBottom: 10,
@@ -439,18 +359,8 @@ const styles = StyleSheet.create({
     backgroundColor: AZUL_SUAVE,
     marginRight: 6,
   },
-  cobradorName: {
-    fontSize: 8.5,
-    fontWeight: "bold",
-    color: AZUL_MED,
-    flex: 1,
-  },
-  cobradorSubtotal: {
-    fontSize: 8.5,
-    fontWeight: "bold",
-    color: AZUL_SUAVE,
-  },
-
+  cobradorName: { fontSize: 8.5, fontWeight: "bold", color: AZUL_MED, flex: 1 },
+  cobradorSubtotal: { fontSize: 8.5, fontWeight: "bold", color: AZUL_SUAVE },
   cobradorSeparator: {
     height: 1,
     backgroundColor: "#edf2f7",
@@ -458,7 +368,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 12,
   },
 
-  // ── Tabla de pagos ──
   table: {
     borderRadius: 6,
     overflow: "hidden",
@@ -471,11 +380,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 8,
   },
-  th: {
-    color: "#ffffff",
-    fontWeight: "bold",
-    fontSize: 7.5,
-  },
+  th: { color: "#ffffff", fontWeight: "bold", fontSize: 7.5 },
   tr: {
     flexDirection: "row",
     paddingVertical: 5,
@@ -492,7 +397,6 @@ const styles = StyleSheet.create({
   colDetalle: { width: "31%" },
   colMonto: { width: "22%", textAlign: "right" },
 
-  // ── Total general de la calle ──
   totalBand: {
     marginHorizontal: 22,
     marginTop: 6,
@@ -513,17 +417,9 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
-  totalBandSub: {
-    fontSize: 7.5,
-    color: "#7dd3fc",
-  },
-  totalBandValue: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#ffffff",
-  },
+  totalBandSub: { fontSize: 7.5, color: "#7dd3fc" },
+  totalBandValue: { fontSize: 18, fontWeight: "bold", color: "#ffffff" },
 
-  // ── Estado vacío ──
   emptyBox: {
     margin: 22,
     borderWidth: 1,
@@ -535,7 +431,39 @@ const styles = StyleSheet.create({
   },
   emptyText: { fontSize: 9.5, color: TEXTO_SEC },
 
-  // ── Pie de página ──
+  // ── Firmantes ──
+  signaturesBox: {
+    marginTop: 40,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    height: 120,
+  },
+  signatureItem: {
+    width: "30%",
+    alignItems: "center",
+    justifyContent: "flex-end",
+  },
+  signatureLine: {
+    borderTopWidth: 1,
+    borderTopColor: "#000000",
+    width: "80%",
+    marginBottom: 12,
+    marginTop: 60,
+  },
+  signatureRole: {
+    fontSize: 7,
+    color: "#64748b",
+    textTransform: "uppercase",
+    marginBottom: 2,
+    textAlign: "center",
+  },
+  signatureName: {
+    fontSize: 7.5,
+    fontWeight: "bold",
+    color: "#0f172a",
+    textAlign: "center",
+  },
+
   footer: {
     position: "absolute",
     left: 22,
@@ -548,8 +476,6 @@ const styles = StyleSheet.create({
   },
   footerCenter: { textAlign: "center", flexGrow: 1 },
 });
-
-// ── Componente principal ─────────────────────────────────────────────────────
 
 export default function EstadoCuentaCallesPDF({
   rows,
@@ -568,7 +494,6 @@ export default function EstadoCuentaCallesPDF({
     0,
   );
 
-  // Cobradores únicos en esta calle
   const cobradoresUnicos = [
     ...new Set(
       cuentahabientes.flatMap((c) =>
@@ -577,7 +502,6 @@ export default function EstadoCuentaCallesPDF({
     ),
   ];
 
-  // ── Vacío ────────────────────────────────────────────────────────────────
   if (!cuentahabientes.length) {
     return (
       <Document>
@@ -613,16 +537,13 @@ export default function EstadoCuentaCallesPDF({
     );
   }
 
-  // ── Normal ───────────────────────────────────────────────────────────────
   return (
     <Document>
       <Page size="LETTER" style={styles.page} wrap>
-        {/* Marca de agua */}
         <View style={styles.watermark} fixed>
           <Image src={WatermarkLogo} style={styles.watermarkImg} />
         </View>
 
-        {/* ── HERO: protagonista = la calle ── */}
         <View style={styles.heroBand} fixed>
           <View style={styles.heroLeft}>
             <Text style={styles.heroTagline}>
@@ -631,7 +552,6 @@ export default function EstadoCuentaCallesPDF({
             <Text style={styles.heroCalleLabel}>CALLE</Text>
             <Text style={styles.heroCalleName}>{nombreCalle}</Text>
 
-            {/* Pills de resumen rápido */}
             <View style={styles.heroMetaRow}>
               <View style={styles.heroMetaPill}>
                 <Text style={styles.heroMetaText}>Cuentahabientes</Text>
@@ -658,7 +578,6 @@ export default function EstadoCuentaCallesPDF({
           </View>
         </View>
 
-        {/* ── Banda de estadísticas ── */}
         <View style={styles.statsBand} fixed>
           <View style={styles.statItem}>
             <Text style={styles.statLabel}>Total recaudado</Text>
@@ -681,9 +600,7 @@ export default function EstadoCuentaCallesPDF({
           </View>
         </View>
 
-        {/* ── Cuerpo ── */}
         <View style={styles.body}>
-          {/* Título de sección */}
           <View style={styles.sectionHeader}>
             <View style={styles.sectionAccent} />
             <Text style={styles.sectionTitle}>Desglose por cuentahabiente</Text>
@@ -692,14 +609,12 @@ export default function EstadoCuentaCallesPDF({
             </Text>
           </View>
 
-          {/* Una tarjeta por cuentahabiente */}
           {cuentahabientes.map((cuenta, ci) => (
             <View
               key={`${cuenta.id_cuentahabiente}-${ci}`}
               style={styles.accountCard}
               wrap={false}
             >
-              {/* Cabecera de la tarjeta */}
               <View style={styles.accountCardHeader}>
                 <View style={styles.accountCardHeaderLeft}>
                   <Text style={styles.accountIndex}>
@@ -717,7 +632,6 @@ export default function EstadoCuentaCallesPDF({
                 </View>
               </View>
 
-              {/* Meta en grid 2×2 */}
               <View style={styles.accountMeta}>
                 <View style={styles.accountMetaItem}>
                   <Text style={styles.accountMetaLabel}>Contrato</Text>
@@ -759,13 +673,11 @@ export default function EstadoCuentaCallesPDF({
                 </View>
               </View>
 
-              {/* Sub-bloque por cobrador */}
               {cuenta.cobradores.map((cobrador, cbi) => (
                 <View key={`${cobrador.id_cobrador}-${cbi}`}>
                   {cbi > 0 && <View style={styles.cobradorSeparator} />}
 
                   <View style={styles.cobradorWrap}>
-                    {/* Encabezado del cobrador */}
                     <View style={styles.cobradorHeader}>
                       <View style={styles.cobradorDot} />
                       <Text style={styles.cobradorName}>
@@ -776,7 +688,6 @@ export default function EstadoCuentaCallesPDF({
                       </Text>
                     </View>
 
-                    {/* Tabla de pagos */}
                     <View style={styles.table}>
                       <View style={styles.thead}>
                         <Text style={[styles.th, styles.colFecha]}>Fecha</Text>
@@ -825,7 +736,6 @@ export default function EstadoCuentaCallesPDF({
           ))}
         </View>
 
-        {/* ── Total general de la calle ── */}
         <View style={styles.totalBand} wrap={false}>
           <View style={styles.totalBandLeft}>
             <Text style={styles.totalBandTitle}>
@@ -839,7 +749,25 @@ export default function EstadoCuentaCallesPDF({
           <Text style={styles.totalBandValue}>{money(totalRecaudado)}</Text>
         </View>
 
-        {/* Pie de página */}
+        {/* Firmantes */}
+        <View style={styles.signaturesBox} wrap={false}>
+          <View style={styles.signatureItem}>
+            <View style={styles.signatureLine} />
+            <Text style={styles.signatureRole}>Presidente</Text>
+            <Text style={styles.signatureName}>Odilón Paredes Carbajal</Text>
+          </View>
+          <View style={styles.signatureItem}>
+            <View style={styles.signatureLine} />
+            <Text style={styles.signatureRole}>Tesorero</Text>
+            <Text style={styles.signatureName}>Jaime Paredes González</Text>
+          </View>
+          <View style={styles.signatureItem}>
+            <View style={styles.signatureLine} />
+            <Text style={styles.signatureRole}>Secretario</Text>
+            <Text style={styles.signatureName}>Antonio Corte Hernández</Text>
+          </View>
+        </View>
+
         <View style={styles.footer} fixed>
           <Text style={styles.footerCenter}>
             Guadalupe Hidalgo Acuamanala, C.P. 90860
