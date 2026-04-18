@@ -562,7 +562,7 @@ export default function EstadoCuentaGeneralCallesPDF({ rows, anio }: Props) {
               <Text style={styles.globalValuePrimary}>{money(granTotal)}</Text>
             </View>
             <View style={styles.globalCard}>
-              <Text style={styles.globalLabel}>Total de pagos</Text>
+              <Text style={styles.globalLabel}>Total de cobros</Text>
               <Text style={styles.globalValueSecondary}>{granPagos}</Text>
             </View>
             <View style={styles.globalCard}>
@@ -615,7 +615,7 @@ export default function EstadoCuentaGeneralCallesPDF({ rows, anio }: Props) {
                       </Text>
                     </View>
                     <View style={styles.summaryCellLast}>
-                      <Text style={styles.summaryLabel}>Total pagos</Text>
+                      <Text style={styles.summaryLabel}>Total cobros</Text>
                       <Text style={styles.summaryValueGray}>
                         {calle.total_pagos}
                       </Text>
