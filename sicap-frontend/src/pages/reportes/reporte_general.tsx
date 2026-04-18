@@ -542,6 +542,39 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
+  // ── Firmantes ──
+  signaturesBox: {
+    marginTop: 40,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    height: 120,
+  },
+  signatureItem: {
+    width: "30%",
+    alignItems: "center",
+    justifyContent: "flex-end", // empuja contenido hacia abajo
+  },
+  signatureLine: {
+    borderTopWidth: 1,
+    borderTopColor: "#000000",
+    width: "80%",
+    marginBottom: 12,
+    marginTop: 60,
+  },
+  signatureRole: {
+    fontSize: 7,
+    color: "#64748b",
+    textTransform: "uppercase",
+    marginBottom: 2,
+    textAlign: "center",
+  },
+  signatureName: {
+    fontSize: 7.5,
+    fontWeight: "bold",
+    color: "#0f172a",
+    textAlign: "center",
+  },
+
   footer: {
     position: "absolute",
     left: 22,
@@ -588,7 +621,6 @@ export default function EstadoCuentaGeneralPDF({ rows, anio }: Props) {
           <View style={styles.infoCard}>
             <Text style={styles.infoTitle}>{reportTitle}</Text>
 
-            {/* Año destacado */}
             {anio && (
               <View style={styles.infoRow}>
                 <Text style={styles.label}>Año del reporte</Text>
@@ -628,7 +660,7 @@ export default function EstadoCuentaGeneralPDF({ rows, anio }: Props) {
             </View>
 
             <View style={styles.globalCard}>
-              <Text style={styles.globalLabel}>Cobros por otros conceptos</Text>
+              <Text style={styles.globalLabel}>Cobro por pagos pendientes</Text>
               <Text style={styles.globalValueOrange}>{money(granCargos)}</Text>
             </View>
           </View>
@@ -679,7 +711,7 @@ export default function EstadoCuentaGeneralPDF({ rows, anio }: Props) {
 
                     <View style={styles.summaryCellLast}>
                       <Text style={styles.summaryLabel}>
-                        Cobros por otros conceptos
+                        Cobro por pagos pendientes
                       </Text>
                       <Text style={styles.summaryValueOrange}>
                         {money(cobrador.total_pagos_cargos)}
@@ -699,7 +731,7 @@ export default function EstadoCuentaGeneralPDF({ rows, anio }: Props) {
                     <Text style={styles.headNormales}>
                       Por servicio de agua
                     </Text>
-                    <Text style={styles.headCargos}>Cargos</Text>
+                    <Text style={styles.headCargos}>Pagos pendientes</Text>
                     <Text style={styles.headTotal}>Total</Text>
                   </View>
                 </View>
@@ -746,12 +778,35 @@ export default function EstadoCuentaGeneralPDF({ rows, anio }: Props) {
               <View style={styles.grandTotalLeft}>
                 <Text style={styles.grandTotalTitle}>Gran total recaudado</Text>
                 <Text style={styles.grandTotalSub}>
-                  Cobros por servicio de agua: {money(granNormales)} • Cobros
-                  por otros conceptos: {money(granCargos)}
+                  Cobros por servicio de agua: {money(granNormales)} • Cobro por
+                  pagos pendientes: {money(granCargos)}
                 </Text>
               </View>
 
               <Text style={styles.grandTotalValue}>{money(granTotal)}</Text>
+            </View>
+
+            {/* Firmantes */}
+            <View style={styles.signaturesBox} wrap={false}>
+              <View style={styles.signatureItem}>
+                <View style={styles.signatureLine} />
+                <Text style={styles.signatureRole}>Presidente</Text>
+                <Text style={styles.signatureName}>
+                  Odilón Paredes Carbajal
+                </Text>
+              </View>
+              <View style={styles.signatureItem}>
+                <View style={styles.signatureLine} />
+                <Text style={styles.signatureRole}>Tesorero</Text>
+                <Text style={styles.signatureName}>Jaime Paredes González</Text>
+              </View>
+              <View style={styles.signatureItem}>
+                <View style={styles.signatureLine} />
+                <Text style={styles.signatureRole}>Secretario</Text>
+                <Text style={styles.signatureName}>
+                  Antonio Corte Hernández
+                </Text>
+              </View>
             </View>
           </>
         )}
