@@ -625,7 +625,7 @@ export default function EstadoCuentaCobradoresPDF({ rows, anio }: Props) {
               </View>
 
               <View style={styles.infoRow}>
-                <Text style={styles.label}>Pagos registrados</Text>
+                <Text style={styles.label}>Cobros registrados</Text>
                 <Text style={styles.value}>{cobrador.total_pagos}</Text>
               </View>
 
@@ -660,7 +660,7 @@ export default function EstadoCuentaCobradoresPDF({ rows, anio }: Props) {
             </Text>
 
             <Text style={styles.secondarySummaryText}>
-              Pagos normales:{" "}
+              Cobros por servicio de agua:{" "}
               <Text style={styles.secondarySummaryStrongGreen}>
                 {money(cobrador.total_pagos_normales)}
               </Text>
@@ -672,7 +672,7 @@ export default function EstadoCuentaCobradoresPDF({ rows, anio }: Props) {
             </Text>
 
             <Text style={styles.secondarySummaryText}>
-              Pagos de cargos:{" "}
+              Cobros por otros servicios:{" "}
               <Text style={styles.secondarySummaryStrongOrange}>
                 {money(cobrador.total_pagos_cargos)}
               </Text>

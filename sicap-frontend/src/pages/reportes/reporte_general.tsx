@@ -695,8 +695,10 @@ export default function EstadoCuentaGeneralPDF({ rows, anio }: Props) {
 
                   <View style={styles.tableHead}>
                     <Text style={styles.headName}>Cuentahabiente</Text>
-                    <Text style={styles.headPagos}>Pagos</Text>
-                    <Text style={styles.headNormales}>Normales</Text>
+                    <Text style={styles.headPagos}>Cobros</Text>
+                    <Text style={styles.headNormales}>
+                      Por servicio de agua
+                    </Text>
                     <Text style={styles.headCargos}>Cargos</Text>
                     <Text style={styles.headTotal}>Total</Text>
                   </View>
@@ -744,8 +746,8 @@ export default function EstadoCuentaGeneralPDF({ rows, anio }: Props) {
               <View style={styles.grandTotalLeft}>
                 <Text style={styles.grandTotalTitle}>Gran total recaudado</Text>
                 <Text style={styles.grandTotalSub}>
-                  Pagos normales: {money(granNormales)} • Pagos de cargos:{" "}
-                  {money(granCargos)}
+                  Cobros por servicio de agua: {money(granNormales)} • Cobros
+                  por otros conceptos: {money(granCargos)}
                 </Text>
               </View>
 
