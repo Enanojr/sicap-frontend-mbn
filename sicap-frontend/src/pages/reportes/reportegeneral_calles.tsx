@@ -20,15 +20,11 @@ interface Props {
 const ONE_CALLE_PER_PAGE = false;
 const CALLE_MIN_PRESENCE_AHEAD = 140;
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
 const money = (n: number) =>
   `$${Number(n || 0).toLocaleString("es-MX", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
-
-// ── Tipos de agrupación ──────────────────────────────────────────────────────
 
 type ResumenCobrador = {
   nombre_cobrador: string;
@@ -51,8 +47,6 @@ type ResumenCalle = {
   total_cuentahabientes: number;
   cuentahabientes: ResumenCuentahabiente[];
 };
-
-// ── Construcción del resumen ─────────────────────────────────────────────────
 
 const buildResumen = (rows: EstadoCuentaNewDetalleRow[]): ResumenCalle[] => {
   const calleMap = new Map<
@@ -149,8 +143,6 @@ const buildResumen = (rows: EstadoCuentaNewDetalleRow[]): ResumenCalle[] => {
     .sort((a, b) => a.nombre_calle.localeCompare(b.nombre_calle, "es-MX"));
 };
 
-// ── Estilos ──────────────────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
   page: {
     paddingTop: 120,
@@ -176,7 +168,6 @@ const styles = StyleSheet.create({
     objectFit: "contain",
   },
 
-  // Encabezado fijo
   headerRow: {
     position: "absolute",
     top: 18,
@@ -215,7 +206,6 @@ const styles = StyleSheet.create({
   label: { fontSize: 8, color: "#64748b" },
   value: { fontSize: 8, color: "#0f172a", fontWeight: "bold" },
 
-  // Tarjetas globales
   globalRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -248,7 +238,6 @@ const styles = StyleSheet.create({
   globalValuePrimary: { fontSize: 13, fontWeight: "bold", color: "#123e6b" },
   globalValueSecondary: { fontSize: 13, fontWeight: "bold", color: "#0f172a" },
 
-  // Sección por calle
   calleSection: { marginBottom: 14 },
 
   sectionHeader: {
@@ -274,7 +263,6 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
 
-  // Fila de resumen de la calle
   summaryRow: {
     flexDirection: "row",
     borderLeftWidth: 1,
@@ -309,7 +297,6 @@ const styles = StyleSheet.create({
   summaryValueBlue: { fontSize: 10, fontWeight: "bold", color: "#123e6b" },
   summaryValueGray: { fontSize: 10, fontWeight: "bold", color: "#334155" },
 
-  // Cabecera tabla cuentahabientes
   detailTitleBox: {
     paddingHorizontal: 12,
     paddingTop: 7,
@@ -379,7 +366,6 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
 
-  // Filas de detalle
   detailRowsBox: {
     borderLeftWidth: 1,
     borderRightWidth: 1,
@@ -407,7 +393,6 @@ const styles = StyleSheet.create({
     borderBottomColor: "#edf2f7",
     backgroundColor: "#fafcff",
   },
-  // Sub-fila de cobrador dentro del cuentahabiente
   cobradorSubRow: {
     flexDirection: "row",
     paddingVertical: 3,
@@ -442,7 +427,6 @@ const styles = StyleSheet.create({
   },
   noDataText: { fontSize: 7.4, color: "#64748b", textAlign: "center" },
 
-  // Gran total
   grandTotalBox: {
     marginTop: 4,
     borderWidth: 1.3,
@@ -481,6 +465,39 @@ const styles = StyleSheet.create({
   },
   emptyText: { fontSize: 10, color: "#64748b", textAlign: "center" },
 
+  // ── Firmantes ──
+  signaturesBox: {
+    marginTop: 40,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    height: 120,
+  },
+  signatureItem: {
+    width: "30%",
+    alignItems: "center",
+    justifyContent: "flex-end",
+  },
+  signatureLine: {
+    borderTopWidth: 1,
+    borderTopColor: "#000000",
+    width: "80%",
+    marginBottom: 12,
+    marginTop: 60,
+  },
+  signatureRole: {
+    fontSize: 7,
+    color: "#64748b",
+    textTransform: "uppercase",
+    marginBottom: 2,
+    textAlign: "center",
+  },
+  signatureName: {
+    fontSize: 7.5,
+    fontWeight: "bold",
+    color: "#0f172a",
+    textAlign: "center",
+  },
+
   footer: {
     position: "absolute",
     left: 22,
@@ -492,8 +509,6 @@ const styles = StyleSheet.create({
     color: "#94a3b8",
   },
 });
-
-// ── Componente ───────────────────────────────────────────────────────────────
 
 export default function EstadoCuentaGeneralCallesPDF({ rows, anio }: Props) {
   const footerDate = new Date().toLocaleDateString("es-MX");
@@ -513,12 +528,10 @@ export default function EstadoCuentaGeneralCallesPDF({ rows, anio }: Props) {
   return (
     <Document>
       <Page size="LETTER" style={styles.page} wrap>
-        {/* Marca de agua */}
         <View style={styles.watermark} fixed>
           <Image src={WatermarkLogo} style={styles.watermarkImg} />
         </View>
 
-        {/* Encabezado fijo */}
         <View style={styles.headerRow} fixed>
           <View style={styles.leftBrand}>
             <Image src={Logo} style={styles.logo} />
@@ -554,7 +567,6 @@ export default function EstadoCuentaGeneralCallesPDF({ rows, anio }: Props) {
           </View>
         </View>
 
-        {/* Tarjetas globales */}
         {resumen.length > 0 && (
           <View style={styles.globalRow} wrap={false}>
             <View style={styles.globalCardPrimary}>
@@ -572,7 +584,6 @@ export default function EstadoCuentaGeneralCallesPDF({ rows, anio }: Props) {
           </View>
         )}
 
-        {/* Contenido */}
         {resumen.length === 0 ? (
           <View style={styles.emptyBox}>
             <Text style={styles.emptyText}>
@@ -588,7 +599,6 @@ export default function EstadoCuentaGeneralCallesPDF({ rows, anio }: Props) {
                 break={ONE_CALLE_PER_PAGE && index > 0}
                 minPresenceAhead={CALLE_MIN_PRESENCE_AHEAD}
               >
-                {/* Encabezado de la calle */}
                 <View wrap={false}>
                   <View style={styles.sectionHeader}>
                     <Text style={styles.sectionHeaderName}>
@@ -600,7 +610,6 @@ export default function EstadoCuentaGeneralCallesPDF({ rows, anio }: Props) {
                     </Text>
                   </View>
 
-                  {/* Resumen numérico de la calle */}
                   <View style={styles.summaryRow}>
                     <View style={styles.summaryCell}>
                       <Text style={styles.summaryLabel}>Total recaudado</Text>
@@ -622,14 +631,12 @@ export default function EstadoCuentaGeneralCallesPDF({ rows, anio }: Props) {
                     </View>
                   </View>
 
-                  {/* Título tabla */}
                   <View style={styles.detailTitleBox}>
                     <Text style={styles.detailTitle}>
                       Cuentahabientes y cobradores
                     </Text>
                   </View>
 
-                  {/* Cabecera tabla */}
                   <View style={styles.tableHead}>
                     <Text style={styles.headName}>Cuentahabiente</Text>
                     <Text style={styles.headContrato}>Contrato</Text>
@@ -639,7 +646,6 @@ export default function EstadoCuentaGeneralCallesPDF({ rows, anio }: Props) {
                   </View>
                 </View>
 
-                {/* Filas de cuentahabientes */}
                 <View style={styles.detailRowsBox}>
                   {calle.cuentahabientes.length === 0 ? (
                     <View style={styles.noDataRow}>
@@ -652,7 +658,6 @@ export default function EstadoCuentaGeneralCallesPDF({ rows, anio }: Props) {
                       <View
                         key={`${calle.nombre_calle}-${cuenta.nombre}-${rowIndex}`}
                       >
-                        {/* Fila principal del cuentahabiente (primera sub-fila = primer cobrador) */}
                         {cuenta.cobradores.length === 0 ? (
                           <View
                             style={
@@ -687,7 +692,6 @@ export default function EstadoCuentaGeneralCallesPDF({ rows, anio }: Props) {
                               }
                               wrap={false}
                             >
-                              {/* Solo el primer cobrador muestra nombre y contrato del cuentahabiente */}
                               <Text style={styles.cellName}>
                                 {ci === 0 ? cuenta.nombre : ""}
                               </Text>
@@ -715,7 +719,6 @@ export default function EstadoCuentaGeneralCallesPDF({ rows, anio }: Props) {
               </View>
             ))}
 
-            {/* Gran total */}
             <View style={styles.grandTotalBox} wrap={false}>
               <View style={styles.grandTotalLeft}>
                 <Text style={styles.grandTotalTitle}>Gran total recaudado</Text>
@@ -726,10 +729,32 @@ export default function EstadoCuentaGeneralCallesPDF({ rows, anio }: Props) {
               </View>
               <Text style={styles.grandTotalValue}>{money(granTotal)}</Text>
             </View>
+
+            {/* Firmantes */}
+            <View style={styles.signaturesBox} wrap={false}>
+              <View style={styles.signatureItem}>
+                <View style={styles.signatureLine} />
+                <Text style={styles.signatureRole}>Presidente</Text>
+                <Text style={styles.signatureName}>
+                  Odilón Paredes Carbajal
+                </Text>
+              </View>
+              <View style={styles.signatureItem}>
+                <View style={styles.signatureLine} />
+                <Text style={styles.signatureRole}>Tesorero</Text>
+                <Text style={styles.signatureName}>Jaime Paredes González</Text>
+              </View>
+              <View style={styles.signatureItem}>
+                <View style={styles.signatureLine} />
+                <Text style={styles.signatureRole}>Secretario</Text>
+                <Text style={styles.signatureName}>
+                  Antonio Corte Hernández
+                </Text>
+              </View>
+            </View>
           </>
         )}
 
-        {/* Pie de página fijo */}
         <View style={styles.footer} fixed>
           <Text>Guadalupe Hidalgo Acuamanala, C.P. 90860</Text>
           <Text

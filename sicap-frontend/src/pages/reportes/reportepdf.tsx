@@ -56,7 +56,6 @@ const formatFechaLocal = (fecha?: string | null) => {
   const clean = fecha.includes("T") ? fecha.split("T")[0] : fecha;
   const [y, m, d] = clean.split("-").map(Number);
   if (!y || !m || !d) return "—";
-
   const dt = new Date(y, m - 1, d);
   return dt.toLocaleDateString("es-MX", {
     day: "2-digit",
@@ -76,7 +75,6 @@ const isCargoPayment = (
 ) => {
   const tipo = normalizeText(tipoMovimiento);
   const det = normalizeText(detalle);
-
   return tipo.includes("cargo") || det.includes("cargo");
 };
 
@@ -144,7 +142,6 @@ const groupRows = (rows: EstadoCuentaNewDetalleRow[]): CobradorGroup[] => {
           pagos: [],
           total_recaudado: 0,
         };
-
         cobrador.cuentahabientes.push(cuenta);
       }
 
@@ -152,7 +149,6 @@ const groupRows = (rows: EstadoCuentaNewDetalleRow[]): CobradorGroup[] => {
 
       cuenta.pagos.push(row);
       cuenta.total_recaudado += monto;
-
       cobrador.total_recaudado += monto;
       cobrador.total_pagos += 1;
 
@@ -179,15 +175,12 @@ const groupRows = (rows: EstadoCuentaNewDetalleRow[]): CobradorGroup[] => {
       );
 
     const total_cuentahabientes = cuentahabientes.length;
-
     const cuentahabientes_con_adeudo = cuentahabientes.filter(
       (cuenta) => Number(cuenta.saldo_pendiente_actualizado || 0) > 0,
     ).length;
-
     const porcentaje_pagos_normales = cobrador.total_recaudado
       ? (cobrador.total_pagos_normales / cobrador.total_recaudado) * 100
       : 0;
-
     const porcentaje_pagos_cargos = cobrador.total_recaudado
       ? (cobrador.total_pagos_cargos / cobrador.total_recaudado) * 100
       : 0;
@@ -236,25 +229,14 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 14,
   },
-  leftBrand: {
-    width: "34%",
-  },
+  leftBrand: { width: "34%" },
   logoWrap: {
     padding: 4,
     borderRadius: 12,
     backgroundColor: "rgba(255,255,255,0.6)",
   },
-  logo: {
-    width: 78,
-    height: 78,
-    objectFit: "contain",
-  },
-  brandText: {
-    marginTop: 6,
-    fontSize: 7,
-    color: "#0f172a",
-    lineHeight: 1.2,
-  },
+  logo: { width: 78, height: 78, objectFit: "contain" },
+  brandText: { marginTop: 6, fontSize: 7, color: "#0f172a", lineHeight: 1.2 },
 
   infoCard: {
     width: "66%",
@@ -276,10 +258,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 4,
   },
-  label: {
-    color: "#475569",
-    fontSize: 9,
-  },
+  label: { color: "#475569", fontSize: 9 },
   value: {
     color: "#0f172a",
     fontSize: 9,
@@ -312,21 +291,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     backgroundColor: "#f8fafc",
   },
-  summaryCardLabel: {
-    fontSize: 9,
-    color: "#64748b",
-    marginBottom: 6,
-  },
+  summaryCardLabel: { fontSize: 9, color: "#64748b", marginBottom: 6 },
   summaryCardValuePrimary: {
     fontSize: 16,
     fontWeight: "bold",
     color: "#0b3a66",
   },
-  summaryCardValue: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#0f172a",
-  },
+  summaryCardValue: { fontSize: 16, fontWeight: "bold", color: "#0f172a" },
 
   secondarySummaryBox: {
     borderWidth: 1,
@@ -349,22 +320,10 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     lineHeight: 1.3,
   },
-  secondarySummaryStrong: {
-    fontWeight: "bold",
-    color: "#0b3a66",
-  },
-  secondarySummaryStrongGreen: {
-    fontWeight: "bold",
-    color: "#15803d",
-  },
-  secondarySummaryStrongOrange: {
-    fontWeight: "bold",
-    color: "#c2410c",
-  },
-  secondarySummaryStrongRed: {
-    fontWeight: "bold",
-    color: "#b91c1c",
-  },
+  secondarySummaryStrong: { fontWeight: "bold", color: "#0b3a66" },
+  secondarySummaryStrongGreen: { fontWeight: "bold", color: "#15803d" },
+  secondarySummaryStrongOrange: { fontWeight: "bold", color: "#c2410c" },
+  secondarySummaryStrongRed: { fontWeight: "bold", color: "#b91c1c" },
 
   sectionTitle: {
     fontSize: 11,
@@ -382,10 +341,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     backgroundColor: "transparent",
   },
-
-  accountHeader: {
-    marginBottom: 8,
-  },
+  accountHeader: { marginBottom: 8 },
   accountName: {
     fontSize: 11,
     fontWeight: "bold",
@@ -397,10 +353,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 3,
   },
-  accountMetaLabel: {
-    fontSize: 8.5,
-    color: "#64748b",
-  },
+  accountMetaLabel: { fontSize: 8.5, color: "#64748b" },
   accountMetaValue: {
     fontSize: 8.5,
     color: "#0f172a",
@@ -422,11 +375,7 @@ const styles = StyleSheet.create({
     paddingVertical: 9,
     paddingHorizontal: 10,
   },
-  th: {
-    color: "#ffffff",
-    fontWeight: "bold",
-    fontSize: 8.5,
-  },
+  th: { color: "#ffffff", fontWeight: "bold", fontSize: 8.5 },
   tr: {
     flexDirection: "row",
     paddingVertical: 8,
@@ -434,42 +383,17 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#000000",
   },
-  trEven: {
-    backgroundColor: "#f8fafc",
-  },
-  td: {
-    fontSize: 8.5,
-    color: "#0f172a",
-  },
+  trEven: { backgroundColor: "#f8fafc" },
+  td: { fontSize: 8.5, color: "#0f172a" },
 
-  colFecha: {
-    width: "20%",
-  },
-  colTipo: {
-    width: "25%",
-  },
-  colDetalle: {
-    width: "30%",
-  },
-  colMonto: {
-    width: "25%",
-    textAlign: "right",
-  },
+  colFecha: { width: "20%" },
+  colTipo: { width: "25%" },
+  colDetalle: { width: "30%" },
+  colMonto: { width: "25%", textAlign: "right" },
 
-  subtotalBox: {
-    marginTop: 8,
-    alignItems: "flex-end",
-  },
-  subtotalLabel: {
-    fontSize: 10,
-    fontWeight: "bold",
-    color: "#0f172a",
-  },
-  subtotalValue: {
-    fontSize: 13,
-    fontWeight: "bold",
-    color: "#0b3a66",
-  },
+  subtotalBox: { marginTop: 8, alignItems: "flex-end" },
+  subtotalLabel: { fontSize: 10, fontWeight: "bold", color: "#0f172a" },
+  subtotalValue: { fontSize: 13, fontWeight: "bold", color: "#0b3a66" },
 
   totalCobradorBox: {
     marginTop: 12,
@@ -481,11 +405,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#eff6ff",
     alignItems: "flex-end",
   },
-  totalCobradorLabel: {
-    fontSize: 11,
-    fontWeight: "bold",
-    color: "#0f172a",
-  },
+  totalCobradorLabel: { fontSize: 11, fontWeight: "bold", color: "#0f172a" },
   totalCobradorValue: {
     fontSize: 17,
     fontWeight: "bold",
@@ -499,9 +419,39 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 14,
   },
-  emptyText: {
-    fontSize: 10,
-    color: "#475569",
+  emptyText: { fontSize: 10, color: "#475569" },
+
+  // ── Firmantes ──
+  signaturesBox: {
+    marginTop: 40,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    height: 120,
+  },
+  signatureItem: {
+    width: "30%",
+    alignItems: "center",
+    justifyContent: "flex-end",
+  },
+  signatureLine: {
+    borderTopWidth: 1,
+    borderTopColor: "#000000",
+    width: "80%",
+    marginBottom: 12,
+    marginTop: 60,
+  },
+  signatureRole: {
+    fontSize: 7,
+    color: "#64748b",
+    textTransform: "uppercase",
+    marginBottom: 2,
+    textAlign: "center",
+  },
+  signatureName: {
+    fontSize: 7.5,
+    fontWeight: "bold",
+    color: "#0f172a",
+    textAlign: "center",
   },
 
   footer: {
@@ -514,10 +464,7 @@ const styles = StyleSheet.create({
     fontSize: 7,
     color: "#64748b",
   },
-  footerCenter: {
-    textAlign: "center",
-    flexGrow: 1,
-  },
+  footerCenter: { textAlign: "center", flexGrow: 1 },
 });
 
 const getReportTitle = (anio?: number) =>
@@ -599,7 +546,6 @@ export default function EstadoCuentaCobradoresPDF({ rows, anio }: Props) {
             <View style={styles.infoCard}>
               <Text style={styles.infoTitle}>{getReportTitle(anio)}</Text>
 
-              {/* Año destacado */}
               {anio && (
                 <View style={styles.infoRow}>
                   <Text style={styles.label}>Año del reporte</Text>
@@ -672,7 +618,7 @@ export default function EstadoCuentaCobradoresPDF({ rows, anio }: Props) {
             </Text>
 
             <Text style={styles.secondarySummaryText}>
-              Cobros por otros servicios:{" "}
+              Cobro por pagos pendientes:{" "}
               <Text style={styles.secondarySummaryStrongOrange}>
                 {money(cobrador.total_pagos_cargos)}
               </Text>
@@ -764,15 +710,12 @@ export default function EstadoCuentaCobradoresPDF({ rows, anio }: Props) {
                       <Text style={[styles.td, styles.colFecha]}>
                         {formatFechaLocal(pago.fecha_pago)}
                       </Text>
-
                       <Text style={[styles.td, styles.colTipo]}>
                         {pago.tipo_movimiento || "—"}
                       </Text>
-
                       <Text style={[styles.td, styles.colDetalle]}>
                         {pago.detalle_movimiento || "—"}
                       </Text>
-
                       <Text style={[styles.td, styles.colMonto]}>
                         {money(Number(pago.monto_recibido || 0))}
                       </Text>
@@ -804,6 +747,31 @@ export default function EstadoCuentaCobradoresPDF({ rows, anio }: Props) {
               {money(cobrador.total_recaudado)}
             </Text>
           </View>
+
+          {/* Firmantes — solo en la última página de cada cobrador */}
+          {cobradorIndex === cobradores.length - 1 && (
+            <View style={styles.signaturesBox} wrap={false}>
+              <View style={styles.signatureItem}>
+                <View style={styles.signatureLine} />
+                <Text style={styles.signatureRole}>Presidente</Text>
+                <Text style={styles.signatureName}>
+                  Odilón Paredes Carbajal
+                </Text>
+              </View>
+              <View style={styles.signatureItem}>
+                <View style={styles.signatureLine} />
+                <Text style={styles.signatureRole}>Tesorero</Text>
+                <Text style={styles.signatureName}>Jaime Paredes González</Text>
+              </View>
+              <View style={styles.signatureItem}>
+                <View style={styles.signatureLine} />
+                <Text style={styles.signatureRole}>Secretario</Text>
+                <Text style={styles.signatureName}>
+                  Antonio Corte Hernández
+                </Text>
+              </View>
+            </View>
+          )}
 
           <View style={styles.footer} fixed>
             <Text style={styles.footerCenter}>
