@@ -626,7 +626,7 @@ export default function EstadoCuentaCallesPDF({
         <View style={styles.heroBand} fixed>
           <View style={styles.heroLeft}>
             <Text style={styles.heroTagline}>
-              {anio ? `Estado de cuenta · ${anio}` : "Estado de cuenta · Calle"}
+              {anio ? `Estado de cuenta · ${anio}` : "Reporte · Calle"}
             </Text>
             <Text style={styles.heroCalleLabel}>CALLE</Text>
             <Text style={styles.heroCalleName}>{nombreCalle}</Text>
@@ -640,7 +640,7 @@ export default function EstadoCuentaCallesPDF({
                 </Text>
               </View>
               <View style={styles.heroMetaPill}>
-                <Text style={styles.heroMetaText}>Pagos</Text>
+                <Text style={styles.heroMetaText}>Cobros</Text>
                 <Text style={styles.heroMetaValue}>{totalPagos}</Text>
               </View>
               <View style={styles.heroMetaPill}>
@@ -676,7 +676,7 @@ export default function EstadoCuentaCallesPDF({
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statLabel}>Pagos registrados</Text>
+            <Text style={styles.statLabel}>Cobros registrados</Text>
             <Text style={styles.statValue}>{totalPagos}</Text>
           </View>
         </View>
@@ -710,7 +710,7 @@ export default function EstadoCuentaCallesPDF({
                   </Text>
                 </View>
                 <View style={styles.accountCardHeaderRight}>
-                  <Text style={styles.accountTotalLabel}>Total pagado</Text>
+                  <Text style={styles.accountTotalLabel}>Total cobrado</Text>
                   <Text style={styles.accountTotalValue}>
                     {money(cuenta.total_recaudado)}
                   </Text>
@@ -813,7 +813,7 @@ export default function EstadoCuentaCallesPDF({
                       ) : (
                         <View style={styles.tr}>
                           <Text style={styles.tdMuted}>
-                            Sin pagos registrados
+                            Sin cobros registrados
                           </Text>
                         </View>
                       )}
@@ -833,7 +833,7 @@ export default function EstadoCuentaCallesPDF({
             </Text>
             <Text style={styles.totalBandSub}>
               {nombreCalle} · {cuentahabientes.length} cuentahabientes ·{" "}
-              {totalPagos} pagos
+              {totalPagos} Cobros
             </Text>
           </View>
           <Text style={styles.totalBandValue}>{money(totalRecaudado)}</Text>
