@@ -18,7 +18,7 @@ interface Props {
   nombreCalle: string;
 }
 
-// ── Tipos de agrupación ──────────────────────────────────────────────────────
+// ── Tipos ────────────────────────────────────────────────────────────────────
 
 type PagoGroup = {
   fecha_pago: string | null;
@@ -68,7 +68,7 @@ const formatFechaLocal = (fecha?: string | null) => {
 const sortByFechaAsc = (a?: string | null, b?: string | null) =>
   (a ? new Date(a).getTime() : 0) - (b ? new Date(b).getTime() : 0);
 
-// ── Agrupación: Calle → Cuentahabiente → Cobrador → Pagos ───────────────────
+// ── Agrupación ───────────────────────────────────────────────────────────────
 
 const groupRows = (
   rows: EstadoCuentaNewDetalleRow[],
@@ -110,7 +110,6 @@ const groupRows = (
       let cobrador = cuenta.cobradores.find(
         (c) => c.id_cobrador === cobradorId,
       );
-
       if (!cobrador) {
         cobrador = {
           id_cobrador: cobradorId,
@@ -151,214 +150,392 @@ const groupRows = (
 
 // ── Estilos ──────────────────────────────────────────────────────────────────
 
+const AZUL_OSCURO = "#0b2e52";
+const AZUL_MED = "#1a4b7a";
+const AZUL_SUAVE = "#2d6ca8";
+
+const AZUL_PALO = "#eff6ff";
+const GRIS_BORDE = "#d1d9e3";
+const GRIS_BG = "#f8fafc";
+const TEXTO_PRIM = "#0f172a";
+const TEXTO_SEC = "#475569";
+const TEXTO_HINT = "#94a3b8";
+const VERDE = "#15803d";
+const ROJO = "#b91c1c";
+
 const styles = StyleSheet.create({
   page: {
-    paddingTop: 22,
-    paddingHorizontal: 22,
+    paddingTop: 0,
+    paddingHorizontal: 0,
     paddingBottom: 28,
     fontFamily: "Helvetica",
-    fontSize: 10,
-    color: "#0f172a",
+    fontSize: 9,
+    color: TEXTO_PRIM,
     backgroundColor: "#ffffff",
   },
 
+  // ── Marca de agua ──
   watermark: {
     position: "absolute",
     left: 0,
     right: 0,
-    top: 250,
+    top: 310,
     alignItems: "center",
     justifyContent: "center",
-    opacity: 0.1,
+    opacity: 0.06,
   },
   watermarkImg: {
-    width: 380,
-    height: 380,
+    width: 360,
+    height: 360,
     objectFit: "contain",
   },
 
-  // Encabezado
-  headerRow: {
+  // ── Banda de hero superior ──
+  heroBand: {
+    backgroundColor: AZUL_OSCURO,
+    paddingTop: 22,
+    paddingBottom: 20,
+    paddingHorizontal: 26,
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 14,
+    alignItems: "flex-start",
+    marginBottom: 0,
   },
-  leftBrand: { width: "34%" },
-  logoWrap: {
-    padding: 4,
-    borderRadius: 12,
-    backgroundColor: "rgba(255,255,255,0.6)",
+  heroLeft: {
+    flexDirection: "column",
+    flex: 1,
   },
-  logo: { width: 78, height: 78, objectFit: "contain" },
-  brandText: { marginTop: 6, fontSize: 7, color: "#0f172a", lineHeight: 1.2 },
+  heroTagline: {
+    fontSize: 7.5,
+    color: "#93c5fd",
+    textTransform: "uppercase",
+    letterSpacing: 1.2,
+    marginBottom: 6,
+  },
+  heroCalleLabel: {
+    fontSize: 7,
+    color: "#93c5fd",
+    marginBottom: 2,
+    letterSpacing: 0.5,
+  },
+  heroCalleName: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#ffffff",
+    lineHeight: 1.15,
+    marginBottom: 10,
+  },
+  heroMetaRow: {
+    flexDirection: "row",
+    gap: 18,
+  },
+  heroMetaPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.10)",
+    borderRadius: 20,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    marginRight: 8,
+  },
+  heroMetaText: {
+    fontSize: 8,
+    color: "#bfdbfe",
+  },
+  heroMetaValue: {
+    fontSize: 8,
+    fontWeight: "bold",
+    color: "#ffffff",
+    marginLeft: 4,
+  },
+  heroRight: {
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    flexDirection: "column",
+    minWidth: 120,
+  },
+  heroLogo: {
+    width: 56,
+    height: 56,
+    objectFit: "contain",
+    marginBottom: 8,
+  },
+  heroBrandText: {
+    fontSize: 6.2,
+    color: "#7dd3fc",
+    textAlign: "right",
+    lineHeight: 1.4,
+  },
 
-  infoCard: {
-    width: "66%",
-    borderWidth: 1,
-    borderColor: "#d6dbe3",
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+  // ── Banda de totales bajo el hero ──
+  statsBand: {
+    backgroundColor: AZUL_MED,
+    paddingVertical: 12,
+    paddingHorizontal: 26,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 18,
   },
-  infoTitle: {
+  statItem: {
+    alignItems: "center",
+    flex: 1,
+  },
+  statDivider: {
+    width: 1,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    marginVertical: 2,
+  },
+  statLabel: {
+    fontSize: 6.5,
+    color: "#bfdbfe",
+    textTransform: "uppercase",
+    marginBottom: 4,
+    letterSpacing: 0.5,
+  },
+  statValue: {
     fontSize: 13,
     fontWeight: "bold",
-    color: "#0b3a66",
-    marginBottom: 8,
+    color: "#ffffff",
   },
-  infoRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 4,
-  },
-  label: { color: "#475569", fontSize: 9 },
-  value: {
-    color: "#0f172a",
-    fontSize: 9,
+  statValueAccent: {
+    fontSize: 13,
     fontWeight: "bold",
-    maxWidth: "62%",
-    textAlign: "right",
+    color: "#7dd3fc",
   },
 
-  // Tarjetas resumen
-  cardsRow: {
+  // ── Contenedor del cuerpo ──
+  body: {
+    paddingHorizontal: 22,
+  },
+
+  // ── Título de sección ──
+  sectionHeader: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 12,
+    alignItems: "center",
+    marginBottom: 10,
+    marginTop: 2,
   },
-  summaryCardPrimary: {
-    width: "48.5%",
-    borderWidth: 1.2,
-    borderColor: "#0b3a66",
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    backgroundColor: "#eff6ff",
+  sectionAccent: {
+    width: 4,
+    height: 14,
+    backgroundColor: AZUL_SUAVE,
+    borderRadius: 2,
+    marginRight: 8,
   },
-  summaryCard: {
-    width: "48.5%",
-    borderWidth: 1,
-    borderColor: "#d7dee7",
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    backgroundColor: "#f8fafc",
-  },
-  summaryLabel: { fontSize: 8.5, color: "#64748b", marginBottom: 5 },
-  summaryValuePrimary: { fontSize: 15, fontWeight: "bold", color: "#0b3a66" },
-  summaryValue: { fontSize: 15, fontWeight: "bold", color: "#0f172a" },
-
   sectionTitle: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: "bold",
-    color: "#0b3a66",
-    marginBottom: 8,
-    marginTop: 4,
+    color: AZUL_OSCURO,
+  },
+  sectionCount: {
+    fontSize: 8,
+    color: TEXTO_HINT,
+    marginLeft: 6,
   },
 
-  // Tarjeta de cuentahabiente
+  // ── Tarjeta de cuentahabiente ──
   accountCard: {
     borderWidth: 1,
-    borderColor: "#d6dbe3",
+    borderColor: GRIS_BORDE,
     borderRadius: 10,
-    padding: 10,
-    marginBottom: 12,
+    marginBottom: 14,
+    overflow: "hidden",
+    backgroundColor: "#ffffff",
+  },
+
+  // Cabecera de la tarjeta
+  accountCardHeader: {
+    backgroundColor: "#f0f4f8",
+    borderBottomWidth: 1,
+    borderBottomColor: GRIS_BORDE,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  accountCardHeaderLeft: {
+    flex: 1,
+  },
+  accountIndex: {
+    fontSize: 7,
+    color: AZUL_SUAVE,
+    fontWeight: "bold",
+    marginBottom: 2,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
   accountName: {
     fontSize: 11,
     fontWeight: "bold",
-    color: "#0f172a",
-    marginBottom: 5,
+    color: AZUL_OSCURO,
   },
-  accountMetaRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 3,
+  accountCardHeaderRight: {
+    alignItems: "flex-end",
   },
-  accountMetaLabel: { fontSize: 8.5, color: "#64748b" },
-  accountMetaValue: {
-    fontSize: 8.5,
-    color: "#0f172a",
+  accountTotalLabel: {
+    fontSize: 7,
+    color: TEXTO_HINT,
+    marginBottom: 2,
+  },
+  accountTotalValue: {
+    fontSize: 13,
     fontWeight: "bold",
-    maxWidth: "62%",
-    textAlign: "right",
+    color: AZUL_SUAVE,
   },
 
-  // Sub-sección cobrador dentro de la tarjeta
-  cobradorBox: {
-    marginTop: 8,
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    borderRadius: 8,
-    overflow: "hidden",
+  // Meta del cuentahabiente (grid 2 cols)
+  accountMeta: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    borderBottomWidth: 1,
+    borderBottomColor: "#edf2f7",
+  },
+  accountMetaItem: {
+    width: "50%",
+    marginBottom: 4,
+  },
+  accountMetaLabel: {
+    fontSize: 7,
+    color: TEXTO_HINT,
+    marginBottom: 1,
+  },
+  accountMetaValue: {
+    fontSize: 8,
+    color: TEXTO_PRIM,
+    fontWeight: "bold",
+  },
+  accountMetaValueRed: {
+    fontSize: 8,
+    color: ROJO,
+    fontWeight: "bold",
+  },
+  accountMetaValueGreen: {
+    fontSize: 8,
+    color: VERDE,
+    fontWeight: "bold",
+  },
+
+  // ── Sub-bloque del cobrador ──
+  cobradorWrap: {
+    paddingHorizontal: 12,
+    paddingBottom: 10,
+    paddingTop: 8,
   },
   cobradorHeader: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#1e3a5f",
-    paddingVertical: 6,
-    paddingHorizontal: 10,
+    marginBottom: 6,
+    paddingBottom: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: "#e8edf3",
   },
-  cobradorName: { fontSize: 9, fontWeight: "bold", color: "#ffffff" },
-  cobradorTotal: { fontSize: 9, color: "#bfdbfe" },
+  cobradorDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: AZUL_SUAVE,
+    marginRight: 6,
+  },
+  cobradorName: {
+    fontSize: 8.5,
+    fontWeight: "bold",
+    color: AZUL_MED,
+    flex: 1,
+  },
+  cobradorSubtotal: {
+    fontSize: 8.5,
+    fontWeight: "bold",
+    color: AZUL_SUAVE,
+  },
 
-  // Tabla de pagos dentro del cobrador
-  table: { backgroundColor: "transparent" },
+  cobradorSeparator: {
+    height: 1,
+    backgroundColor: "#edf2f7",
+    marginVertical: 8,
+    marginHorizontal: 12,
+  },
+
+  // ── Tabla de pagos ──
+  table: {
+    borderRadius: 6,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+  },
   thead: {
     flexDirection: "row",
-    backgroundColor: "#0b3a66",
-    paddingVertical: 7,
-    paddingHorizontal: 10,
+    backgroundColor: AZUL_OSCURO,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
   },
-  th: { color: "#ffffff", fontWeight: "bold", fontSize: 8 },
+  th: {
+    color: "#ffffff",
+    fontWeight: "bold",
+    fontSize: 7.5,
+  },
   tr: {
     flexDirection: "row",
-    paddingVertical: 6,
-    paddingHorizontal: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 8,
     borderTopWidth: 1,
-    borderTopColor: "#e2e8f0",
+    borderTopColor: "#edf2f7",
   },
-  trEven: { backgroundColor: "#f8fafc" },
-  td: { fontSize: 8, color: "#0f172a" },
+  trEven: { backgroundColor: AZUL_PALO },
+  td: { fontSize: 7.5, color: TEXTO_PRIM },
+  tdMuted: { fontSize: 7.5, color: TEXTO_SEC },
 
-  colFecha: { width: "22%" },
-  colTipo: { width: "25%" },
-  colDetalle: { width: "30%" },
-  colMonto: { width: "23%", textAlign: "right" },
+  colFecha: { width: "21%" },
+  colTipo: { width: "26%" },
+  colDetalle: { width: "31%" },
+  colMonto: { width: "22%", textAlign: "right" },
 
-  // Subtotal por cuentahabiente
-  subtotalBox: { marginTop: 8, alignItems: "flex-end" },
-  subtotalLabel: { fontSize: 9.5, fontWeight: "bold", color: "#0f172a" },
-  subtotalValue: { fontSize: 12, fontWeight: "bold", color: "#0b3a66" },
-
-  // Total general
-  totalBox: {
-    marginTop: 12,
-    borderWidth: 1,
-    borderColor: "#0b3a66",
+  // ── Total general de la calle ──
+  totalBand: {
+    marginHorizontal: 22,
+    marginTop: 6,
     borderRadius: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    backgroundColor: "#eff6ff",
-    alignItems: "flex-end",
+    backgroundColor: AZUL_OSCURO,
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
-  totalLabel: { fontSize: 11, fontWeight: "bold", color: "#0f172a" },
-  totalValue: {
-    fontSize: 17,
+  totalBandLeft: { flex: 1 },
+  totalBandTitle: {
+    fontSize: 9,
     fontWeight: "bold",
-    color: "#0b3a66",
-    marginTop: 3,
+    color: "#bfdbfe",
+    marginBottom: 3,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  totalBandSub: {
+    fontSize: 7.5,
+    color: "#7dd3fc",
+  },
+  totalBandValue: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#ffffff",
   },
 
+  // ── Estado vacío ──
   emptyBox: {
+    margin: 22,
     borderWidth: 1,
-    borderColor: "#d6dbe3",
+    borderColor: GRIS_BORDE,
     borderRadius: 10,
-    padding: 14,
+    padding: 20,
+    alignItems: "center",
+    backgroundColor: GRIS_BG,
   },
-  emptyText: { fontSize: 10, color: "#475569" },
+  emptyText: { fontSize: 9.5, color: TEXTO_SEC },
 
+  // ── Pie de página ──
   footer: {
     position: "absolute",
     left: 22,
@@ -366,13 +543,13 @@ const styles = StyleSheet.create({
     bottom: 10,
     flexDirection: "row",
     justifyContent: "space-between",
-    fontSize: 7,
-    color: "#64748b",
+    fontSize: 6.5,
+    color: TEXTO_HINT,
   },
   footerCenter: { textAlign: "center", flexGrow: 1 },
 });
 
-// ── Componente ───────────────────────────────────────────────────────────────
+// ── Componente principal ─────────────────────────────────────────────────────
 
 export default function EstadoCuentaCallesPDF({
   rows,
@@ -386,38 +563,36 @@ export default function EstadoCuentaCallesPDF({
     (s, c) => s + c.total_recaudado,
     0,
   );
+  const totalPagos = cuentahabientes.reduce(
+    (s, c) => s + c.cobradores.reduce((sc, cb) => sc + cb.pagos.length, 0),
+    0,
+  );
 
-  const reportTitle = anio
-    ? `Reporte de pagos por calle — ${anio}`
-    : "Reporte de pagos por calle";
+  // Cobradores únicos en esta calle
+  const cobradoresUnicos = [
+    ...new Set(
+      cuentahabientes.flatMap((c) =>
+        c.cobradores.map((cb) => cb.nombre_cobrador),
+      ),
+    ),
+  ];
 
+  // ── Vacío ────────────────────────────────────────────────────────────────
   if (!cuentahabientes.length) {
     return (
       <Document>
         <Page size="LETTER" style={styles.page}>
-          <View style={styles.watermark} fixed>
-            <Image src={WatermarkLogo} style={styles.watermarkImg} />
-          </View>
-
-          <View style={styles.headerRow}>
-            <View style={styles.leftBrand}>
-              <View style={styles.logoWrap}>
-                <Image src={Logo} style={styles.logo} />
-              </View>
-              <Text style={styles.brandText}>
-                COMISIÓN DE AGUA{"\n"}GUADALUPE HIDALGO,{"\n"}ACUAMANALA, TLAX.
-              </Text>
+          <View style={styles.heroBand}>
+            <View style={styles.heroLeft}>
+              <Text style={styles.heroTagline}>Estado de cuenta · Calle</Text>
+              <Text style={styles.heroCalleLabel}>CALLE</Text>
+              <Text style={styles.heroCalleName}>{nombreCalle}</Text>
             </View>
-            <View style={styles.infoCard}>
-              <Text style={styles.infoTitle}>{reportTitle}</Text>
-              <View style={styles.infoRow}>
-                <Text style={styles.label}>Calle</Text>
-                <Text style={styles.value}>{nombreCalle}</Text>
-              </View>
-              <View style={styles.infoRow}>
-                <Text style={styles.label}>Fecha de emisión</Text>
-                <Text style={styles.value}>{footerDate}</Text>
-              </View>
+            <View style={styles.heroRight}>
+              <Image src={Logo} style={styles.heroLogo} />
+              <Text style={styles.heroBrandText}>
+                COMISIÓN DE AGUA{"\n"}GUADALUPE HIDALGO{"\n"}ACUAMANALA, TLAX.
+              </Text>
             </View>
           </View>
 
@@ -438,187 +613,233 @@ export default function EstadoCuentaCallesPDF({
     );
   }
 
+  // ── Normal ───────────────────────────────────────────────────────────────
   return (
     <Document>
       <Page size="LETTER" style={styles.page} wrap>
+        {/* Marca de agua */}
         <View style={styles.watermark} fixed>
           <Image src={WatermarkLogo} style={styles.watermarkImg} />
         </View>
 
-        {/* Encabezado */}
-        <View style={styles.headerRow}>
-          <View style={styles.leftBrand}>
-            <View style={styles.logoWrap}>
-              <Image src={Logo} style={styles.logo} />
-            </View>
-            <Text style={styles.brandText}>
-              COMISIÓN DE AGUA{"\n"}GUADALUPE HIDALGO,{"\n"}ACUAMANALA, TLAX.
+        {/* ── HERO: protagonista = la calle ── */}
+        <View style={styles.heroBand} fixed>
+          <View style={styles.heroLeft}>
+            <Text style={styles.heroTagline}>
+              {anio ? `Estado de cuenta · ${anio}` : "Estado de cuenta · Calle"}
             </Text>
-          </View>
+            <Text style={styles.heroCalleLabel}>CALLE</Text>
+            <Text style={styles.heroCalleName}>{nombreCalle}</Text>
 
-          <View style={styles.infoCard}>
-            <Text style={styles.infoTitle}>{reportTitle}</Text>
-
-            {anio && (
-              <View style={styles.infoRow}>
-                <Text style={styles.label}>Año del reporte</Text>
-                <Text style={styles.value}>{anio}</Text>
+            {/* Pills de resumen rápido */}
+            <View style={styles.heroMetaRow}>
+              <View style={styles.heroMetaPill}>
+                <Text style={styles.heroMetaText}>Cuentahabientes</Text>
+                <Text style={styles.heroMetaValue}>
+                  {cuentahabientes.length}
+                </Text>
               </View>
-            )}
-
-            <View style={styles.infoRow}>
-              <Text style={styles.label}>Calle</Text>
-              <Text style={styles.value}>{nombreCalle}</Text>
+              <View style={styles.heroMetaPill}>
+                <Text style={styles.heroMetaText}>Pagos</Text>
+                <Text style={styles.heroMetaValue}>{totalPagos}</Text>
+              </View>
+              <View style={styles.heroMetaPill}>
+                <Text style={styles.heroMetaText}>Emitido</Text>
+                <Text style={styles.heroMetaValue}>{footerDate}</Text>
+              </View>
             </View>
+          </View>
 
-            <View style={styles.infoRow}>
-              <Text style={styles.label}>Cuentahabientes</Text>
-              <Text style={styles.value}>{cuentahabientes.length}</Text>
-            </View>
-
-            <View style={styles.infoRow}>
-              <Text style={styles.label}>Fecha de emisión</Text>
-              <Text style={styles.value}>{footerDate}</Text>
-            </View>
+          <View style={styles.heroRight}>
+            <Image src={Logo} style={styles.heroLogo} />
+            <Text style={styles.heroBrandText}>
+              COMISIÓN DE AGUA{"\n"}GUADALUPE HIDALGO{"\n"}ACUAMANALA, TLAX.
+            </Text>
           </View>
         </View>
 
-        {/* Tarjetas resumen */}
-        <View style={styles.cardsRow}>
-          <View style={styles.summaryCardPrimary}>
-            <Text style={styles.summaryLabel}>Total recaudado en la calle</Text>
-            <Text style={styles.summaryValuePrimary}>
-              {money(totalRecaudado)}
-            </Text>
+        {/* ── Banda de estadísticas ── */}
+        <View style={styles.statsBand} fixed>
+          <View style={styles.statItem}>
+            <Text style={styles.statLabel}>Total recaudado</Text>
+            <Text style={styles.statValueAccent}>{money(totalRecaudado)}</Text>
           </View>
-          <View style={styles.summaryCard}>
-            <Text style={styles.summaryLabel}>Cuentahabientes atendidos</Text>
-            <Text style={styles.summaryValue}>{cuentahabientes.length}</Text>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statLabel}>Cuentahabientes</Text>
+            <Text style={styles.statValue}>{cuentahabientes.length}</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statLabel}>Cobradores activos</Text>
+            <Text style={styles.statValue}>{cobradoresUnicos.length}</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statLabel}>Pagos registrados</Text>
+            <Text style={styles.statValue}>{totalPagos}</Text>
           </View>
         </View>
 
-        <Text style={styles.sectionTitle}>
-          Desglose por cuentahabiente y cobrador
-        </Text>
-
-        {/* Una tarjeta por cuentahabiente */}
-        {cuentahabientes.map((cuenta, ci) => (
-          <View
-            key={`${cuenta.id_cuentahabiente}-${ci}`}
-            style={styles.accountCard}
-            wrap={false}
-          >
-            {/* Datos del cuentahabiente */}
-            <Text style={styles.accountName}>
-              {cuenta.nombre_cuentahabiente}
+        {/* ── Cuerpo ── */}
+        <View style={styles.body}>
+          {/* Título de sección */}
+          <View style={styles.sectionHeader}>
+            <View style={styles.sectionAccent} />
+            <Text style={styles.sectionTitle}>Desglose por cuentahabiente</Text>
+            <Text style={styles.sectionCount}>
+              ({cuentahabientes.length} registros)
             </Text>
+          </View>
 
-            <View style={styles.accountMetaRow}>
-              <Text style={styles.accountMetaLabel}>Número de contrato</Text>
-              <Text style={styles.accountMetaValue}>
-                {cuenta.numero_contrato || "—"}
-              </Text>
-            </View>
-
-            <View style={styles.accountMetaRow}>
-              <Text style={styles.accountMetaLabel}>Tipo de servicio</Text>
-              <Text style={styles.accountMetaValue}>
-                {cuenta.servicio || "—"}
-              </Text>
-            </View>
-
-            <View style={styles.accountMetaRow}>
-              <Text style={styles.accountMetaLabel}>Estatus</Text>
-              <Text style={styles.accountMetaValue}>
-                {cuenta.deuda_actualizada || "—"}
-              </Text>
-            </View>
-
-            <View style={styles.accountMetaRow}>
-              <Text style={styles.accountMetaLabel}>Saldo pendiente</Text>
-              <Text style={styles.accountMetaValue}>
-                {money(cuenta.saldo_pendiente_actualizado)}
-              </Text>
-            </View>
-
-            {/* Sub-secciones por cobrador */}
-            {cuenta.cobradores.map((cobrador, cbi) => (
-              <View
-                key={`${cobrador.id_cobrador}-${cbi}`}
-                style={styles.cobradorBox}
-              >
-                {/* Cabecera del cobrador */}
-                <View style={styles.cobradorHeader}>
-                  <Text style={styles.cobradorName}>
-                    Cobrador: {cobrador.nombre_cobrador}
+          {/* Una tarjeta por cuentahabiente */}
+          {cuentahabientes.map((cuenta, ci) => (
+            <View
+              key={`${cuenta.id_cuentahabiente}-${ci}`}
+              style={styles.accountCard}
+              wrap={false}
+            >
+              {/* Cabecera de la tarjeta */}
+              <View style={styles.accountCardHeader}>
+                <View style={styles.accountCardHeaderLeft}>
+                  <Text style={styles.accountIndex}>
+                    Cuentahabiente #{ci + 1}
                   </Text>
-                  <Text style={styles.cobradorTotal}>
-                    Recaudado: {money(cobrador.total_recaudado)}
+                  <Text style={styles.accountName}>
+                    {cuenta.nombre_cuentahabiente}
                   </Text>
                 </View>
+                <View style={styles.accountCardHeaderRight}>
+                  <Text style={styles.accountTotalLabel}>Total pagado</Text>
+                  <Text style={styles.accountTotalValue}>
+                    {money(cuenta.total_recaudado)}
+                  </Text>
+                </View>
+              </View>
 
-                {/* Tabla de pagos */}
-                <View style={styles.table}>
-                  <View style={styles.thead}>
-                    <Text style={[styles.th, styles.colFecha]}>
-                      Fecha de pago
-                    </Text>
-                    <Text style={[styles.th, styles.colTipo]}>Tipo</Text>
-                    <Text style={[styles.th, styles.colDetalle]}>
-                      Descuento
-                    </Text>
-                    <Text style={[styles.th, styles.colMonto]}>Monto</Text>
-                  </View>
+              {/* Meta en grid 2×2 */}
+              <View style={styles.accountMeta}>
+                <View style={styles.accountMetaItem}>
+                  <Text style={styles.accountMetaLabel}>Contrato</Text>
+                  <Text style={styles.accountMetaValue}>
+                    {cuenta.numero_contrato || "—"}
+                  </Text>
+                </View>
+                <View style={styles.accountMetaItem}>
+                  <Text style={styles.accountMetaLabel}>Tipo de servicio</Text>
+                  <Text style={styles.accountMetaValue}>
+                    {cuenta.servicio || "—"}
+                  </Text>
+                </View>
+                <View style={styles.accountMetaItem}>
+                  <Text style={styles.accountMetaLabel}>Estatus</Text>
+                  <Text
+                    style={
+                      (cuenta.deuda_actualizada || "")
+                        .toLowerCase()
+                        .includes("adeudo")
+                        ? styles.accountMetaValueRed
+                        : styles.accountMetaValueGreen
+                    }
+                  >
+                    {cuenta.deuda_actualizada || "—"}
+                  </Text>
+                </View>
+                <View style={styles.accountMetaItem}>
+                  <Text style={styles.accountMetaLabel}>Saldo pendiente</Text>
+                  <Text
+                    style={
+                      cuenta.saldo_pendiente_actualizado > 0
+                        ? styles.accountMetaValueRed
+                        : styles.accountMetaValueGreen
+                    }
+                  >
+                    {money(cuenta.saldo_pendiente_actualizado)}
+                  </Text>
+                </View>
+              </View>
 
-                  {cobrador.pagos.length > 0 ? (
-                    cobrador.pagos.map((pago, pi) => (
-                      <View
-                        key={pi}
-                        style={[styles.tr, pi % 2 === 1 ? styles.trEven : {}]}
-                      >
-                        <Text style={[styles.td, styles.colFecha]}>
-                          {formatFechaLocal(pago.fecha_pago)}
-                        </Text>
-                        <Text style={[styles.td, styles.colTipo]}>
-                          {pago.tipo_movimiento || "—"}
-                        </Text>
-                        <Text style={[styles.td, styles.colDetalle]}>
-                          {pago.detalle_movimiento || "—"}
-                        </Text>
-                        <Text style={[styles.td, styles.colMonto]}>
-                          {money(pago.monto_recibido)}
-                        </Text>
-                      </View>
-                    ))
-                  ) : (
-                    <View style={styles.tr}>
-                      <Text style={styles.td}>Sin pagos registrados</Text>
+              {/* Sub-bloque por cobrador */}
+              {cuenta.cobradores.map((cobrador, cbi) => (
+                <View key={`${cobrador.id_cobrador}-${cbi}`}>
+                  {cbi > 0 && <View style={styles.cobradorSeparator} />}
+
+                  <View style={styles.cobradorWrap}>
+                    {/* Encabezado del cobrador */}
+                    <View style={styles.cobradorHeader}>
+                      <View style={styles.cobradorDot} />
+                      <Text style={styles.cobradorName}>
+                        {cobrador.nombre_cobrador}
+                      </Text>
+                      <Text style={styles.cobradorSubtotal}>
+                        {money(cobrador.total_recaudado)}
+                      </Text>
                     </View>
-                  )}
+
+                    {/* Tabla de pagos */}
+                    <View style={styles.table}>
+                      <View style={styles.thead}>
+                        <Text style={[styles.th, styles.colFecha]}>Fecha</Text>
+                        <Text style={[styles.th, styles.colTipo]}>Tipo</Text>
+                        <Text style={[styles.th, styles.colDetalle]}>
+                          Descuento
+                        </Text>
+                        <Text style={[styles.th, styles.colMonto]}>Monto</Text>
+                      </View>
+
+                      {cobrador.pagos.length > 0 ? (
+                        cobrador.pagos.map((pago, pi) => (
+                          <View
+                            key={pi}
+                            style={[
+                              styles.tr,
+                              pi % 2 === 1 ? styles.trEven : {},
+                            ]}
+                          >
+                            <Text style={[styles.td, styles.colFecha]}>
+                              {formatFechaLocal(pago.fecha_pago)}
+                            </Text>
+                            <Text style={[styles.tdMuted, styles.colTipo]}>
+                              {pago.tipo_movimiento || "—"}
+                            </Text>
+                            <Text style={[styles.tdMuted, styles.colDetalle]}>
+                              {pago.detalle_movimiento || "—"}
+                            </Text>
+                            <Text style={[styles.td, styles.colMonto]}>
+                              {money(pago.monto_recibido)}
+                            </Text>
+                          </View>
+                        ))
+                      ) : (
+                        <View style={styles.tr}>
+                          <Text style={styles.tdMuted}>
+                            Sin pagos registrados
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  </View>
                 </View>
-              </View>
-            ))}
-
-            {/* Subtotal del cuentahabiente */}
-            <View style={styles.subtotalBox}>
-              <Text style={styles.subtotalLabel}>
-                Total recaudado por cuentahabiente
-              </Text>
-              <Text style={styles.subtotalValue}>
-                {money(cuenta.total_recaudado)}
-              </Text>
+              ))}
             </View>
-          </View>
-        ))}
-
-        {/* Total general de la calle */}
-        <View style={styles.totalBox}>
-          <Text style={styles.totalLabel}>
-            Total recaudado en {nombreCalle}
-          </Text>
-          <Text style={styles.totalValue}>{money(totalRecaudado)}</Text>
+          ))}
         </View>
 
+        {/* ── Total general de la calle ── */}
+        <View style={styles.totalBand} wrap={false}>
+          <View style={styles.totalBandLeft}>
+            <Text style={styles.totalBandTitle}>
+              Total recaudado en la calle
+            </Text>
+            <Text style={styles.totalBandSub}>
+              {nombreCalle} · {cuentahabientes.length} cuentahabientes ·{" "}
+              {totalPagos} pagos
+            </Text>
+          </View>
+          <Text style={styles.totalBandValue}>{money(totalRecaudado)}</Text>
+        </View>
+
+        {/* Pie de página */}
         <View style={styles.footer} fixed>
           <Text style={styles.footerCenter}>
             Guadalupe Hidalgo Acuamanala, C.P. 90860
