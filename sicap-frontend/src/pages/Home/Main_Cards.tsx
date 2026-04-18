@@ -37,7 +37,7 @@ function Main_Card() {
   const handleEstadoCuenta = () => navigate("/estadocuenta");
   const handleCargos = () => navigate("/cargos");
   const handleCorteCaja = () => navigate("/corte-caja");
-  const handleReportes = () => navigate("/reportes");
+  const handleReportes = () => navigate("/Menu_reporte");
 
   const cards = [
     {
