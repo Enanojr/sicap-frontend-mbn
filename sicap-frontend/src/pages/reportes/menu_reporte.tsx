@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { WaterServiceCard } from "../../components/cards/card";
 import "../../styles/styles.css";
-import { HandCoins, Milestone } from "lucide-react";
+import { HandCoins, Milestone, UserRound, Banknote } from "lucide-react";
 
 function Menu_reporte() {
   const navigate = useNavigate();
@@ -12,6 +12,13 @@ function Menu_reporte() {
 
   const handleRCalles = () => {
     navigate("/reporteCalle");
+  };
+
+  const handlePadron = () => {
+    navigate("/reportePadron");
+  };
+  const handleCargos = () => {
+    navigate("/reporteCargos");
   };
 
   const cards = [
@@ -34,6 +41,25 @@ function Menu_reporte() {
       gradientColors: ["#84cc16", "#365314"] as [string, string],
       waterDropColor: "rgba(132, 204, 22, 0.30)",
       onClick: handleRCalles,
+    },
+    {
+      title: "Reportes por Cargos",
+      description:
+        "Genera reportes de la información de la plataforma, clasificados por cargos",
+      icon: Banknote,
+      ctaText: "Generar",
+      gradientColors: ["#3b82f6", "#1e3a8a"] as [string, string],
+      waterDropColor: "rgba(59, 130, 246, 0.30)",
+      onClick: handleCargos,
+    },
+    {
+      title: "Padrón de usuarios",
+      description: "Consulta el padrón general de usuarios",
+      icon: UserRound,
+      ctaText: "Generar",
+      gradientColors: ["#a855f7", "#581c87"] as [string, string],
+      waterDropColor: "rgba(168, 85, 247, 0.30)",
+      onClick: handlePadron,
     },
   ];
 
