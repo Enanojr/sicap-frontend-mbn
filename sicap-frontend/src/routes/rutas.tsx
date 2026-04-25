@@ -37,6 +37,8 @@ import Grupos from "../pages/grupos/grupo";
 import Reporte from "../pages/reportes/reportes";
 import Menu_reporte from "../pages/reportes/menu_reporte";
 import ReporteCalles from "../pages/reportes/reportepage_calles";
+import ReportePadronGeneral from "../pages/reportes/padron";
+import ReporteCargos from "../pages/reportes/cargos";
 
 const Rutas = [
   // Ruta #1: Login (pública)
@@ -180,6 +182,14 @@ const Rutas = [
           {
             path: "/reporteCalle",
             element: <ReporteCalles />,
+          },
+          {
+            path: "/reportePadron",
+            element: <ReportePadronGeneral />,
+          },
+          {
+            path: "/reporteCargos",
+            element: <ReporteCargos />,
           },
         ],
       },
