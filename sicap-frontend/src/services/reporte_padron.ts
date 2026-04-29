@@ -4,8 +4,12 @@ import { getToken } from "./auth.service";
 // ── Tipos ─────────────────────────────────────────────────────────────────────
 
 export interface DetalleCargo {
-  cargo: string;
-  monto: number;
+  nombre_cargo: string;
+}
+
+export interface DetalleAbonoCargo {
+  monto_abonado: number;
+  cargo_afectado: string;
 }
 
 export interface PadronGeneralRawRow {
@@ -14,14 +18,20 @@ export interface PadronGeneralRawRow {
   numero_contrato: string | number;
   nombre_usuario: string;
   tipo_servicio: string;
-  saldo_pendiente: string | number;
-  total_pagado_acumulado: string | number;
-  detalle_cargos_json: string | null;
+  costo_servicio_anual: string | number;
+  cantidad_abonos_servicio: number;
+  total_pagado_servicio: string | number;
+  detalle_cargos_activos_json: string | null;
+  detalle_abonos_cargos_json: string | null;
+  cantidad_pagos_cargos: number;
+  total_pagado_cargos: string | number;
+  total_pagado_general: string | number;
   anio_reporte: number;
   total_pagos_cobrados: string | number;
   total_cobros_cargos: string | number;
   total_pagos_pendientes: string | number;
   total_cargos_pendientes: string | number;
+  total_recaudado_global: string | number;
   total_usuarios: number;
 }
 
@@ -31,12 +41,24 @@ export interface PadronGeneralRow {
   numero_contrato: string | number;
   nombre_usuario: string;
   tipo_servicio: string;
-  saldo_pendiente: number;
-  total_pagado_acumulado: number;
-  detalle_cargos: DetalleCargo[]; // ya parseado
+  // Servicio de agua
+  costo_servicio_anual: number;
+  cantidad_abonos_servicio: number;
+  total_pagado_servicio: number;
+  // Cargos
+  detalle_cargos_activos: DetalleCargo[];
+  detalle_abonos_cargos: DetalleAbonoCargo[];
+  cantidad_pagos_cargos: number;
+  total_pagado_cargos: number;
+  // General
+  total_pagado_general: number;
   anio_reporte: number;
+  // Globales
   total_pagos_cobrados: number;
   total_cobros_cargos: number;
+  total_pagos_pendientes: number;
+  total_cargos_pendientes: number;
+  total_recaudado_global: number;
   total_usuarios: number;
 }
 
@@ -62,29 +84,20 @@ const extractRows = <T>(data: any): T[] => {
   return [];
 };
 
-const parseDetalleCargos = (raw: string | null): DetalleCargo[] => {
+const parseJSON = <T>(raw: string | null): T[] => {
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.map((item: any) => ({
-      cargo: String(item?.cargo ?? "").trim(),
-      monto: toNumber(item?.monto),
-    }));
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
     try {
-      // Intento normalizando comillas simples o Python-style
       const normalized = raw
         .replace(/\bNone\b/g, "null")
         .replace(/\bTrue\b/g, "true")
         .replace(/\bFalse\b/g, "false")
         .replace(/'/g, '"');
       const parsed = JSON.parse(normalized);
-      if (!Array.isArray(parsed)) return [];
-      return parsed.map((item: any) => ({
-        cargo: String(item?.cargo ?? "").trim(),
-        monto: toNumber(item?.monto),
-      }));
+      return Array.isArray(parsed) ? parsed : [];
     } catch {
       return [];
     }
@@ -97,12 +110,33 @@ const normalizeRow = (raw: PadronGeneralRawRow): PadronGeneralRow => ({
   numero_contrato: raw.numero_contrato,
   nombre_usuario: raw.nombre_usuario?.trim() || "Sin nombre",
   tipo_servicio: raw.tipo_servicio?.trim() || "—",
-  saldo_pendiente: toNumber(raw.saldo_pendiente),
-  total_pagado_acumulado: toNumber(raw.total_pagado_acumulado),
-  detalle_cargos: parseDetalleCargos(raw.detalle_cargos_json),
+  // Servicio de agua
+  costo_servicio_anual: toNumber(raw.costo_servicio_anual),
+  cantidad_abonos_servicio: raw.cantidad_abonos_servicio ?? 0,
+  total_pagado_servicio: toNumber(raw.total_pagado_servicio),
+  // Cargos
+  detalle_cargos_activos: parseJSON<DetalleCargo>(
+    raw.detalle_cargos_activos_json,
+  ).map((item: any) => ({
+    nombre_cargo: String(item?.nombre_cargo ?? "").trim(),
+  })),
+  detalle_abonos_cargos: parseJSON<DetalleAbonoCargo>(
+    raw.detalle_abonos_cargos_json,
+  ).map((item: any) => ({
+    monto_abonado: toNumber(item?.monto_abonado),
+    cargo_afectado: String(item?.cargo_afectado ?? "").trim(),
+  })),
+  cantidad_pagos_cargos: raw.cantidad_pagos_cargos ?? 0,
+  total_pagado_cargos: toNumber(raw.total_pagado_cargos),
+  // General
+  total_pagado_general: toNumber(raw.total_pagado_general),
   anio_reporte: raw.anio_reporte,
+  // Globales
   total_pagos_cobrados: toNumber(raw.total_pagos_cobrados),
   total_cobros_cargos: toNumber(raw.total_cobros_cargos),
+  total_pagos_pendientes: toNumber(raw.total_pagos_pendientes),
+  total_cargos_pendientes: toNumber(raw.total_cargos_pendientes),
+  total_recaudado_global: toNumber(raw.total_recaudado_global),
   total_usuarios: raw.total_usuarios,
 });
 
