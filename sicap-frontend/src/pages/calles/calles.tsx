@@ -16,20 +16,6 @@ interface RegisterCalleProps {
   onCancel: () => void;
 }
 
-const normalizeActivo = (value: unknown): boolean => {
-  if (typeof value === "boolean") return value;
-  if (typeof value === "number") return value === 1;
-
-  if (typeof value === "string") {
-    const clean = value.trim().toLowerCase();
-    return (
-      clean === "true" || clean === "1" || clean === "si" || clean === "sí"
-    );
-  }
-
-  return false;
-};
-
 export default function RegisterCalle({
   calleToEdit,
   onSuccess,
@@ -58,7 +44,10 @@ export default function RegisterCalle({
         type: "select",
         icon: CheckCircle2,
         required: true,
-        defaultValue: normalizeActivo(calleToEdit?.activo) ? "true" : "false",
+        defaultValue:
+          calleToEdit?.activo !== undefined
+            ? String(calleToEdit.activo)
+            : "true",
         options: [
           { value: "true", label: "Sí" },
           { value: "false", label: "No" },
@@ -72,17 +61,21 @@ export default function RegisterCalle({
 
     onSubmit: async (data) => {
       const payload = {
-        nombre_calle: String(data.nombre_calle).trim(),
-        activo: normalizeActivo(data.activo),
+        nombre_calle: data.nombre_calle,
+        activo: data.activo === "true",
       };
 
+      let result;
+
       try {
-        const result = calleToEdit
-          ? await updateCalle(calleToEdit.id_calle, payload)
-          : await createCalle(payload);
+        if (calleToEdit) {
+          result = await updateCalle(calleToEdit.id_calle, payload);
+        } else {
+          result = await createCalle(payload);
+        }
 
         if (result.success) {
-          await Swal.fire({
+          Swal.fire({
             icon: "success",
             title: calleToEdit ? "¡Calle actualizada!" : "¡Registro exitoso!",
             timer: 2500,
@@ -91,17 +84,13 @@ export default function RegisterCalle({
 
           onSuccess();
         } else {
-          throw new Error(
-            result.errors?.general ||
-              JSON.stringify(result.errors) ||
-              "No se pudo guardar la calle.",
-          );
+          throw new Error("Error en la operación");
         }
-      } catch (error: any) {
-        await Swal.fire({
+      } catch (error) {
+        Swal.fire({
           icon: "error",
           title: "Error",
-          text: error?.message || "No se pudo guardar la calle.",
+          text: "No se pudo guardar la calle",
         });
       }
     },

@@ -1,44 +1,42 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Swal from "sweetalert2";
-import { createTransaccion } from "../../services/egresos.service";
 import "../../styles/styles.css";
+
+type ArchivoAdjunto = {
+  file: File;
+  preview: string | null;
+  tipo: "imagen" | "pdf";
+};
 
 type FormEgresoData = {
   concepto: string;
   fecha: string;
-  requisitor: string;
-  monto: number;
+  requisitor_gasto: string;
+  total_pagar: number;
   presupuesto_base: number;
-  observaciones: string;
-  comprobante: File | null;
-  cuenta: number;
+  observaciones: ArchivoAdjunto[];
 };
 
-interface FormularioEgresosProps {
-  onSuccess?: () => void;
-}
+const MAX_ARCHIVOS = 4;
+const TIPOS_PERMITIDOS = ["image/", "application/pdf"];
 
-const FormularioEgresos: React.FC<FormularioEgresosProps> = ({ onSuccess }) => {
+const EgresosManager: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [comprobantePreview, setComprobantePreview] = useState<string | null>(
-    null,
-  );
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const initialState: FormEgresoData = {
+  const [formEgreso, setFormEgreso] = useState<FormEgresoData>({
     concepto: "",
     fecha: new Date().toISOString().split("T")[0],
-    requisitor: "",
-    monto: 0,
+    requisitor_gasto: "",
+    total_pagar: 0,
     presupuesto_base: 5800,
-    observaciones: "",
-    comprobante: null,
-    cuenta: 1,
-  };
+    observaciones: [],
+  });
 
-  const [formEgreso, setFormEgreso] = useState<FormEgresoData>(initialState);
+  const presupuestoRestante = useMemo(() => {
+    return formEgreso.presupuesto_base - formEgreso.total_pagar;
+  }, [formEgreso.presupuesto_base, formEgreso.total_pagar]);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -50,7 +48,7 @@ const FormularioEgresos: React.FC<FormularioEgresosProps> = ({ onSuccess }) => {
     setFormEgreso((prev) => ({
       ...prev,
       [name]:
-        name === "monto" || name === "presupuesto_base" || name === "cuenta"
+        name === "total_pagar" || name === "presupuesto_base"
           ? parseFloat(value) || 0
           : value,
     }));
@@ -60,44 +58,85 @@ const FormularioEgresos: React.FC<FormularioEgresosProps> = ({ onSuccess }) => {
     }
   };
 
-  const procesarArchivo = (file: File) => {
-    const esImagen = file.type.startsWith("image/");
-    const esPdf = file.type === "application/pdf";
+  const crearAdjuntos = (files: File[]): ArchivoAdjunto[] => {
+    return files
+      .filter((file) =>
+        TIPOS_PERMITIDOS.some((tipo) =>
+          tipo.endsWith("/") ? file.type.startsWith(tipo) : file.type === tipo,
+        ),
+      )
+      .map((file) => {
+        const esImagen = file.type.startsWith("image/");
+        const esPdf = file.type === "application/pdf";
 
-    if (!esImagen && !esPdf) {
+        return {
+          file,
+          preview: esImagen ? URL.createObjectURL(file) : null,
+          tipo: esImagen ? "imagen" : esPdf ? "pdf" : "pdf",
+        };
+      });
+  };
+
+  const agregarArchivos = (files: File[]) => {
+    if (!files.length) return;
+
+    const nuevosAdjuntos = crearAdjuntos(files);
+
+    if (!nuevosAdjuntos.length) {
       Swal.fire({
         icon: "warning",
         title: "Archivo no válido",
         text: "Solo se permiten imágenes y archivos PDF.",
-        confirmButtonColor: "#4fa3e3",
+        confirmButtonColor: "#d48a1f",
       });
       return;
     }
 
-    if (comprobantePreview) {
-      URL.revokeObjectURL(comprobantePreview);
-    }
+    setFormEgreso((prev) => {
+      const disponibles = MAX_ARCHIVOS - prev.observaciones.length;
 
-    const preview = esImagen ? URL.createObjectURL(file) : null;
-    setComprobantePreview(preview);
-    setFormEgreso((prev) => ({ ...prev, comprobante: file }));
+      if (disponibles <= 0) {
+        Swal.fire({
+          icon: "warning",
+          title: "Límite alcanzado",
+          text: `Solo puedes adjuntar hasta ${MAX_ARCHIVOS} archivos.`,
+          confirmButtonColor: "#d48a1f",
+        });
+        return prev;
+      }
 
-    if (errors.comprobante) {
-      setErrors((prev) => ({ ...prev, comprobante: "" }));
-    }
+      const archivosFinales = [
+        ...prev.observaciones,
+        ...nuevosAdjuntos.slice(0, disponibles),
+      ];
+
+      if (nuevosAdjuntos.length > disponibles) {
+        Swal.fire({
+          icon: "info",
+          title: "Solo se agregaron algunos archivos",
+          text: `El límite máximo es de ${MAX_ARCHIVOS} archivos.`,
+          confirmButtonColor: "#d48a1f",
+        });
+      }
+
+      return {
+        ...prev,
+        observaciones: archivosFinales,
+      };
+    });
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) procesarArchivo(file);
+    const files = Array.from(e.target.files || []);
+    agregarArchivos(files);
     e.target.value = "";
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) procesarArchivo(file);
+    const files = Array.from(e.dataTransfer.files || []);
+    agregarArchivos(files);
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -117,88 +156,63 @@ const FormularioEgresos: React.FC<FormularioEgresosProps> = ({ onSuccess }) => {
     }
   };
 
-  const removeComprobante = () => {
-    if (comprobantePreview) {
-      URL.revokeObjectURL(comprobantePreview);
-    }
+  const removeArchivo = (index: number) => {
+    setFormEgreso((prev) => {
+      const archivo = prev.observaciones[index];
+      if (archivo?.preview) {
+        URL.revokeObjectURL(archivo.preview);
+      }
 
-    setComprobantePreview(null);
-    setFormEgreso((prev) => ({ ...prev, comprobante: null }));
+      return {
+        ...prev,
+        observaciones: prev.observaciones.filter((_, i) => i !== index),
+      };
+    });
   };
 
   const limpiarFormulario = () => {
-    if (comprobantePreview) {
-      URL.revokeObjectURL(comprobantePreview);
-    }
-
-    setComprobantePreview(null);
-    setFormEgreso({
-      ...initialState,
-      fecha: new Date().toISOString().split("T")[0],
+    formEgreso.observaciones.forEach((archivo) => {
+      if (archivo.preview) URL.revokeObjectURL(archivo.preview);
     });
+
+    setFormEgreso({
+      concepto: "",
+      fecha: new Date().toISOString().split("T")[0],
+      requisitor_gasto: "",
+      total_pagar: 0,
+      presupuesto_base: 5800,
+      observaciones: [],
+    });
+
     setErrors({});
   };
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
+    if (!formEgreso.concepto.trim()) {
+      newErrors.concepto = "El concepto es obligatorio.";
+    }
+
     if (!formEgreso.fecha) {
       newErrors.fecha = "La fecha es obligatoria.";
     }
 
-    if (!formEgreso.monto || formEgreso.monto <= 0) {
-      newErrors.monto = "El total a pagar debe ser mayor a 0.";
+    if (!formEgreso.requisitor_gasto.trim()) {
+      newErrors.requisitor_gasto = "El requisitor del gasto es obligatorio.";
     }
 
-    if (formEgreso.monto > formEgreso.presupuesto_base) {
-      newErrors.monto =
+    if (!formEgreso.total_pagar || formEgreso.total_pagar <= 0) {
+      newErrors.total_pagar = "El total a pagar debe ser mayor a 0.";
+    }
+
+    if (formEgreso.total_pagar > formEgreso.presupuesto_base) {
+      newErrors.total_pagar =
         "El total a pagar no puede ser mayor al presupuesto disponible.";
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-
-  const getBackendErrorMessage = (error: any) => {
-    const data = error?.response?.data;
-
-    if (!data) {
-      return "No se pudo registrar el egreso.";
-    }
-
-    if (typeof data === "string") {
-      return data;
-    }
-
-    if (data.detail && typeof data.detail === "string") {
-      return data.detail;
-    }
-
-    if (data.message && typeof data.message === "string") {
-      return data.message;
-    }
-
-    if (typeof data === "object") {
-      const mensajes = Object.entries(data)
-        .flatMap(([campo, valor]) => {
-          if (Array.isArray(valor)) {
-            return valor.map((msg) => `${campo}: ${msg}`);
-          }
-
-          if (typeof valor === "string") {
-            return [`${campo}: ${valor}`];
-          }
-
-          return [];
-        })
-        .filter(Boolean);
-
-      if (mensajes.length > 0) {
-        return mensajes.join("\n");
-      }
-    }
-
-    return "No se pudo registrar el egreso.";
   };
 
   const handleSubmitEgreso = async (e: React.FormEvent) => {
@@ -210,34 +224,37 @@ const FormularioEgresos: React.FC<FormularioEgresosProps> = ({ onSuccess }) => {
     setLoading(true);
 
     try {
-      await createTransaccion({
-        tipo: "egreso",
-        monto: formEgreso.monto,
-        fecha: formEgreso.fecha,
-        observaciones:
-          formEgreso.observaciones.trim() ||
-          formEgreso.concepto.trim() ||
-          undefined,
-        comprobante: formEgreso.comprobante ?? undefined,
-        requisitor: formEgreso.requisitor.trim() || undefined,
-        cuenta: formEgreso.cuenta,
+      const formData = new FormData();
+      formData.append("concepto", formEgreso.concepto);
+      formData.append("fecha", formEgreso.fecha);
+      formData.append("requisitor_gasto", formEgreso.requisitor_gasto);
+      formData.append("total_pagar", String(formEgreso.total_pagar));
+      formData.append("presupuesto_base", String(formEgreso.presupuesto_base));
+
+      formEgreso.observaciones.forEach((archivo) => {
+        formData.append("observaciones", archivo.file);
       });
+
+      // Aquí conectas tu servicio real
+      // const res = await registrarEgreso(formData);
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       Swal.fire({
         icon: "success",
         title: "Egreso registrado",
         text: "El egreso se ha guardado correctamente.",
-        timer: 1800,
+        timer: 2000,
         showConfirmButton: false,
+        confirmButtonColor: "#d48a1f",
       });
 
       limpiarFormulario();
-      onSuccess?.();
-    } catch (error: any) {
+    } catch (error) {
       Swal.fire({
         icon: "error",
-        title: "Error al registrar",
-        text: getBackendErrorMessage(error),
+        title: "Error inesperado",
+        text: "No se pudo conectar con el servidor.",
         confirmButtonColor: "#ef4444",
       });
     } finally {
@@ -247,17 +264,19 @@ const FormularioEgresos: React.FC<FormularioEgresosProps> = ({ onSuccess }) => {
 
   useEffect(() => {
     return () => {
-      if (comprobantePreview) {
-        URL.revokeObjectURL(comprobantePreview);
-      }
+      formEgreso.observaciones.forEach((archivo) => {
+        if (archivo.preview) {
+          URL.revokeObjectURL(archivo.preview);
+        }
+      });
     };
-  }, [comprobantePreview]);
+  }, [formEgreso.observaciones]);
 
   return (
     <div className="cm-container">
       <div className="cm-top-section cm-top-section-egreso">
         <div className="cm-card cm-form-card cm-egreso-mode cm-egreso-wide">
-          <h3>Registrar Egreso</h3>
+          <h3>Registrar Egresos</h3>
 
           <form onSubmit={handleSubmitEgreso}>
             <div className="cm-form-row">
@@ -269,7 +288,11 @@ const FormularioEgresos: React.FC<FormularioEgresosProps> = ({ onSuccess }) => {
                   value={formEgreso.concepto}
                   onChange={handleChange}
                   placeholder="Reparaciones"
+                  className={errors.concepto ? "cm-input-error" : ""}
                 />
+                {errors.concepto && (
+                  <span className="cm-error-msg">{errors.concepto}</span>
+                )}
               </div>
 
               <div className="cm-form-group">
@@ -292,150 +315,184 @@ const FormularioEgresos: React.FC<FormularioEgresosProps> = ({ onSuccess }) => {
                 <label>Requisitor del gasto</label>
                 <input
                   type="text"
-                  name="requisitor"
-                  value={formEgreso.requisitor}
+                  name="requisitor_gasto"
+                  value={formEgreso.requisitor_gasto}
                   onChange={handleChange}
-                  placeholder="Nombre del requisitor"
+                  placeholder="Nombre del Requisitor"
+                  className={errors.requisitor_gasto ? "cm-input-error" : ""}
                 />
+                {errors.requisitor_gasto && (
+                  <span className="cm-error-msg">
+                    {errors.requisitor_gasto}
+                  </span>
+                )}
               </div>
 
               <div className="cm-form-group">
-                <label>Monto a retirar</label>
+                <label>Total a pagar</label>
                 <input
                   type="number"
                   step="0.01"
-                  name="monto"
-                  value={formEgreso.monto || ""}
+                  name="total_pagar"
+                  value={formEgreso.total_pagar || ""}
                   onChange={handleChange}
                   placeholder="1200.00"
-                  className={`cm-input-money ${
-                    errors.monto ? "cm-input-error" : ""
-                  }`}
+                  className={`cm-input-money ${errors.total_pagar ? "cm-input-error" : ""}`}
                 />
-                {errors.monto && (
-                  <span className="cm-error-msg">{errors.monto}</span>
+                {errors.total_pagar && (
+                  <span className="cm-error-msg">{errors.total_pagar}</span>
                 )}
               </div>
             </div>
 
             <div className="cm-form-group">
-              <label>Observaciones</label>
-              <textarea
-                name="observaciones"
-                value={formEgreso.observaciones}
-                onChange={handleChange}
-                rows={2}
-              />
+              <label>Presupuesto</label>
+              <div className="cm-presupuesto-inline">
+                <span className="cm-presupuesto-base">
+                  $
+                  {formEgreso.presupuesto_base.toLocaleString("es-MX", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
+
+                <span className="cm-presupuesto-descuento">
+                  - $
+                  {formEgreso.total_pagar.toLocaleString("es-MX", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
+
+                <span
+                  className={`cm-presupuesto-restante ${
+                    presupuestoRestante < 0 ? "cm-presupuesto-negative" : ""
+                  }`}
+                >
+                  = $
+                  {presupuestoRestante.toLocaleString("es-MX", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
+              </div>
             </div>
 
             <div className="cm-form-group">
-              <label>Comprobante</label>
+              <label>Observaciones</label>
 
-              {!formEgreso.comprobante ? (
-                <div
-                  className={`cm-upload-dropzone ${
-                    dragging ? "cm-upload-dropzone-active" : ""
-                  }`}
-                  onDrop={handleDrop}
-                  onDragOver={handleDragOver}
-                  onDragEnter={handleDragEnter}
-                  onDragLeave={handleDragLeave}
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <div className="cm-upload-dropzone-content">
-                    <div className="cm-upload-dropzone-icon">⇧</div>
-                    <div className="cm-upload-dropzone-title">
-                      Arrastra el comprobante aquí
-                    </div>
-                    <div className="cm-upload-dropzone-subtitle">
-                      o{" "}
-                      <span className="cm-upload-dropzone-link">
-                        cárgalo desde tu computadora
-                      </span>
-                    </div>
-                    <div className="cm-upload-dropzone-hint">
-                      Imagen o PDF · máx. 1 archivo
-                    </div>
+              <div
+                className={`cm-upload-dropzone ${dragging ? "cm-upload-dropzone-active" : ""}`}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onClick={() =>
+                  document.getElementById("archivos-egreso")?.click()
+                }
+              >
+                <div className="cm-upload-dropzone-content">
+                  <div className="cm-upload-dropzone-icon">⇧</div>
+
+                  <div className="cm-upload-dropzone-title">
+                    Arrastra archivos aquí
                   </div>
 
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*,application/pdf"
-                    hidden
-                    onChange={handleFileChange}
-                  />
-                </div>
-              ) : (
-                <div className="cm-file-card">
-                  <div className="cm-file-preview">
-                    {comprobantePreview ? (
-                      <img
-                        src={comprobantePreview}
-                        alt={formEgreso.comprobante.name}
-                        className="cm-file-image"
-                      />
-                    ) : (
-                      <div className="cm-file-pdf">PDF</div>
-                    )}
-                  </div>
-
-                  <div className="cm-file-info">
-                    <span
-                      className="cm-file-name"
-                      title={formEgreso.comprobante.name}
-                    >
-                      {formEgreso.comprobante.name}
-                    </span>
-                    <span className="cm-file-size">
-                      {(formEgreso.comprobante.size / 1024 / 1024).toFixed(2)}{" "}
-                      MB
+                  <div className="cm-upload-dropzone-subtitle">
+                    o{" "}
+                    <span className="cm-upload-dropzone-link">
+                      cárgalos desde tu computadora
                     </span>
                   </div>
-
-                  <div className="cm-file-actions">
-                    {comprobantePreview ? (
-                      <a
-                        href={comprobantePreview}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="cm-file-action-btn"
-                      >
-                        Ver
-                      </a>
-                    ) : (
-                      <button
-                        type="button"
-                        className="cm-file-action-btn"
-                        onClick={() =>
-                          window.open(
-                            URL.createObjectURL(formEgreso.comprobante!),
-                            "_blank",
-                          )
-                        }
-                      >
-                        Abrir
-                      </button>
-                    )}
-
-                    <button
-                      type="button"
-                      className="cm-file-remove-btn"
-                      onClick={removeComprobante}
-                    >
-                      Eliminar
-                    </button>
-                  </div>
                 </div>
-              )}
+
+                <input
+                  id="archivos-egreso"
+                  type="file"
+                  accept="image/*,application/pdf"
+                  multiple
+                  hidden
+                  onChange={handleFileChange}
+                />
+              </div>
             </div>
+
+            {formEgreso.observaciones.length > 0 && (
+              <div className="cm-form-group">
+                <div className="cm-files-list">
+                  {formEgreso.observaciones.map((archivo, index) => (
+                    <div
+                      key={`${archivo.file.name}-${index}`}
+                      className="cm-file-card"
+                    >
+                      <div className="cm-file-preview">
+                        {archivo.tipo === "imagen" && archivo.preview ? (
+                          <img
+                            src={archivo.preview}
+                            alt={archivo.file.name}
+                            className="cm-file-image"
+                          />
+                        ) : (
+                          <div className="cm-file-pdf">PDF</div>
+                        )}
+                      </div>
+
+                      <div className="cm-file-info">
+                        <span
+                          className="cm-file-name"
+                          title={archivo.file.name}
+                        >
+                          {archivo.file.name}
+                        </span>
+                        <span className="cm-file-size">
+                          {(archivo.file.size / 1024 / 1024).toFixed(2)} MB
+                        </span>
+                      </div>
+
+                      <div className="cm-file-actions">
+                        {archivo.tipo === "imagen" && archivo.preview ? (
+                          <a
+                            href={archivo.preview}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="cm-file-action-btn"
+                          >
+                            Ver
+                          </a>
+                        ) : (
+                          <button
+                            type="button"
+                            className="cm-file-action-btn"
+                            onClick={() =>
+                              window.open(
+                                URL.createObjectURL(archivo.file),
+                                "_blank",
+                              )
+                            }
+                          >
+                            Abrir
+                          </button>
+                        )}
+
+                        <button
+                          type="button"
+                          className="cm-file-remove-btn"
+                          onClick={() => removeArchivo(index)}
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="cm-egreso-actions">
               <button
                 type="button"
                 className="cm-btn cm-btn-secondary"
                 onClick={limpiarFormulario}
-                disabled={loading}
               >
                 Limpiar formulario
               </button>
@@ -445,7 +502,7 @@ const FormularioEgresos: React.FC<FormularioEgresosProps> = ({ onSuccess }) => {
                 className="cm-btn cm-btn-warning"
                 disabled={loading}
               >
-                {loading ? "Registrando..." : "Registrar egreso"}
+                {loading ? "..." : "Registrar egreso"}
               </button>
             </div>
           </form>
@@ -455,4 +512,4 @@ const FormularioEgresos: React.FC<FormularioEgresosProps> = ({ onSuccess }) => {
   );
 };
 
-export default FormularioEgresos;
+export default EgresosManager;

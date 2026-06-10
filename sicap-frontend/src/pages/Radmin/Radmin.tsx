@@ -88,9 +88,6 @@ export default function RegisterAdmin() {
           // El placeholder se maneja con 'placeholder'
           { value: "admin", label: "Admin" },
           { value: "supervisor", label: "Supervisor" },
-          { value: "presidente", label: "Presidente" },
-          { value: "tesorero_jr", label: "Tesorero JR" },
-          { value: "tesorero_sr", label: "Tesorero SR" },
         ],
         placeholder: "Seleccione un rol",
         validation: (value: string | number) =>

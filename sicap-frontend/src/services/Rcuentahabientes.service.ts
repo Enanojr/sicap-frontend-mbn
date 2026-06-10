@@ -218,7 +218,6 @@ export const getCuentahabientes = async (
 };
 
 export const getCuentahabientesList = async (
-  page: number = 1
 ): Promise<
   ApiResult<{
     count: number;
@@ -242,10 +241,23 @@ export const getCuentahabientesList = async (
       nextUrl = response.data.next;
     }
 
-    return allResults;
+    return {
+      success: true,
+      data: {
+        count: allResults.length,
+        next: null,
+        previous: null,
+        results: allResults,
+      },
+    };
   } catch (error) {
     console.error("Error obteniendo lista completa:", error);
-    return [];
+    return {
+      success: false,
+      errors: {
+        general: "Error al obtener la lista completa de cuentahabientes.",
+      },
+    };
   }
 };
 

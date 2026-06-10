@@ -9,7 +9,6 @@ export interface Progreso {
   numero_contrato: number;
   nombre: string;
   estatus: string;
-  anio_pago: number; // <-- ¡Este es el campo nuevo que vimos en Postman!
   total: string;
   saldo: string;
   progreso: string;
@@ -36,12 +35,12 @@ export const getAllProgresos = async () => {
 
     // Iterar a través de todas las páginas
     while (nextUrl) {
-      const response: any = await api.get<PaginatedResponse>(nextUrl);
+      const response: { data: PaginatedResponse } = await api.get<PaginatedResponse>(nextUrl);
       
       // Agregar los resultados de esta página
       allProgresos = [...allProgresos, ...response.data.results];
       
-      // Obtener la siguiente URL (si es null, el while se detiene)
+      // Obtener la siguiente URL
       nextUrl = response.data.next;
     }
 

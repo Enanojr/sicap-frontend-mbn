@@ -59,17 +59,16 @@ const statusOptions: FilterOption[] = [
 ];
 
 // ─────────────────────────────────────────────
-// Status Config (definido fuera del componente para evitar re-creación)
+// Cache y refs de módulo
+// ─────────────────────────────────────────────
+let cachedContracts: ContractSummary[] | null = null;
+
+// ─────────────────────────────────────────────
+// Status Config
 // ─────────────────────────────────────────────
 const statusConfig: Record<
   string,
-  {
-    bg: string;
-    text: string;
-    border: string;
-    icon: React.ReactNode;
-    dot: string;
-  }
+  { bg: string; text: string; border: string; icon: React.ReactNode; dot: string }
 > = {
   pagado: {
     bg: "#0d2e1a",
@@ -113,7 +112,19 @@ const getStatusConf = (estatus: string) =>
   statusConfig[estatus.trim().toLowerCase()] ?? defaultStatusConf;
 
 // ─────────────────────────────────────────────
-// Helpers (fuera del componente — no se recrean)
+// Hooks
+// ─────────────────────────────────────────────
+function useDebounce<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState<T>(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+  return debounced;
+}
+
+// ─────────────────────────────────────────────
+// Helpers (fuera del componente)
 // ─────────────────────────────────────────────
 const formatFechaLocal = (fechaString: string): string => {
   if (!fechaString) return "—";
@@ -129,13 +140,13 @@ const formatFechaLocal = (fechaString: string): string => {
   });
 };
 
-const moneyFormatter = new Intl.NumberFormat("es-MX", {
-  style: "currency",
-  currency: "MXN",
-  minimumFractionDigits: 0,
-  maximumFractionDigits: 0,
-});
-const formatMoney = (amount: number) => moneyFormatter.format(amount);
+const formatMoney = (amount: number): string =>
+  new Intl.NumberFormat("es-MX", {
+    style: "currency",
+    currency: "MXN",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
 
 const normalizeStreet = (value: string): string => {
   if (!value) return "";
@@ -151,30 +162,35 @@ const normalizeStreet = (value: string): string => {
     .trim();
 };
 
-const prettyStreet = (value: string) =>
-  value.replace(/\b\w/g, (l) => l.toUpperCase());
-
-// ─────────────────────────────────────────────
-// Hook: debounce
-// ─────────────────────────────────────────────
-function useDebounce<T>(value: T, delay = 300): T {
-  const [debounced, setDebounced] = useState<T>(value);
-  useEffect(() => {
-    const timer = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(timer);
-  }, [value, delay]);
-  return debounced;
+interface StreetGroup {
+  key: string;
+  label: string;
+  variants: string[];
 }
 
-// ─────────────────────────────────────────────
-// Cache de datos: evita re-fetch innecesarios
-// ─────────────────────────────────────────────
-let cachedContracts: ContractSummary[] | null = null;
+const buildStreetGroups = (contracts: ContractSummary[]): StreetGroup[] => {
+  const map = new Map<string, Set<string>>();
+  for (const c of contracts) {
+    if (!c.calle) continue;
+    const key = normalizeStreet(c.calle);
+    if (!key) continue;
+    if (!map.has(key)) map.set(key, new Set());
+    map.get(key)!.add(c.calle.trim());
+  }
+  return Array.from(map.entries())
+    .map(([key, variants]) => {
+      const variantList = Array.from(variants);
+      const label =
+        variantList[0].replace(/\b\w/g, (l) => l.toUpperCase()) || key;
+      return { key, label, variants: variantList.slice(1) };
+    })
+    .sort((a, b) => a.label.localeCompare(b.label));
+};
 
 // ─────────────────────────────────────────────
-// Sub-components (memoizados)
+// Sub-components
 // ─────────────────────────────────────────────
-const StatusBadge = React.memo<{ estatus: string }>(({ estatus }) => {
+const StatusBadge: React.FC<{ estatus: string }> = ({ estatus }) => {
   const conf = getStatusConf(estatus);
   return (
     <span
@@ -198,15 +214,15 @@ const StatusBadge = React.memo<{ estatus: string }>(({ estatus }) => {
       {estatus}
     </span>
   );
-});
+};
 
-const StatCard = React.memo<{
+const StatCard: React.FC<{
   label: string;
   value: string;
   sub?: string;
   color?: string;
   icon: React.ReactNode;
-}>(({ label, value, sub, color = "#58b2ee", icon }) => (
+}> = ({ label, value, sub, color = "#58b2ee", icon }) => (
   <div
     style={{
       backgroundColor: "#13151c",
@@ -249,7 +265,7 @@ const StatCard = React.memo<{
       style={{
         fontSize: "1.25rem",
         fontWeight: 700,
-        color,
+        color: color,
         fontVariantNumeric: "tabular-nums",
       }}
     >
@@ -257,93 +273,7 @@ const StatCard = React.memo<{
     </div>
     {sub && <div style={{ fontSize: "0.72rem", color: "#6b7280" }}>{sub}</div>}
   </div>
-));
-
-// ─────────────────────────────────────────────
-// Helpers de estilos (fuera del componente)
-// ─────────────────────────────────────────────
-const dropdownStyle: React.CSSProperties = {
-  position: "absolute",
-  top: "calc(100% + 6px)",
-  left: 0,
-  minWidth: "200px",
-  backgroundColor: "#13151c",
-  border: "1px solid #252831",
-  borderRadius: "10px",
-  boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
-  zIndex: 30,
-  overflow: "hidden",
-};
-
-const getDropdownItemStyle = (active: boolean): React.CSSProperties => ({
-  display: "flex",
-  alignItems: "center",
-  gap: "0.6rem",
-  padding: "0.6rem 0.9rem",
-  cursor: "pointer",
-  backgroundColor: active ? "#1e2533" : "transparent",
-  color: active ? "#58b2ee" : "#d1d5db",
-  fontSize: "0.82rem",
-  transition: "background 0.15s",
-});
-
-const getFilterButtonStyle = (active: boolean): React.CSSProperties => ({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "0.4rem",
-  padding: "0.5rem 0.85rem",
-  backgroundColor: active ? "#1a2a3a" : "#13151c",
-  border: `1px solid ${active ? "#58b2ee55" : "#252831"}`,
-  borderRadius: "8px",
-  color: active ? "#58b2ee" : "#9ca3af",
-  fontSize: "0.8rem",
-  fontWeight: 500,
-  cursor: "pointer",
-  whiteSpace: "nowrap",
-  transition: "all 0.15s",
-});
-
-// ─────────────────────────────────────────────
-// Utilidad: calcular streetGroups (pura, sin hooks)
-// ─────────────────────────────────────────────
-type StreetGroup = {
-  key: string;
-  label: string;
-  count: number;
-  variants: string[];
-};
-
-function buildStreetGroups(contracts: ContractSummary[]): StreetGroup[] {
-  const map = new Map<
-    string,
-    { count: number; rawCount: Map<string, number> }
-  >();
-  for (const c of contracts) {
-    const raw = (c.calle || "").trim();
-    const key = normalizeStreet(raw);
-    if (!key) continue;
-    if (!map.has(key)) map.set(key, { count: 0, rawCount: new Map() });
-    const entry = map.get(key)!;
-    entry.count += 1;
-    entry.rawCount.set(raw, (entry.rawCount.get(raw) || 0) + 1);
-  }
-  const groups: StreetGroup[] = [];
-  for (const [key, entry] of map.entries()) {
-    const sortedVariants = Array.from(entry.rawCount.entries()).sort(
-      (a, b) => b[1] - a[1],
-    );
-    const labelRaw = sortedVariants[0]?.[0] || key;
-    const label = prettyStreet(normalizeStreet(labelRaw));
-    const variants = sortedVariants
-      .map(([v]) => v)
-      .filter((v) => normalizeStreet(v) !== normalizeStreet(labelRaw))
-      .slice(0, 3);
-    groups.push({ key, label, count: entry.count, variants });
-  }
-  return groups.sort(
-    (a, b) => b.count - a.count || a.label.localeCompare(b.label),
-  );
-}
+);
 
 // ─────────────────────────────────────────────
 // Component
@@ -360,31 +290,26 @@ const ContractTable: React.FC = () => {
   const streetTermDebounced = useDebounce(streetInput, 250);
 
   const [selectedStreetKey, setSelectedStreetKey] = useState<string>("");
-  const [isStreetDropdownOpen, setIsStreetDropdownOpen] =
-    useState<boolean>(false);
+  const [isStreetDropdownOpen, setIsStreetDropdownOpen] = useState<boolean>(false);
 
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
-  const [isStatusDropdownOpen, setIsStatusDropdownOpen] =
-    useState<boolean>(false);
+  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState<boolean>(false);
   const [selectedYear, setSelectedYear] = useState<string>("");
   const [isYearDropdownOpen, setIsYearDropdownOpen] = useState<boolean>(false);
 
-  const [selectedContract, setSelectedContract] =
-    useState<ContractSummary | null>(null);
+  const [selectedContract, setSelectedContract] = useState<ContractSummary | null>(null);
   const [modalPreYear, setModalPreYear] = useState<string>("all");
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
 
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 15;
 
-  // Ref para evitar doble-fetch en StrictMode
-  const fetchedRef = useRef(false);
+  const yearInitialized = useRef(false);
 
-  // ── Data loading ────────────────────────────────────────────────
+  // ── Data loading ──────────────────────────────────────────────
   const loadData = useCallback(async () => {
-    // Usar caché si ya se cargó antes
     if (cachedContracts) {
       setContracts(cachedContracts);
       return;
@@ -420,21 +345,17 @@ const ContractTable: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (fetchedRef.current) return;
-    fetchedRef.current = true;
     loadData();
   }, [loadData]);
 
-  // ── Year options (memoizado, depende solo de contracts) ──────────
-  const yearOptions = React.useMemo<FilterOption[]>(() => {
+  // ── Year options ──────────────────────────────────────────────
+  const yearOptions: FilterOption[] = React.useMemo(() => {
     const years = Array.from(
       new Set(contracts.map((c) => c.anio?.toString()).filter(Boolean)),
     ).sort((a, b) => Number(b) - Number(a));
     return years.map((y) => ({ id: `year-${y}`, label: y!, value: y! }));
   }, [contracts]);
 
-  // Setear año más reciente UNA sola vez cuando llegan datos
-  const yearInitialized = useRef(false);
   useEffect(() => {
     if (!yearInitialized.current && yearOptions.length > 0) {
       setSelectedYear(yearOptions[0].value);
@@ -442,7 +363,7 @@ const ContractTable: React.FC = () => {
     }
   }, [yearOptions]);
 
-  // Reset página cuando cambian filtros
+  // ── Reset página cuando cambian filtros ───────────────────────
   useEffect(() => {
     setCurrentPage(1);
   }, [
@@ -454,22 +375,13 @@ const ContractTable: React.FC = () => {
     selectedStreetKey,
   ]);
 
-  // ── Street groups (calculado una sola vez por dataset) ───────────
+  // ── Street groups ─────────────────────────────────────────────
   const streetGroups = React.useMemo(
     () => buildStreetGroups(contracts),
     [contracts],
   );
 
-  // ── Street suggestions (filtrado sobre streetGroups ya calculado) ─
-  const streetSuggestions = React.useMemo<StreetGroup[]>(() => {
-    const q = normalizeStreet(streetInput);
-    if (!q) return streetGroups.slice(0, 10);
-    return streetGroups
-      .filter((g) => g.key.includes(q) || normalizeStreet(g.label).includes(q))
-      .slice(0, 10);
-  }, [streetInput, streetGroups]);
-
-  // ── Filter helpers (funciones puras, memoizadas) ─────────────────
+  // ── Filter helpers ────────────────────────────────────────────
   const filterByDateRange = useCallback(
     (contract: ContractSummary): boolean => {
       if (selectedFilter === "all") return true;
@@ -485,48 +397,36 @@ const ContractTable: React.FC = () => {
         (today.getTime() - lastPaymentDate.getTime()) / 86400000,
       );
       switch (selectedFilter) {
-        case "day":
-          return diffDays <= 1;
-        case "week":
-          return diffDays <= 7;
-        case "month":
-          return diffDays <= 31;
-        case "year":
-          return diffDays <= 365;
-        default:
-          return true;
+        case "day":   return diffDays <= 1;
+        case "week":  return diffDays <= 7;
+        case "month": return diffDays <= 31;
+        case "year":  return diffDays <= 365;
+        default:      return true;
       }
     },
     [selectedFilter],
   );
 
-  // ── Filtered + table rows en un solo useMemo ─────────────────────
+  // ── Table rows (filtrado + mapeo en un solo useMemo) ──────────
   const tableRows = React.useMemo<TableRow[]>(() => {
     const lowerSearch = searchTerm.toLowerCase();
     const normalizedStreet = normalizeStreet(streetTermDebounced);
 
     return contracts
       .filter((contract) => {
-        // Búsqueda por nombre/contrato
+        // Búsqueda por nombre / contrato
         if (
           lowerSearch &&
-          !contract.numero_contrato
-            .toString()
-            .toLowerCase()
-            .includes(lowerSearch) &&
+          !contract.numero_contrato.toString().toLowerCase().includes(lowerSearch) &&
           !contract.nombre_completo.toLowerCase().includes(lowerSearch)
         )
           return false;
 
         // Filtro de calle
-        const contractStreet = normalizeStreet(contract.calle || "");
         if (selectedStreetKey) {
-          if (contractStreet !== selectedStreetKey) return false;
-        } else if (
-          normalizedStreet &&
-          !contractStreet.includes(normalizedStreet)
-        ) {
-          return false;
+          if (normalizeStreet(contract.calle || "") !== selectedStreetKey) return false;
+        } else if (normalizedStreet) {
+          if (!normalizeStreet(contract.calle || "").includes(normalizedStreet)) return false;
         }
 
         // Filtro de estado
@@ -579,7 +479,7 @@ const ContractTable: React.FC = () => {
     filterByDateRange,
   ]);
 
-  // ── Pagination ───────────────────────────────────────────────────
+  // ── Pagination ────────────────────────────────────────────────
   const totalPages = Math.ceil(tableRows.length / itemsPerPage);
   const currentRows = React.useMemo(
     () =>
@@ -644,16 +544,66 @@ const ContractTable: React.FC = () => {
     setSearchInput("");
   }, []);
 
-  // ────────────────────────────────────────────────────────────────
+  const streetSuggestions = React.useMemo(() => {
+    const q = normalizeStreet(streetTermDebounced);
+    if (!q) return streetGroups.slice(0, 10);
+    return streetGroups
+      .filter((g) => g.key.includes(q) || normalizeStreet(g.label).includes(q))
+      .slice(0, 10);
+  }, [streetTermDebounced, streetGroups]);
+
+  // ── Shared dropdown style ─────────────────────────────────────
+  const dropdownStyle: React.CSSProperties = {
+    position: "absolute",
+    top: "calc(100% + 6px)",
+    left: 0,
+    minWidth: "200px",
+    backgroundColor: "#13151c",
+    border: "1px solid #252831",
+    borderRadius: "10px",
+    boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+    zIndex: 30,
+    overflow: "hidden",
+  };
+
+  const dropdownItemStyle = (active: boolean): React.CSSProperties => ({
+    display: "flex",
+    alignItems: "center",
+    gap: "0.6rem",
+    padding: "0.6rem 0.9rem",
+    cursor: "pointer",
+    backgroundColor: active ? "#1e2533" : "transparent",
+    color: active ? "#58b2ee" : "#d1d5db",
+    fontSize: "0.82rem",
+    transition: "background 0.15s",
+  });
+
+  const filterButtonStyle = (active: boolean): React.CSSProperties => ({
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "0.4rem",
+    padding: "0.5rem 0.85rem",
+    backgroundColor: active ? "#1a2a3a" : "#13151c",
+    border: `1px solid ${active ? "#58b2ee55" : "#252831"}`,
+    borderRadius: "8px",
+    color: active ? "#58b2ee" : "#9ca3af",
+    fontSize: "0.8rem",
+    fontWeight: 500,
+    cursor: "pointer",
+    whiteSpace: "nowrap",
+    transition: "all 0.15s",
+  });
+
+  // ────────────────────────────────────────────────────────────
   // RENDER
-  // ────────────────────────────────────────────────────────────────
+  // ────────────────────────────────────────────────────────────
   return (
     <div className="contracts-page-container">
       <div
         className="contracts-card"
         style={{ backgroundColor: "#0d0f14", border: "1px solid #1a1d24" }}
       >
-        {/* ── HEADER ──────────────────────────────────────────────── */}
+        {/* ── HEADER ─────────────────────────────────────────── */}
         <div style={{ padding: "1.5rem 1.75rem 0" }}>
           <div
             style={{
@@ -716,7 +666,7 @@ const ContractTable: React.FC = () => {
           />
         </div>
 
-        {/* ── TOOLBAR ─────────────────────────────────────────────── */}
+        {/* ── TOOLBAR ────────────────────────────────────────── */}
         <div
           style={{
             padding: "0 1.75rem 1rem",
@@ -730,7 +680,7 @@ const ContractTable: React.FC = () => {
           <div style={{ position: "relative" }}>
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              style={getFilterButtonStyle(selectedFilter !== "all")}
+              style={filterButtonStyle(selectedFilter !== "all")}
               type="button"
             >
               <Clock size={13} />
@@ -742,7 +692,7 @@ const ContractTable: React.FC = () => {
                 {filterOptions.map((opt) => (
                   <div
                     key={opt.id}
-                    style={getDropdownItemStyle(selectedFilter === opt.value)}
+                    style={dropdownItemStyle(selectedFilter === opt.value)}
                     onClick={() => {
                       setSelectedFilter(opt.value);
                       setIsDropdownOpen(false);
@@ -769,7 +719,7 @@ const ContractTable: React.FC = () => {
           <div style={{ position: "relative" }}>
             <button
               onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
-              style={getFilterButtonStyle(selectedStatus !== "all")}
+              style={filterButtonStyle(selectedStatus !== "all")}
               type="button"
             >
               <TrendingUp size={13} />
@@ -783,7 +733,7 @@ const ContractTable: React.FC = () => {
                   return (
                     <div
                       key={opt.id}
-                      style={getDropdownItemStyle(selectedStatus === opt.value)}
+                      style={dropdownItemStyle(selectedStatus === opt.value)}
                       onClick={() => {
                         setSelectedStatus(opt.value);
                         setIsStatusDropdownOpen(false);
@@ -811,9 +761,7 @@ const ContractTable: React.FC = () => {
           <div style={{ position: "relative" }}>
             <button
               onClick={() => setIsYearDropdownOpen(!isYearDropdownOpen)}
-              style={getFilterButtonStyle(
-                !!selectedYear && selectedYear !== "all",
-              )}
+              style={filterButtonStyle(selectedYear !== "all")}
               type="button"
             >
               <Calendar size={13} />
@@ -825,7 +773,7 @@ const ContractTable: React.FC = () => {
                 {yearOptions.map((opt) => (
                   <div
                     key={opt.id}
-                    style={getDropdownItemStyle(selectedYear === opt.value)}
+                    style={dropdownItemStyle(selectedYear === opt.value)}
                     onClick={() => {
                       setSelectedYear(opt.value);
                       setIsYearDropdownOpen(false);
@@ -893,7 +841,7 @@ const ContractTable: React.FC = () => {
                       <div
                         key={g.key}
                         style={{
-                          ...getDropdownItemStyle(selectedStreetKey === g.key),
+                          ...dropdownItemStyle(selectedStreetKey === g.key),
                           flexDirection: "column",
                           alignItems: "flex-start",
                           gap: "0.2rem",
@@ -936,7 +884,7 @@ const ContractTable: React.FC = () => {
                   setStreetInput("");
                   setSelectedStreetKey("");
                 }}
-                style={{ ...getFilterButtonStyle(false), padding: "0.5rem" }}
+                style={{ ...filterButtonStyle(false), padding: "0.5rem" }}
               >
                 <X size={13} />
               </button>
@@ -999,7 +947,7 @@ const ContractTable: React.FC = () => {
               type="button"
               onClick={handleClearAll}
               style={{
-                ...getFilterButtonStyle(false),
+                ...filterButtonStyle(false),
                 color: "#f87171",
                 borderColor: "#7f1d1d22",
                 gap: "0.3rem",
@@ -1033,7 +981,7 @@ const ContractTable: React.FC = () => {
 
         {!loading && !error && (
           <>
-            {/* ── TABLE ───────────────────────────────────────────── */}
+            {/* ── TABLE ──────────────────────────────────────── */}
             <div style={{ overflowX: "auto" }}>
               <table
                 style={{
@@ -1078,6 +1026,7 @@ const ContractTable: React.FC = () => {
                     ))}
                   </tr>
                 </thead>
+
                 <tbody>
                   {currentRows.map((row) => {
                     const isHovered = hoveredRow === row.rowKey;
@@ -1095,6 +1044,7 @@ const ContractTable: React.FC = () => {
                           cursor: "default",
                         }}
                       >
+                        {/* N° Contrato */}
                         <td
                           style={{
                             padding: "0.7rem 1rem",
@@ -1115,6 +1065,8 @@ const ContractTable: React.FC = () => {
                             #{row.contract.numero_contrato}
                           </span>
                         </td>
+
+                        {/* Nombre */}
                         <td
                           style={{
                             padding: "0.7rem 1rem",
@@ -1134,6 +1086,8 @@ const ContractTable: React.FC = () => {
                             {row.contract.nombre_completo}
                           </div>
                         </td>
+
+                        {/* Calle */}
                         <td
                           style={{
                             padding: "0.7rem 1rem",
@@ -1159,6 +1113,8 @@ const ContractTable: React.FC = () => {
                             {row.contract.calle || "—"}
                           </div>
                         </td>
+
+                        {/* Año */}
                         <td
                           style={{
                             padding: "0.7rem 1rem",
@@ -1169,6 +1125,8 @@ const ContractTable: React.FC = () => {
                         >
                           {row.anioFila}
                         </td>
+
+                        {/* Total pagado */}
                         <td
                           style={{
                             padding: "0.7rem 1rem",
@@ -1190,6 +1148,8 @@ const ContractTable: React.FC = () => {
                             {formatMoney(row.pagosTotalesFila)}
                           </span>
                         </td>
+
+                        {/* Total restante */}
                         <td
                           style={{
                             padding: "0.7rem 1rem",
@@ -1211,6 +1171,8 @@ const ContractTable: React.FC = () => {
                             {formatMoney(row.saldoPendienteFila)}
                           </span>
                         </td>
+
+                        {/* Estatus */}
                         <td
                           style={{
                             padding: "0.7rem 1rem",
@@ -1219,6 +1181,8 @@ const ContractTable: React.FC = () => {
                         >
                           <StatusBadge estatus={row.contract.estatus_deuda} />
                         </td>
+
+                        {/* Acción */}
                         <td
                           style={{
                             padding: "0.7rem 1rem",
@@ -1280,7 +1244,7 @@ const ContractTable: React.FC = () => {
               )}
             </div>
 
-            {/* ── PAGINATION ──────────────────────────────────────── */}
+            {/* ── PAGINATION ─────────────────────────────────── */}
             {tableRows.length > 0 && (
               <div
                 style={{
@@ -1380,7 +1344,9 @@ const ContractTable: React.FC = () => {
         )}
       </div>
 
-      {/* ── MODAL ──────────────────────────────────────────────────── */}
+      {/* ──────────────────────────────────────────────────────────
+          MODAL
+      ────────────────────────────────────────────────────────── */}
       {selectedContract &&
         (() => {
           const allPagos = selectedContract.pagos || [];
@@ -1573,6 +1539,7 @@ const ContractTable: React.FC = () => {
                     gap: "1.25rem",
                   }}
                 >
+                  {/* Stat Cards */}
                   <div
                     style={{
                       display: "grid",
@@ -1721,28 +1688,25 @@ const ContractTable: React.FC = () => {
                                       borderBottom: "1px solid #1a1d24",
                                     }}
                                   >
-                                    {[
-                                      "#",
-                                      "Fecha",
-                                      "Monto",
-                                      "Descuento",
-                                      "Cobrador",
-                                    ].map((h, i) => (
-                                      <th
-                                        key={i}
-                                        style={{
-                                          padding: "0.5rem 0.9rem",
-                                          textAlign: i === 2 ? "right" : "left",
-                                          color: "#4b5563",
-                                          fontWeight: 600,
-                                          fontSize: "0.68rem",
-                                          textTransform: "uppercase",
-                                          letterSpacing: "0.06em",
-                                        }}
-                                      >
-                                        {h}
-                                      </th>
-                                    ))}
+                                    {["#", "Fecha", "Monto", "Descuento", "Cobrador"].map(
+                                      (h, i) => (
+                                        <th
+                                          key={i}
+                                          style={{
+                                            padding: "0.5rem 0.9rem",
+                                            textAlign:
+                                              i === 2 ? "right" : "left",
+                                            color: "#4b5563",
+                                            fontWeight: 600,
+                                            fontSize: "0.68rem",
+                                            textTransform: "uppercase",
+                                            letterSpacing: "0.06em",
+                                          }}
+                                        >
+                                          {h}
+                                        </th>
+                                      ),
+                                    )}
                                   </tr>
                                 </thead>
                                 <tbody>

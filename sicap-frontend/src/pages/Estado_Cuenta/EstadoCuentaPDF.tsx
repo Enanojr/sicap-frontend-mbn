@@ -62,20 +62,6 @@ const getPdfTitle = () => "Recibo y Estado de Cuenta";
 
 // ── Estilos ──────────────────────────────────────────────────────────────────
 
-const getPdfTitle = (
-  estatus: string,
-  historico: EstadoCuentaPDFData["historico"],
-) => {
-  const v = (estatus || "").trim().toLowerCase();
-  const last = getLastPayment(historico);
-
-  if (v === "pagado" && last) {
-    return "Recibo y Estado de Cuenta";
-  }
-
-  return "Recibo y Estado de Cuenta";
-};
-
 const styles = StyleSheet.create({
   page: {
     paddingTop: 22,
@@ -144,6 +130,7 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
 
+  // Encabezado de año
   yearHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -151,20 +138,15 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 6,
   },
+  yearTitle: { fontSize: 11, fontWeight: 700, color: "#0b3a66" },
 
-  yearTitle: {
-    fontSize: 11,
-    fontWeight: 700,
-    color: "#0b3a66",
-  },
-
+  // Cards resumen
   cardsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 4,
     marginBottom: 10,
   },
-
   summaryCard: {
     width: "48.5%",
     borderWidth: 1,
@@ -174,20 +156,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     backgroundColor: "#f8fafc",
   },
+  summaryCardLabel: { fontSize: 9, color: "#64748b", marginBottom: 6 },
+  saldoCardValue: { fontSize: 16, fontWeight: 700, color: "#0f172a" },
 
-  summaryCardLabel: {
-    fontSize: 9,
-    color: "#64748b",
-    marginBottom: 6,
-  },
-  yearTitle: { fontSize: 11, fontWeight: 700, color: "#0b3a66" },
-
-  saldoCardValue: {
-    fontSize: 16,
-    fontWeight: 700,
-    color: "#0f172a",
-  },
-
+  // Badges estatus
   badgeBase: {
     alignSelf: "flex-start",
     paddingVertical: 4,
@@ -197,23 +169,12 @@ const styles = StyleSheet.create({
     fontWeight: 700,
     color: "#ffffff",
   },
+  badgePagado: { backgroundColor: "#16a34a" },
+  badgeAdeudo: { backgroundColor: "#ef4444" },
+  badgeRezagado: { backgroundColor: "#f97316" },
+  badgeDefault: { backgroundColor: "#2563eb" },
 
-  badgePagado: {
-    backgroundColor: "#16a34a",
-  },
-
-  badgeAdeudo: {
-    backgroundColor: "#ef4444",
-  },
-
-  badgeRezagado: {
-    backgroundColor: "#f97316",
-  },
-
-  badgeDefault: {
-    backgroundColor: "#2563eb",
-  },
-
+  // ── Tabla historial de pagos ─────────────────────────────────────────────
   table: {
     borderWidth: 1,
     borderColor: "#000000",
@@ -244,46 +205,70 @@ const styles = StyleSheet.create({
   },
   td: { fontSize: 9, color: "#0f172a" },
 
-  colFecha: {
-    width: "34%",
-  },
+  // Mejor distribución
+  colFecha: { width: "26%" },
+  colTipo: { width: "46%" },
+  colMonto: { width: "28%", textAlign: "right" },
 
-  colTipo: {
-    width: "38%",
-  },
+  // Total pagos
+  summaryBox: { marginTop: 12, alignItems: "flex-end" },
+  summaryLine: { marginBottom: 4 },
+  summaryLabel: { fontSize: 11, fontWeight: 700, color: "#0f172a" },
+  summaryValue: { fontSize: 15, fontWeight: 700, color: "#0b3a66" },
+  alertText: { fontSize: 10, fontWeight: 700, color: "#b91c1c", marginTop: 2 },
 
-  colMonto: {
-    width: "28%",
-    textAlign: "right",
-  },
+  // ── Sección Cargos ───────────────────────────────────────────────────────
+  cargosSection: { marginTop: 18 },
 
-  summaryBox: {
-    marginTop: 12,
-    alignItems: "flex-end",
-  },
-
-  summaryLine: {
-    marginBottom: 4,
-  },
-
-  summaryLabel: {
+  cargosTitle: {
     fontSize: 11,
     fontWeight: 700,
     color: "#0f172a",
   },
 
-  summaryValue: {
-    fontSize: 15,
+  cargosTable: {
+    borderWidth: 1,
+    borderColor: "#991b1b",
+    borderRadius: 10,
+    overflow: "hidden",
+    backgroundColor: "transparent",
+  },
+
+  cargosThead: {
+    flexDirection: "row",
+    backgroundColor: "#b91c1c",
+    paddingVertical: 9,
+    paddingHorizontal: 10,
+  },
+  cargosTh: {
+    color: "#ffffff",
     fontWeight: 700,
-    color: "#0b3a66",
+    fontSize: 9,
+  },
+
+  cargosTr: {
+    flexDirection: "row",
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#fca5a5",
   },
   cargosTrEven: { backgroundColor: "#fff5f5" },
 
-  alertText: {
-    fontSize: 10,
+  cargosTd: { fontSize: 9, color: "#7f1d1d" },
+
+  // Mejor reparto de columnas
+  colCargoTipo: { width: "34%" },
+  colCargoFecha: { width: "20%", textAlign: "center" },
+  colCargoAnio: { width: "12%", textAlign: "center" },
+  colCargoSaldo: { width: "20%", textAlign: "right" },
+  colCargoActivo: { width: "14%", textAlign: "center" },
+
+  // Texto simple para activo/inactivo, sin badge
+  cargoStatusText: {
+    fontSize: 9,
     fontWeight: 700,
-    color: "#b91c1c",
-    marginTop: 2,
+    textAlign: "center",
   },
 
   // Total cargos
@@ -320,14 +305,13 @@ export default function EstadoCuentaPDF({
   );
 
   const sinPagos = totalAportado === 0;
+  const cargos = data.cargos ?? [];
 
   const getEstatusBadgeStyle = (estatus: string) => {
-    const value = (estatus || "").trim().toLowerCase();
-
-    if (value === "pagado") return styles.badgePagado;
-    if (value === "adeudo") return styles.badgeAdeudo;
-    if (value === "rezagado") return styles.badgeRezagado;
-
+    const v = (estatus || "").trim().toLowerCase();
+    if (v === "pagado") return styles.badgePagado;
+    if (v === "adeudo") return styles.badgeAdeudo;
+    if (v === "rezagado") return styles.badgeRezagado;
     return styles.badgeDefault;
   };
 
@@ -362,6 +346,7 @@ export default function EstadoCuentaPDF({
               <Text style={styles.label}>Nombre</Text>
               <Text style={styles.value}>{data.nombre}</Text>
             </View>
+
             <View style={styles.infoRow}>
               <Text style={styles.label}>Teléfono</Text>
               <Text style={styles.value}>{data.telefono || "—"}</Text>
@@ -382,10 +367,7 @@ export default function EstadoCuentaPDF({
           </View>
         </View>
 
-        <View style={styles.yearHeader}>
-          <Text style={styles.yearTitle}>Histórico de pagos {data.anio}</Text>
-        </View>
-
+        {/* Cards resumen */}
         <View style={styles.cardsRow}>
           <View style={styles.summaryCard}>
             <Text style={styles.summaryCardLabel}>Estatus</Text>
@@ -404,6 +386,12 @@ export default function EstadoCuentaPDF({
           </View>
         </View>
 
+        {/* Título histórico */}
+        <View style={styles.yearHeader}>
+          <Text style={styles.yearTitle}>Histórico de pagos {data.anio}</Text>
+        </View>
+
+        {/* Tabla historial */}
         {data.historico?.length ? (
           <View style={styles.table}>
             <View style={styles.thead}>
@@ -415,7 +403,10 @@ export default function EstadoCuentaPDF({
             </View>
 
             {data.historico.map((p, idx) => (
-              <View key={idx} style={styles.tr}>
+              <View
+                key={idx}
+                style={[styles.tr, idx % 2 === 1 ? styles.trEven : {}]}
+              >
                 <Text style={[styles.td, styles.colFecha]}>
                   {formatFechaLocal(p.fecha_pago)}
                 </Text>
@@ -436,6 +427,7 @@ export default function EstadoCuentaPDF({
           </View>
         )}
 
+        {/* Total aportado */}
         <View style={styles.summaryBox}>
           <View style={styles.summaryLine}>
             <Text style={styles.summaryLabel}>

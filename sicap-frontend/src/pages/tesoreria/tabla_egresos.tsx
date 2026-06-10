@@ -1,85 +1,54 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
-import {
-  getTransacciones,
-  type TransaccionResponse,
-} from "../../services/egresos.service";
+import { getEgresos } from "../../services/egresos.service";
+import type { EgresoResponse } from "../../services/egresos.service";
 import "../../styles/styles.css";
 
-interface TablaEgresosProps {
-  refreshKey?: number;
-}
-
-const TablaEgresos: React.FC<TablaEgresosProps> = ({ refreshKey = 0 }) => {
-  const [listaEgresos, setListaEgresos] = useState<TransaccionResponse[]>([]);
+const HistoricoEgresos: React.FC = () => {
+  const [listaEgresos, setListaEgresos] = useState<EgresoResponse[]>([]);
   const [nextPage, setNextPage] = useState<string | null>(null);
   const [prevPage, setPrevPage] = useState<string | null>(null);
-  const [totalRegistros, setTotalRegistros] = useState(0);
+  const [totalEgresos, setTotalEgresos] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [busquedaTabla, setBusquedaTabla] = useState("");
 
-  const formatDate = (value?: string | null) => {
-    if (!value) return "—";
-    const clean = value.includes("T") ? value.split("T")[0] : value;
-    const [y, m, d] = clean.split("-");
-    if (!y || !m || !d) return value;
-    return `${d}/${m}/${y}`;
-  };
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      cargarTablaEgresos(undefined, busquedaTabla);
+    }, 500);
 
-  const formatCurrency = (value: number | string) =>
-    `$${Number(value || 0).toLocaleString("es-MX", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
+    return () => clearTimeout(timeoutId);
+  }, [busquedaTabla]);
 
-  const totalMonto = useMemo(() => {
-    return listaEgresos.reduce((acc, item) => acc + Number(item.monto || 0), 0);
-  }, [listaEgresos]);
-
-  const handleVerMas = (archivoUrl?: string | null) => {
-    if (!archivoUrl) {
-      Swal.fire({
-        icon: "info",
-        title: "Sin documento",
-        text: "Este egreso aún no cuenta con archivo adjunto.",
-        confirmButtonColor: "#58b2ee",
-      });
-      return;
-    }
-    window.open(archivoUrl, "_blank", "noopener,noreferrer");
-  };
+  useEffect(() => {
+    cargarTablaEgresos();
+  }, []);
 
   const cargarTablaEgresos = async (url?: string, searchTerm?: string) => {
     setLoading(true);
-    try {
-      const result = await getTransacciones(url, searchTerm);
 
-      if (!result.success || !result.data) {
+    try {
+      const res = await getEgresos(url, searchTerm);
+
+      if (res.success && res.data) {
+        if (Array.isArray(res.data)) {
+          setListaEgresos(res.data);
+          setNextPage(null);
+          setPrevPage(null);
+          setTotalEgresos(res.data.length);
+        } else {
+          setListaEgresos(res.data.results || []);
+          setNextPage(res.data.next || null);
+          setPrevPage(res.data.previous || null);
+          setTotalEgresos(res.data.count || 0);
+        }
+      } else {
         setListaEgresos([]);
         setNextPage(null);
         setPrevPage(null);
-        setTotalRegistros(0);
-        return;
+        setTotalEgresos(0);
       }
-
-      if (Array.isArray(result.data)) {
-        const soloEgresos = result.data.filter(
-          (item) => item.tipo?.toLowerCase() === "egreso",
-        );
-        setListaEgresos(soloEgresos);
-        setNextPage(null);
-        setPrevPage(null);
-        setTotalRegistros(soloEgresos.length);
-      } else {
-        const soloEgresos = (result.data.results || []).filter(
-          (item) => item.tipo?.toLowerCase() === "egreso",
-        );
-        setListaEgresos(soloEgresos);
-        setNextPage(result.data.next || null);
-        setPrevPage(result.data.previous || null);
-        setTotalRegistros(soloEgresos.length);
-      }
-    } catch {
+    } catch (error) {
       Swal.fire({
         icon: "error",
         title: "Error inesperado",
@@ -91,13 +60,6 @@ const TablaEgresos: React.FC<TablaEgresosProps> = ({ refreshKey = 0 }) => {
     }
   };
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      cargarTablaEgresos(undefined, busquedaTabla);
-    }, 350);
-    return () => clearTimeout(timeout);
-  }, [busquedaTabla, refreshKey]);
-
   const handleNext = () => {
     if (nextPage) cargarTablaEgresos(nextPage, busquedaTabla);
   };
@@ -106,95 +68,108 @@ const TablaEgresos: React.FC<TablaEgresosProps> = ({ refreshKey = 0 }) => {
     if (prevPage) cargarTablaEgresos(prevPage, busquedaTabla);
   };
 
+  const handleVerMas = (archivoUrl?: string | null) => {
+    if (!archivoUrl) {
+      Swal.fire({
+        icon: "info",
+        title: "Sin documento",
+        text: "Este egreso aún no cuenta con archivo adjunto.",
+        confirmButtonColor: "#d48a1f",
+      });
+      return;
+    }
+
+    window.open(archivoUrl, "_blank", "noopener,noreferrer");
+  };
+
   return (
-    <div className="egresos-card">
-      <div className="egresos-card-header">
-        <h3 className="egresos-card-title">Egresos Registrados</h3>
-        <div className="egresos-card-divider" />
-      </div>
+    <div className="cm-card cm-bottom-section">
+      <div className="cm-table-header">
+        <h3>Histórico de Egresos ({totalEgresos})</h3>
 
-      <div className="egresos-toolbar">
-        <div className="egresos-summary">
-          <span className="egresos-summary-label">Total de egresos</span>
-          <strong className="egresos-summary-value">
-            {formatCurrency(totalMonto)}
-          </strong>
-        </div>
-
-        <div className="egresos-search">
+        <div className="cm-search-box">
           <input
             type="text"
-            placeholder="Buscar egreso..."
+            placeholder="🔍 Buscar egreso..."
             value={busquedaTabla}
             onChange={(e) => setBusquedaTabla(e.target.value)}
           />
         </div>
       </div>
 
-      {/* Estado vacío / cargando FUERA de la tabla */}
-      {listaEgresos.length === 0 && (
-        <div className="egresos-empty-state">
-          {loading
-            ? "Cargando histórico de egresos..."
-            : "No se encontraron egresos registrados."}
-        </div>
-      )}
+      <div className="cm-table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>ID Egreso</th>
+              <th>Fecha</th>
+              <th>Monto</th>
+              <th>Concepto</th>
+              <th>Requisitor del gasto</th>
+              <th>Cobrador</th>
+              <th>Documento</th>
+            </tr>
+          </thead>
 
-      {/* Tabla solo se renderiza si hay datos */}
-      {listaEgresos.length > 0 && (
-        <div className="egresos-table-container">
-          <table className="egresos-table">
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Concepto</th>
-                <th>Requisitor</th>
-                <th>Monto</th>
-                <th>Comprobante</th>
-              </tr>
-            </thead>
-            <tbody>
-              {listaEgresos.map((item) => (
-                <tr key={item.id}>
-                  <td data-label="Fecha">{formatDate(item.fecha)}</td>
-                  <td data-label="Concepto">
-                    {item.observaciones || "Sin concepto"}
+          <tbody>
+            {listaEgresos.length > 0 ? (
+              listaEgresos.map((item) => (
+                <tr key={item.id_egreso}>
+                  <td>{item.id_egreso}</td>
+                  <td>{item.fecha_egreso}</td>
+                  <td className="cm-egreso-monto">
+                    $
+                    {Number(item.monto).toLocaleString("es-MX", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
                   </td>
-                  <td data-label="Requisitor">{item.requisitor || "N/A"}</td>
-                  <td data-label="Monto" className="egresos-table-amount">
-                    {formatCurrency(item.monto)}
+                  <td>
+                    <span className="cm-badge">
+                      {item.concepto || "Sin concepto"}
+                    </span>
                   </td>
-                  <td data-label="Comprobante">
+                  <td>{item.requisitor_gasto || "N/A"}</td>
+                  <td>{item.id_cobrador ?? "N/A"}</td>
+                  <td>
                     <button
                       type="button"
-                      className="egresos-btn-view"
-                      onClick={() => handleVerMas(item.comprobante)}
+                      className="cm-btn-table-view"
+                      onClick={() => handleVerMas(item.archivo_url)}
                     >
-                      Ver
+                      Ver más
                     </button>
                   </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              ))
+            ) : (
+              <tr>
+                <td colSpan={7} className="cm-empty-row">
+                  {loading
+                    ? "Cargando histórico de egresos..."
+                    : "No se encontraron egresos registrados."}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
 
-      <div className="egresos-pagination">
+      <div className="cm-pagination">
         <button
-          className="egresos-pagination-btn"
+          className="cm-btn-pag"
           onClick={handlePrev}
           disabled={!prevPage || loading}
         >
           ⬅ Ant.
         </button>
 
-        <span className="egresos-pagination-info">
-          Mostrando {listaEgresos.length} de {totalRegistros}
+        <span className="cm-pag-info">
+          Mostrando {listaEgresos.length} de {totalEgresos}
         </span>
 
         <button
-          className="egresos-pagination-btn"
+          className="cm-btn-pag"
           onClick={handleNext}
           disabled={!nextPage || loading}
         >
@@ -205,4 +180,4 @@ const TablaEgresos: React.FC<TablaEgresosProps> = ({ refreshKey = 0 }) => {
   );
 };
 
-export default TablaEgresos;
+export default HistoricoEgresos;
