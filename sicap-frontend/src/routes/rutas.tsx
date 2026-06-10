@@ -24,6 +24,7 @@ import CargosPage from "../pages/Principal_Form_Table/cargospage";
 import CorteCaja from "../pages/CorteCaja/CorteCaja";
 import CorteJunior from "../pages/CorteJunior/CorteJunior";
 import CorteSenior from "../pages/CorteSenior/CorteSenior";
+import CallesPage from "../pages/Principal_Form_Table/callespage";
 
 //Test
 

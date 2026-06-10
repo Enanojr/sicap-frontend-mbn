@@ -56,6 +56,8 @@ function Admin_Cards() {
   const handleServicios = () => navigate("/Servicios");
   const handleCierreAnual = () => navigate("/cierreanual");
   const handleCargos = () => navigate("/tcargos");
+  //const handleGrupos = () => navigate("/grupos");
+  //const handleCalles = () => navigate("/calles");
 
   // Array de configuración de cards
   const cards = [
@@ -64,8 +66,8 @@ function Admin_Cards() {
       description: "Registra nuevos administradores para gestionar el sistema.",
       icon: UserCog,
       ctaText: "Registrar Admin",
-      gradientColors: ["#2196f3", "#1976d2"] as [string, string],
-      waterDropColor: "rgba(33, 150, 243, 0.6)",
+      gradientColors: ["#4361ee", "#3a0ca3"] as [string, string],
+      waterDropColor: "rgba(67, 97, 238, 0.35)",
       onClick: handleAdmin,
     },
     {
@@ -73,8 +75,8 @@ function Admin_Cards() {
       description: "Registra nuevos cobradores.",
       icon: UserSquare,
       ctaText: "Registrar Cobrador",
-      gradientColors: ["#4caf50", "#388e3c"] as [string, string],
-      waterDropColor: "rgba(76, 175, 80, 0.6)",
+      gradientColors: ["#2a9d8f", "#1d7874"] as [string, string],
+      waterDropColor: "rgba(42, 157, 143, 0.35)",
       onClick: handleCobradores,
     },
     /* {
@@ -82,8 +84,8 @@ function Admin_Cards() {
       description: "Registra nuevos sectores en el sistema.",
       icon: MapPin,
       ctaText: "Registrar Sector",
-      gradientColors: ["#ff9800", "#f57c00"] as [string, string],
-      waterDropColor: "rgba(255, 152, 0, 0.6)",
+      gradientColors: ["#f77f00", "#d62828"] as [string, string],
+      waterDropColor: "rgba(247, 127, 0, 0.35)",
       onClick: handleSector,
     }, 
     /*{
@@ -91,8 +93,8 @@ function Admin_Cards() {
       description: "Registra nuevas colonias en el sistema.",
       icon: Home,
       ctaText: "Registrar Colonia",
-      gradientColors: ["#009688", "#00796b"] as [string, string],
-      waterDropColor: "rgba(0, 150, 136, 0.6)",
+      gradientColors: ["#4cc9f0", "#4895ef"] as [string, string],
+      waterDropColor: "rgba(76, 201, 240, 0.35)",
       onClick: handleColonias,
     },
     {
@@ -100,8 +102,8 @@ function Admin_Cards() {
       description: "Asigna las calles que van a visitar los cobradores.",
       icon: Clipboard,
       ctaText: "Asignar Cobrador",
-      gradientColors: ["#f44336", "#d32f2f"] as [string, string],
-      waterDropColor: "rgba(244, 67, 54, 0.6)",
+      gradientColors: ["#ef476f", "#d62839"] as [string, string],
+      waterDropColor: "rgba(239, 71, 111, 0.35)",
       onClick: handleAsignacion,
     },*/
     {
@@ -109,8 +111,8 @@ function Admin_Cards() {
       description: "Registra nuevos descuentos para los cuentahabientes.",
       icon: Percent,
       ctaText: "Registrar Descuento",
-      gradientColors: ["#3f51b5", "#303f9f"] as [string, string],
-      waterDropColor: "rgba(63, 81, 181, 0.6)",
+      gradientColors: ["#8338ec", "#5a189a"] as [string, string],
+      waterDropColor: "rgba(131, 56, 236, 0.35)",
       onClick: handleDescuento,
     },
     {
@@ -118,8 +120,8 @@ function Admin_Cards() {
       description: "Registra nuevos tipos de servicio en el sistema.",
       icon: Drill,
       ctaText: "Registrar Servicio",
-      gradientColors: ["#795548", "#5d4037"] as [string, string],
-      waterDropColor: "rgba(121, 85, 72, 0.6)",
+      gradientColors: ["#c77d00", "#a05a00"] as [string, string],
+      waterDropColor: "rgba(199, 125, 0, 0.35)",
       onClick: handleServicios,
     },
     {
@@ -127,8 +129,8 @@ function Admin_Cards() {
       description: "Registra nuevos cargos en el sistema.",
       icon: Banknote,
       ctaText: "Registrar Cargo",
-      gradientColors: ["#51bbbb", "#51bbbb"] as [string, string],
-      waterDropColor: "rgba(129, 118, 56, 0.6)",
+      gradientColors: ["#00b4d8", "#0077b6"] as [string, string],
+      waterDropColor: "rgba(0, 180, 216, 0.35)",
       onClick: handleCargos,
     },
     {
@@ -136,8 +138,8 @@ function Admin_Cards() {
       description: "Sección de cierre de cuentas anual.",
       icon: Stamp,
       ctaText: "Cerrar Cuenta",
-      gradientColors: ["#a7a546", "#979639"] as [string, string],
-      waterDropColor: "rgba(129, 118, 56, 0.6)",
+      gradientColors: ["#8d99ae", "#2b2d42"] as [string, string],
+      waterDropColor: "rgba(141, 153, 174, 0.35)",
       onClick: handleCierreAnual,
     },
     /*{
