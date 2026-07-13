@@ -253,6 +253,65 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#fca5a5",
   },
+
+  cargosSection: {
+    marginTop: 10,
+  },
+  cargosTitle: {
+    fontSize: 11,
+    fontWeight: 700,
+    color: "#0b3a66",
+    marginBottom: 6,
+  },
+  cargosTable: {
+    borderWidth: 1,
+    borderColor: "#000000",
+    borderRadius: 10,
+    overflow: "hidden",
+    backgroundColor: "transparent",
+  },
+  cargosThead: {
+    flexDirection: "row",
+    backgroundColor: "#0b3a66",
+    paddingVertical: 9,
+    paddingHorizontal: 10,
+  },
+  cargosTh: {
+    color: "#ffffff",
+    fontWeight: 700,
+    fontSize: 9,
+  },
+  cargosTr: {
+    flexDirection: "row",
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#000000",
+  },
+  cargosTd: {
+    fontSize: 9,
+    color: "#0f172a",
+  },
+  colCargoTipo: {
+    width: "26%",
+  },
+  colCargoFecha: {
+    width: "24%",
+  },
+  colCargoAnio: {
+    width: "16%",
+  },
+  colCargoSaldo: {
+    width: "22%",
+    textAlign: "right",
+  },
+  colCargoActivo: {
+    width: "12%",
+    textAlign: "right",
+  },
+  cargoStatusText: {
+    fontWeight: 700,
+  },
   cargosTrEven: { backgroundColor: "#fff5f5" },
 
   cargosTd: { fontSize: 9, color: "#7f1d1d" },

@@ -69,7 +69,7 @@ const CorteCaja: React.FC = () => {
     const colorAzulTitulo = [0, 51, 153];
     const colorBordeGris = [200, 200, 200];
 
-    // NUEVO: Adaptamos el nombre del responsable en el PDF para el Corte General
+    // Adaptamos el nombre del responsable en el PDF para el Corte General
     const nombreResponsable = isCorteGeneral
       ? "Corte General (Todos)"
       : cobradorSeleccionado
@@ -266,7 +266,7 @@ const CorteCaja: React.FC = () => {
 
   // ── Confirmar corte ──
   const handleConfirmarCorte = async () => {
-    // NUEVO: Validamos tanto si hay cobrador seleccionado o si es corte general
+    // Validamos tanto si hay cobrador seleccionado o si es corte general
     if (!cobradorSeleccionado && !isCorteGeneral) {
       Swal.fire(
         "Atención",
@@ -280,7 +280,7 @@ const CorteCaja: React.FC = () => {
     const fechaInicioAPI = format(startDate, "yyyy-MM-dd");
     const fechaFinAPI = format(endDate, "yyyy-MM-dd");
 
-    // NUEVO: Determinamos el nombre a mostrar en el alert
+    // Determinamos el nombre a mostrar en el alert
     const nombreMostrar = isCorteGeneral
       ? "Corte General (Todos los cobradores)"
       : `${cobradorSeleccionado!.nombre} ${cobradorSeleccionado!.apellidos}`;
@@ -311,7 +311,7 @@ const CorteCaja: React.FC = () => {
       const response = await generarCorteCaja({
         fecha_inicio: fInicio,
         fecha_fin: fFin,
-        // NUEVO: Si es general se envía null, de lo contrario se envía el id
+        // Si es general se envía null, de lo contrario se envía el id
         cobrador_id: isCorteGeneral ? null : cobradorSeleccionado!.id_cobrador,
       });
 
@@ -355,7 +355,6 @@ const CorteCaja: React.FC = () => {
               <div className="cdc-select-wrapper">
                 <select
                   className="cdc-select"
-                  // NUEVO: El value ahora reacciona a si se seleccionó corte general
                   value={
                     isCorteGeneral
                       ? "general"
@@ -363,7 +362,6 @@ const CorteCaja: React.FC = () => {
                   }
                   onChange={(e) => {
                     const val = e.target.value;
-                    // NUEVO: Lógica para manejar la opción de 'general'
                     if (val === "general") {
                       setIsCorteGeneral(true);
                       setCobradorSeleccionado(null);
@@ -379,7 +377,6 @@ const CorteCaja: React.FC = () => {
                     — Selecciona un cobrador —
                   </option>
                   
-                  {/* NUEVO: Opción de corte general */}
                   <option value="general">
                     — Corte General (Todos los cobradores) —
                   </option>
@@ -462,7 +459,6 @@ const CorteCaja: React.FC = () => {
           <button
             className="corte-btn-generate"
             onClick={handleConfirmarCorte}
-            // NUEVO: Validamos que el botón no esté inhabilitado si es Corte General
             disabled={loading || (!cobradorSeleccionado && !isCorteGeneral)}
           >
             {loading ? "Procesando..." : "Generar Corte Ahora"}
@@ -533,7 +529,6 @@ const CorteCaja: React.FC = () => {
                     <td style={{ fontWeight: "bold" }}>
                       ${mov.monto_recibido}
                     </td>
-                    
                   </tr>
                 ))}
               </tbody>

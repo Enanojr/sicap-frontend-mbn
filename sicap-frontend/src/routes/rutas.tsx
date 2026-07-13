@@ -24,7 +24,6 @@ import CargosPage from "../pages/Principal_Form_Table/cargospage";
 import CorteCaja from "../pages/CorteCaja/CorteCaja";
 import CorteJunior from "../pages/CorteJunior/CorteJunior";
 import CorteSenior from "../pages/CorteSenior/CorteSenior";
-import CallesPage from "../pages/Principal_Form_Table/callespage";
 
 //Test
 
@@ -40,6 +39,8 @@ import Menu_reporte from "../pages/reportes/menu_reporte";
 import ReporteCalles from "../pages/reportes/reportepage_calles";
 import ReportePadronGeneral from "../pages/reportes/padron";
 import ReporteCargos from "../pages/reportes/cargos";
+import Corte_Cards from "../pages/Home/Corte_cards";
+import { Path } from "@react-pdf/renderer";
 
 const Rutas = [
   // Ruta #1: Login (pública)
@@ -147,6 +148,10 @@ const Rutas = [
           {
             path: "/corte-senior",
             element: <CorteSenior />,
+          },
+          {
+            path: "/Corte-cards",
+            element: <Corte_Cards />,
           },
           {
             path: "/egresos",

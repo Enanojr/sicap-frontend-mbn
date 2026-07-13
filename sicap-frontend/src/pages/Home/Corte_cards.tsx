@@ -3,27 +3,27 @@ import { WaterServiceCard } from "../../components/cards/card";
 import "../../styles/styles.css";
 import { Archive, BanknoteArrowUp } from "lucide-react";
 
-function Tesoreria_Cards() {
+function Corte_Cards() {
   const navigate = useNavigate();
 
-  const handleEgresos = () => navigate("/egresos");
-  const handleCorte = () => navigate("/Corte-cards");
+  const handleEgresos = () => navigate("/corte-junior");
+  const handleCorte = () => navigate("/corte-senior");
 
   const cards = [
     {
-      title: "Gestión de Egresos",
+      title: "Corte Jr",
       description:
-        "Administra, registra y consulta los egresos generados dentro del módulo de tesorería.",
+        "Realiza los cortes de caja a los cobradores",
       icon: BanknoteArrowUp,
       ctaText: "Registrar Egreso",
-      gradientColors: ["#ff9800", "#f57c00"] as [string, string],
-      waterDropColor: "rgba(255, 152, 0, 0.6)",
+      gradientColors: ["#002fffad", "#007ff5"] as [string, string],
+      waterDropColor: "rgba(126, 121, 115, 0.6)",
       onClick: handleEgresos,
     },
     {
-      title: "Corte de Caja",
+      title: "Corte Sr",
       description:
-        "Consulta, genera y da seguimiento a los cortes de caja del sistema.",
+        "Realiza los cortes de caja a tus Tesoreros JR",
       icon: Archive,
       ctaText: "Gestionar Corte de Caja",
       gradientColors: ["#4caf50", "#388e3c"] as [string, string],
@@ -35,10 +35,9 @@ function Tesoreria_Cards() {
   return (
     <div className="admin-page-container">
       <div className="admin-header">
-        <h1 className="admin-title">Módulo de Tesorería</h1>
+        <h1 className="admin-title">Módulo de Cortes</h1>
         <p className="admin-subtitle">
-          Administra de forma eficiente los movimientos y procesos clave del
-          área de tesorería.
+          Administra los cortes de caja de manera eficiente.
         </p>
       </div>
 
@@ -61,4 +60,4 @@ function Tesoreria_Cards() {
   );
 }
 
-export default Tesoreria_Cards;
+export default Corte_Cards;
