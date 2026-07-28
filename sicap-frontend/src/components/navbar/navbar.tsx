@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FaUserCircle } from "react-icons/fa";
 import Logo from "../../assets/Logo.png";
-import { useTheme } from "../botones/ThemeContext";
-import { useAuth } from "../../services/authcontext";
+import { useTheme } from "../botones/theme.context";
+import { useAuth } from "../../services/auth.context";
 import "../../styles/styles.css";
 import Swal from "sweetalert2";
 import { Link } from "react-router-dom";

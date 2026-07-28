@@ -77,7 +77,7 @@ export default function FormularioServicios({
         }
 
         onSuccess();
-      } catch (e) {
+      } catch {
         Swal.fire({
           icon: "error",
           title: "Error al guardar",

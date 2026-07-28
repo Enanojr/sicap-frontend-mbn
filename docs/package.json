@@ -1,0 +1,14 @@
+{
+  "name": "sicap-docs",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Generador de la documentacion tecnica del frontend SICAP (Word .docx)",
+  "type": "commonjs",
+  "scripts": {
+    "generate": "node generate_docx.js"
+  },
+  "dependencies": {
+    "docx": "^9.7.1",
+    "sharp": "^0.35.3"
+  }
+}

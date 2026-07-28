@@ -495,7 +495,7 @@ const ReporteCalles: React.FC = () => {
             columns={columns}
             fetchData={fetchData}
             searchableFields={["nombre_calle"]}
-            itemsPerPage={10}
+            itemsPerPage={20}
             showActions={false}
             title="Calles Registradas"
           />

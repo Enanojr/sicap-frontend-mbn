@@ -1,5 +1,6 @@
 import api from "../../src/api_axios";
 import Swal from "sweetalert2";
+import { fetchAllPages } from "./paginacion";
 
 export interface PagoCreate {
   cuentahabiente: number;
@@ -20,13 +21,6 @@ export interface PagoResponse {
   mes: string;
   anio: number;
   comentarios: string;
-}
-
-interface PaginatedResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: PagoResponse[];
 }
 
 const PAGOS_URL = "/pago/";
@@ -53,40 +47,10 @@ export const createPago = async (data: PagoCreate): Promise<PagoResponse> => {
 
 export const getAllPagos = async (): Promise<PagoResponse[]> => {
   try {
-    console.log("Obteniendo todos los pagos...");
-    let todosPagos: PagoResponse[] = [];
-    let nextUrl: string | null = PAGOS_URL;
-    let pagina = 1;
-
-    while (nextUrl) {
-      console.log(`Obteniendo página ${pagina}...`);
-      const response: { data: PaginatedResponse | PagoResponse[] } =
-        await api.get<PaginatedResponse | PagoResponse[]>(nextUrl);
-
-      // Verificar si la respuesta es un array directo o tiene paginación
-      const pagosData = Array.isArray(response.data)
-        ? response.data
-        : response.data.results || [];
-
-      todosPagos = [...todosPagos, ...pagosData.map(normalizePago)];
-
-      // Verificar si hay más páginas (solo si es respuesta paginada)
-      nextUrl =
-        !Array.isArray(response.data) && response.data.next
-          ? response.data.next
-          : null;
-
-      pagina++;
-
-      // Seguridad: evitar loops infinitos
-      if (pagina > 100) {
-        console.warn("Se alcanzó el límite de páginas (100)");
-        break;
-      }
-    }
-
-    console.log(`Total de pagos obtenidos: ${todosPagos.length}`);
-    return todosPagos;
+    const pagos = await fetchAllPages<PagoResponse>(PAGOS_URL, {
+      pageSize: 200,
+    });
+    return pagos.map(normalizePago);
   } catch (error: any) {
     console.error("Error en getAllPagos:", error);
 

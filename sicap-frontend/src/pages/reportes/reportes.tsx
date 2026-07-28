@@ -511,7 +511,7 @@ const Reporte: React.FC = () => {
             columns={columns}
             fetchData={fetchData}
             searchableFields={["nombre_completo", "usuario_texto"]}
-            itemsPerPage={10}
+            itemsPerPage={20}
             showActions={false}
             title="Cobradores Registrados"
           />

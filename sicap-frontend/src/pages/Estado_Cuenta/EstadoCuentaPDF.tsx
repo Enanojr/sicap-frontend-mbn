@@ -10,6 +10,8 @@ import {
 import Logo from "../../assets/Logo.png";
 import WatermarkLogo from "../../assets/Logo.png";
 
+import { money, formatFechaLocal } from "../../components/pdf/formato";
+
 // ── Tipos ────────────────────────────────────────────────────────────────────
 
 export type VistaCargoPDF = {
@@ -38,25 +40,6 @@ export type EstadoCuentaPDFData = {
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-
-const money = (n: number) =>
-  `$${Number(n || 0).toLocaleString("es-MX", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
-
-const formatFechaLocal = (fecha: string) => {
-  if (!fecha) return "—";
-  const clean = fecha.includes("T") ? fecha.split("T")[0] : fecha;
-  const [y, m, d] = clean.split("-").map(Number);
-  if (!y || !m || !d) return "—";
-  const dt = new Date(y, m - 1, d);
-  return dt.toLocaleDateString("es-MX", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
-};
 
 const getPdfTitle = () => "Recibo y Estado de Cuenta";
 
@@ -218,42 +201,6 @@ const styles = StyleSheet.create({
   alertText: { fontSize: 10, fontWeight: 700, color: "#b91c1c", marginTop: 2 },
 
   // ── Sección Cargos ───────────────────────────────────────────────────────
-  cargosSection: { marginTop: 18 },
-
-  cargosTitle: {
-    fontSize: 11,
-    fontWeight: 700,
-    color: "#0f172a",
-  },
-
-  cargosTable: {
-    borderWidth: 1,
-    borderColor: "#991b1b",
-    borderRadius: 10,
-    overflow: "hidden",
-    backgroundColor: "transparent",
-  },
-
-  cargosThead: {
-    flexDirection: "row",
-    backgroundColor: "#b91c1c",
-    paddingVertical: 9,
-    paddingHorizontal: 10,
-  },
-  cargosTh: {
-    color: "#ffffff",
-    fontWeight: 700,
-    fontSize: 9,
-  },
-
-  cargosTr: {
-    flexDirection: "row",
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#fca5a5",
-  },
-
   cargosSection: {
     marginTop: 10,
   },
@@ -287,30 +234,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderTopWidth: 1,
     borderTopColor: "#000000",
-  },
-  cargosTd: {
-    fontSize: 9,
-    color: "#0f172a",
-  },
-  colCargoTipo: {
-    width: "26%",
-  },
-  colCargoFecha: {
-    width: "24%",
-  },
-  colCargoAnio: {
-    width: "16%",
-  },
-  colCargoSaldo: {
-    width: "22%",
-    textAlign: "right",
-  },
-  colCargoActivo: {
-    width: "12%",
-    textAlign: "right",
-  },
-  cargoStatusText: {
-    fontWeight: 700,
   },
   cargosTrEven: { backgroundColor: "#fff5f5" },
 

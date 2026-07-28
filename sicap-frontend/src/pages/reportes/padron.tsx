@@ -37,7 +37,9 @@ const ReportePadronGeneral: React.FC = () => {
           setAvailableYears(years);
           setSelectedYear(years[0]);
         }
-      } catch {}
+      } catch {
+        // Si falla, se mantiene el año actual como única opción
+      }
     };
 
     loadYears();

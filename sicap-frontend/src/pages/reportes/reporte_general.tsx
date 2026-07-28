@@ -11,6 +11,8 @@ import Logo from "../../assets/Logo.png";
 import WatermarkLogo from "../../assets/Logo.png";
 
 import type { EstadoCuentaNewDetalleRow } from "../../services/reporte_cobradores";
+import { money, DIRECCION_FOOTER } from "../../components/pdf/formato";
+import { BloqueFirmas } from "../../components/pdf/comunes";
 
 interface Props {
   rows: EstadoCuentaNewDetalleRow[];
@@ -19,12 +21,6 @@ interface Props {
 
 const ONE_COBRADOR_PER_PAGE = false;
 const COBRADOR_MIN_PRESENCE_AHEAD = 155;
-
-const money = (n: number) =>
-  `$${Number(n || 0).toLocaleString("es-MX", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
 
 const normalizeText = (value?: string | null) =>
   String(value ?? "")
@@ -787,32 +783,12 @@ export default function EstadoCuentaGeneralPDF({ rows, anio }: Props) {
             </View>
 
             {/* Firmantes */}
-            <View style={styles.signaturesBox} wrap={false}>
-              <View style={styles.signatureItem}>
-                <View style={styles.signatureLine} />
-                <Text style={styles.signatureRole}>Presidente</Text>
-                <Text style={styles.signatureName}>
-                  Odilón Paredes Carbajal
-                </Text>
-              </View>
-              <View style={styles.signatureItem}>
-                <View style={styles.signatureLine} />
-                <Text style={styles.signatureRole}>Tesorero</Text>
-                <Text style={styles.signatureName}>Jaime Paredes González</Text>
-              </View>
-              <View style={styles.signatureItem}>
-                <View style={styles.signatureLine} />
-                <Text style={styles.signatureRole}>Secretario</Text>
-                <Text style={styles.signatureName}>
-                  Antonio Corte Hernández
-                </Text>
-              </View>
-            </View>
+            <BloqueFirmas styles={styles} />
           </>
         )}
 
         <View style={styles.footer} fixed>
-          <Text>Guadalupe Hidalgo Acuamanala, C.P. 90860</Text>
+          <Text>{DIRECCION_FOOTER}</Text>
           <Text
             render={({ pageNumber, totalPages }) =>
               `${footerDate}   |   ${pageNumber}/${totalPages}`

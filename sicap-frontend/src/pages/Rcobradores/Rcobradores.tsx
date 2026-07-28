@@ -1,6 +1,6 @@
 import { registerUser } from "../../services/Rcobradores.service";
 import Swal from "sweetalert2";
-import { User, Mail, Lock, UserPlus, Users } from "lucide-react";
+import { User, Mail, Lock, UserPlus } from "lucide-react";
 
 import FormularioReutilizable from "../../components/forms/form";
 import type { FormConfig } from "../../components/forms/form";
@@ -40,10 +40,7 @@ export default function RegisterCobrador() {
         icon: Mail,
         required: true,
         placeholder: "correo@ejemplo.com",
-        validation: (
-          value: string | number,
-          _allData?: Record<string, any>,
-        ) => {
+        validation: (value: string | number) => {
           const strValue = String(value);
           if (!strValue.trim()) {
             return "El email es requerido";

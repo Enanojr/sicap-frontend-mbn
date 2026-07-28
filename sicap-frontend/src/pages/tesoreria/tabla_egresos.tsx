@@ -48,7 +48,7 @@ const HistoricoEgresos: React.FC = () => {
         setPrevPage(null);
         setTotalEgresos(0);
       }
-    } catch (error) {
+    } catch {
       Swal.fire({
         icon: "error",
         title: "Error inesperado",

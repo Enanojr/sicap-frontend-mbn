@@ -40,7 +40,6 @@ import ReporteCalles from "../pages/reportes/reportepage_calles";
 import ReportePadronGeneral from "../pages/reportes/padron";
 import ReporteCargos from "../pages/reportes/cargos";
 import Corte_Cards from "../pages/Home/Corte_cards";
-import { Path } from "@react-pdf/renderer";
 
 const Rutas = [
   // Ruta #1: Login (pública)

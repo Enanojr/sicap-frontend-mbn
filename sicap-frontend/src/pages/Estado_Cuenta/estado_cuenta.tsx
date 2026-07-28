@@ -377,7 +377,7 @@ export default function EstadoCuentaPage() {
         columns={columns}
         fetchData={fetchAllCuentahabientes}
         searchableFields={["nombre_completo", "contrato_texto"]}
-        itemsPerPage={10}
+        itemsPerPage={20}
         title="Estado de Cuenta"
         showActions={false}
       />

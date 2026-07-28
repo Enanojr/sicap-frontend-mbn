@@ -34,7 +34,7 @@ const BatteryIcon: React.FC<{ progreso: string }> = ({ progreso }) => {
   const progressValue = parseInt(progressStr) || 0;
 
   let color = "#10b981"; // Verde
-  let fillLevel = Math.min(Math.max(progressValue, 0), 100);
+  const fillLevel = Math.min(Math.max(progressValue, 0), 100);
 
   if (progressValue >= 80 && progressValue <= 100) {
     color = "#10b981";
@@ -121,7 +121,7 @@ const ProgresoTable: React.FC = () => {
     typeof window !== 'undefined' ? window.innerWidth : 1024
   );
 
-  const itemsPerPage = 15;
+  const itemsPerPage = 20;
 
   const getStatusClass = (estatus: string) => {
     if (!estatus) return "status-pending-light";

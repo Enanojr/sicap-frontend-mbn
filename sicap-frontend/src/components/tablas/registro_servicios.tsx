@@ -88,7 +88,7 @@ const TablaServicios: React.FC<TablaServiciosProps> = ({ onEdit }) => {
       columns={columns}
       fetchData={fetchData}
       searchableFields={["nombre"]}
-      itemsPerPage={10}
+      itemsPerPage={20}
       title="Servicios Registrados"
       showActions={true}
       onEdit={handleEdit}

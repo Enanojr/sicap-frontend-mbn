@@ -126,7 +126,7 @@ const TablaCuentahabientes: React.FC<{
         columns={columns}
         fetchData={fetchData}
         searchableFields={["nombre", "numero_contrato", "calle"]}
-        itemsPerPage={10}
+        itemsPerPage={20}
         title="Cuentahabientes Registrados"
         showActions={true}
         onEdit={async (row) => {

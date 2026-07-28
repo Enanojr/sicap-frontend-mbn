@@ -1,4 +1,5 @@
 import api from '../api_axios';
+import { fetchAllPages } from './paginacion';
 
 const API_URL = "/api";
 
@@ -16,34 +17,15 @@ export interface Progreso {
 }
 
 /**
- * Interface para respuesta paginada
- */
-interface PaginatedResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: Progreso[];
-}
-
-/**
  * Obtiene todos los registros de progreso (todas las páginas)
  * @returns Promise con la lista completa de progresos
  */
 export const getAllProgresos = async () => {
   try {
-    let allProgresos: Progreso[] = [];
-    let nextUrl: string | null = `${API_URL}/vista-progreso/`;
-
-    // Iterar a través de todas las páginas
-    while (nextUrl) {
-      const response: any = await api.get<PaginatedResponse>(nextUrl);
-      
-      // Agregar los resultados de esta página
-      allProgresos = [...allProgresos, ...response.data.results];
-      
-      // Obtener la siguiente URL (si es null, el while se detiene)
-      nextUrl = response.data.next;
-    }
+    const allProgresos = await fetchAllPages<Progreso>(
+      `${API_URL}/vista-progreso/`,
+      { pageSize: 200 },
+    );
 
     return {
       success: true,

@@ -21,7 +21,7 @@ const MainHeader = () => (
   </div>
 );
 
-function Main_Card() {
+function MainCard() {
   const navigate = useNavigate();
 
   const handlePayment = () => {
@@ -134,4 +134,4 @@ function Main_Card() {
   );
 }
 
-export default Main_Card;
+export default MainCard;

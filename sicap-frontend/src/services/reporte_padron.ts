@@ -1,5 +1,4 @@
-import api from "../api_axios";
-import { getToken } from "./auth.service";
+import { fetchAllPages } from "./paginacion";
 
 // ── Tipos ─────────────────────────────────────────────────────────────────────
 
@@ -66,22 +65,9 @@ export interface PadronGeneralRow {
 
 const PADRON_GENERAL_URL = "/reporte-padron-general/";
 
-const authHeaders = () => {
-  const token = getToken();
-  return {
-    headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-  };
-};
-
 const toNumber = (value: unknown): number => {
   const num = Number(value);
   return Number.isFinite(num) ? num : 0;
-};
-
-const extractRows = <T>(data: any): T[] => {
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.results)) return data.results;
-  return [];
 };
 
 const parseJSON = <T>(raw: string | null): T[] => {
@@ -146,21 +132,12 @@ const fetchPadronGeneral = async (
   anio?: number,
 ): Promise<PadronGeneralRawRow[]> => {
   try {
-    const params: Record<string, any> = {};
-    if (typeof anio === "number") params.anio_reporte = anio;
-
-    const allRows: PadronGeneralRawRow[] = [];
-    let res = await api.get(PADRON_GENERAL_URL, { ...authHeaders(), params });
-    let data = res.data;
-    allRows.push(...extractRows<PadronGeneralRawRow>(data));
-
-    while (data?.next) {
-      const nextRes = await api.get(data.next, authHeaders());
-      data = nextRes.data;
-      allRows.push(...extractRows<PadronGeneralRawRow>(data));
-    }
-
-    return allRows;
+    const url =
+      typeof anio === "number"
+        ? `${PADRON_GENERAL_URL}?anio_reporte=${anio}`
+        : PADRON_GENERAL_URL;
+    // Descarga en paralelo; el token lo agrega el interceptor de axios.
+    return await fetchAllPages<PadronGeneralRawRow>(url, { pageSize: 200 });
   } catch (error: any) {
     console.error(
       "Error en fetchPadronGeneral",

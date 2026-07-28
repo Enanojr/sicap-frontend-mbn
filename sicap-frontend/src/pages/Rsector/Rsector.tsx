@@ -82,7 +82,7 @@ export default function RegisterSector({
         } else {
           throw new Error("Error en la operación");
         }
-      } catch (error) {
+      } catch {
         Swal.fire({
           icon: "error",
           title: "Error",

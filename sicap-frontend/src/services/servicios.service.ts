@@ -99,7 +99,7 @@ export const getAllServicios = async (): Promise<ServicioResponse[]> => {
     console.log("Respuesta de la API:", response.data);
 
     //  Extraer el array de la propiedad "results"
-    let servicios = response.data.results || response.data;
+    const servicios = response.data.results || response.data;
 
     // Validar que sea un array
     if (!Array.isArray(servicios)) {

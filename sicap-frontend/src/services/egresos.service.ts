@@ -1,5 +1,6 @@
 import api from "../../src/api_axios";
 import Swal from "sweetalert2";
+import { fetchAllPages } from "./paginacion";
 
 export interface EgresoCreate {
   fecha_egreso: string;
@@ -124,38 +125,10 @@ export const getEgresos = async (
 
 export const getAllEgresos = async (): Promise<EgresoResponse[]> => {
   try {
-    console.log("Obteniendo todos los egresos...");
-    let todosEgresos: EgresoResponse[] = [];
-    let nextUrl: string | null = EGRESOS_URL;
-    let pagina = 1;
-
-    while (nextUrl) {
-      console.log(`Obteniendo página ${pagina} de egresos...`);
-
-      const response: { data: PaginatedResponse | EgresoResponse[] } =
-        await api.get<PaginatedResponse | EgresoResponse[]>(nextUrl);
-
-      const egresosData = Array.isArray(response.data)
-        ? response.data
-        : response.data.results || [];
-
-      todosEgresos = [...todosEgresos, ...egresosData.map(normalizeEgreso)];
-
-      nextUrl =
-        !Array.isArray(response.data) && response.data.next
-          ? response.data.next
-          : null;
-
-      pagina++;
-
-      if (pagina > 100) {
-        console.warn("Se alcanzó el límite de páginas (100)");
-        break;
-      }
-    }
-
-    console.log(`Total de egresos obtenidos: ${todosEgresos.length}`);
-    return todosEgresos;
+    const egresos = await fetchAllPages<EgresoResponse>(EGRESOS_URL, {
+      pageSize: 200,
+    });
+    return egresos.map(normalizeEgreso);
   } catch (error: any) {
     console.error("Error en getAllEgresos:", error);
 

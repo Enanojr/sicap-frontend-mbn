@@ -1,5 +1,4 @@
-import api from "../api_axios";
-import { getToken } from "./auth.service";
+import { fetchAllPages } from "./paginacion";
 
 // ── Tipos ─────────────────────────────────────────────────────────────────────
 
@@ -39,22 +38,9 @@ export interface ReporteCargosRow {
 
 const REPORTE_CARGOS_URL = "/reporte-cargos/";
 
-const authHeaders = () => {
-  const token = getToken();
-  return {
-    headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-  };
-};
-
 const toNumber = (value: unknown): number => {
   const num = Number(value);
   return Number.isFinite(num) ? num : 0;
-};
-
-const extractRows = <T>(data: any): T[] => {
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.results)) return data.results;
-  return [];
 };
 
 const formatFecha = (fecha?: string | null): string => {
@@ -94,22 +80,13 @@ const fetchReporteCargos = async (
   idCobrador?: number,
 ): Promise<ReporteCargosRawRow[]> => {
   try {
-    const params: Record<string, any> = {};
-    if (typeof anio === "number") params.anio = anio;
-    if (typeof idCobrador === "number") params.id_cobrador = idCobrador;
-
-    const allRows: ReporteCargosRawRow[] = [];
-    let res = await api.get(REPORTE_CARGOS_URL, { ...authHeaders(), params });
-    let data = res.data;
-    allRows.push(...extractRows<ReporteCargosRawRow>(data));
-
-    while (data?.next) {
-      const nextRes = await api.get(data.next, authHeaders());
-      data = nextRes.data;
-      allRows.push(...extractRows<ReporteCargosRawRow>(data));
-    }
-
-    return allRows;
+    const qs = new URLSearchParams();
+    if (typeof anio === "number") qs.set("anio", String(anio));
+    if (typeof idCobrador === "number") qs.set("id_cobrador", String(idCobrador));
+    const query = qs.toString();
+    const url = query ? `${REPORTE_CARGOS_URL}?${query}` : REPORTE_CARGOS_URL;
+    // Descarga en paralelo; el token lo agrega el interceptor de axios.
+    return await fetchAllPages<ReporteCargosRawRow>(url, { pageSize: 200 });
   } catch (error: any) {
     console.error(
       "Error en fetchReporteCargos",

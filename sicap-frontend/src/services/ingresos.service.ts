@@ -1,5 +1,6 @@
 import api from "../api_axios";
 import Swal from "sweetalert2";
+import { fetchAllPages } from "./paginacion";
 
 export interface IngresoCreate {
   fecha_ingreso: string;
@@ -112,31 +113,10 @@ export const getIngresos = async (
 
 export const getAllIngresos = async (): Promise<IngresoResponse[]> => {
   try {
-    let todosIngresos: IngresoResponse[] = [];
-    let nextUrl: string | null = INGRESOS_URL;
-    let pagina = 1;
-
-    while (nextUrl) {
-      const response: { data: PaginatedResponse | IngresoResponse[] } =
-        await api.get<PaginatedResponse | IngresoResponse[]>(nextUrl);
-
-      const ingresosData = Array.isArray(response.data)
-        ? response.data
-        : response.data.results || [];
-
-      todosIngresos = [...todosIngresos, ...ingresosData.map(normalizeIngreso)];
-
-      nextUrl =
-        !Array.isArray(response.data) && response.data.next
-          ? response.data.next
-          : null;
-
-      pagina++;
-
-      if (pagina > 100) break;
-    }
-
-    return todosIngresos;
+    const ingresos = await fetchAllPages<IngresoResponse>(INGRESOS_URL, {
+      pageSize: 200,
+    });
+    return ingresos.map(normalizeIngreso);
   } catch (error: any) {
     console.error("Error en getAllIngresos:", error);
 

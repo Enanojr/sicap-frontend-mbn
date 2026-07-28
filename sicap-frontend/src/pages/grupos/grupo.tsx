@@ -244,7 +244,7 @@ const GruposTable: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 20;
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [editingGrupo, setEditingGrupo] = useState<GrupoResponse | null>(null);

@@ -1,5 +1,4 @@
-import api from "../api_axios";
-import { getToken } from "./auth.service";
+import { fetchAllPages } from "./paginacion";
 
 export interface PagoDesglosado {
   fecha_pago: string | null;
@@ -46,24 +45,9 @@ export interface EstadoCuentaNewDetalleRow {
 
 const ESTADO_CUENTA_NEW_URL = "/estado-cuenta-new/";
 
-const authHeaders = () => {
-  const token = getToken();
-  return {
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-  };
-};
-
 const toNumber = (value: unknown): number => {
   const num = Number(value);
   return Number.isFinite(num) ? num : 0;
-};
-
-const extractRows = <T>(data: any): T[] => {
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.results)) return data.results;
-  return [];
 };
 
 /**
@@ -128,27 +112,12 @@ const fetchEstadoCuentaNew = async (
   idCobrador?: number,
 ): Promise<EstadoCuentaNewRawRow[]> => {
   try {
-    const params =
-      typeof idCobrador === "number" ? { id_cobrador: idCobrador } : {};
-    const allRows: EstadoCuentaNewRawRow[] = [];
-
-    // Primera petición
-    let res = await api.get(ESTADO_CUENTA_NEW_URL, {
-      ...authHeaders(),
-      params,
-    });
-
-    let data = res.data;
-    allRows.push(...extractRows<EstadoCuentaNewRawRow>(data));
-
-    // Seguir paginando mientras haya "next"
-    while (data?.next) {
-      const nextRes = await api.get(data.next, authHeaders());
-      data = nextRes.data;
-      allRows.push(...extractRows<EstadoCuentaNewRawRow>(data));
-    }
-
-    return allRows;
+    const url =
+      typeof idCobrador === "number"
+        ? `${ESTADO_CUENTA_NEW_URL}?id_cobrador=${idCobrador}`
+        : ESTADO_CUENTA_NEW_URL;
+    // Descarga en paralelo; el token lo agrega el interceptor de axios.
+    return await fetchAllPages<EstadoCuentaNewRawRow>(url, { pageSize: 200 });
   } catch (error: any) {
     console.error(
       "Error en fetchEstadoCuentaNew",

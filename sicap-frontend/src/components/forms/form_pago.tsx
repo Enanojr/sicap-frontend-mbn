@@ -14,6 +14,7 @@ import {
 import Swal from "sweetalert2";
 import { createPago } from "../../services/pago.service";
 import api from "../../api_axios";
+import { fetchAllPages } from "../../services/paginacion";
 
 import TicketPago, { type TicketData } from "../forms/ticket";
 import Logo from "../../assets/Logo.png";
@@ -37,13 +38,6 @@ interface Descuento {
   id_descuento: number;
   nombre_descuento: string;
   porcentaje?: string;
-}
-
-interface PaginatedDescuentosResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: Descuento[];
 }
 
 const FormularioPagos: React.FC = () => {
@@ -92,7 +86,7 @@ const FormularioPagos: React.FC = () => {
         }));
 
         setFilteredOptions(initial);
-      } catch (error) {
+      } catch {
         Swal.fire(
           "Error",
           "No se pudieron cargar los cuentahabientes iniciales",
@@ -105,21 +99,11 @@ const FormularioPagos: React.FC = () => {
 
     const fetchDescuentos = async () => {
       try {
-        const all: Descuento[] = [];
-        let nextUrl: string | null = "/descuentos/";
-
-        // Para catálogos pequeños como descuentos, el while es aceptable.
-        // Si crece mucho, aplicar la misma técnica asíncrona que en cuentahabientes.
-        while (nextUrl) {
-          const response = await api.get<PaginatedDescuentosResponse>(nextUrl);
-          const data: PaginatedDescuentosResponse = response.data;
-
-          all.push(...data.results);
-
-          nextUrl = data.next
-            ? data.next.replace("https://sicap-backend.onrender.com", "")
-            : null;
-        }
+        // Catálogo: se cachea 5 minutos para no repetir la carga completa
+        // cada vez que se abre el formulario de pago.
+        const all = await fetchAllPages<Descuento>("/descuentos/", {
+          cacheMs: 5 * 60 * 1000,
+        });
         const activos = all.filter((d) => (d as any).activo === true);
 
         const map = new Map<number, Descuento>();
@@ -132,7 +116,7 @@ const FormularioPagos: React.FC = () => {
             label: d.nombre_descuento,
           })),
         );
-      } catch (error) {
+      } catch {
         Swal.fire("Error", "No se pudieron cargar los descuentos", "error");
       }
     };

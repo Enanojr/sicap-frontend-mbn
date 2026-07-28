@@ -70,7 +70,7 @@ const TablaDescuentos: React.FC<TablaDescuentosProps> = ({ onEdit }) => {
       columns={columns}
       fetchData={fetchData}
       searchableFields={["nombre_descuento"]}
-      itemsPerPage={10}
+      itemsPerPage={20}
       title="Descuentos Registrados"
       showActions={true}
       onEdit={handleEdit}

@@ -69,7 +69,7 @@ export default function FormularioCargos({ cargoToEdit, onSuccess, onCancel }: F
           });
         }
         onSuccess();
-      } catch (e) {
+      } catch {
         // No hacemos nada aquí porque el SERVICE ya mostró la alerta de error
         console.warn("Operación cancelada por error en API");
       }

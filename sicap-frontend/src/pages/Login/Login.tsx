@@ -5,7 +5,7 @@ import "../../styles/styles.css";
 import Logo from "../../assets/Logo.png";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Swal from "sweetalert2";
-import { useAuth } from "../../services/authcontext"; // Importar useAuth
+import { useAuth } from "../../services/auth.context"; // Importar useAuth
 
 const LoginPage = () => {
   const [usuario, setUsuario] = useState<string>("");

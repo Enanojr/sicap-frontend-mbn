@@ -1,4 +1,4 @@
-import { useTheme } from './ThemeContext';
+import { useTheme } from './theme.context';
 import Sol from '../../assets/sol.png';
 import Luna from '../../assets/luna.png';
 import '../../index.css'

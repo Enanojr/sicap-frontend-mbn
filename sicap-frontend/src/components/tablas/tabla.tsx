@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Search,
   ChevronDown,
@@ -20,8 +20,14 @@ import {
   CreditCard,
 } from "lucide-react";
 import Swal from "sweetalert2";
-import type { ContractSummary } from "../../services/views.service";
-import { getContractData } from "../../services/views.service";
+import type {
+  ContractSummary,
+  HistorialPago,
+} from "../../services/views.service";
+import {
+  getPagosPagina,
+  getHistorialPorContrato,
+} from "../../services/views.service";
 import "../../styles/styles.css";
 
 // ─────────────────────────────────────────────
@@ -59,9 +65,17 @@ const statusOptions: FilterOption[] = [
 ];
 
 // ─────────────────────────────────────────────
-// Cache y refs de módulo
+// Años disponibles para el filtro (rango reciente, sin depender de descargar
+// todos los datos). Incluye "Todos" para no filtrar por año.
 // ─────────────────────────────────────────────
-let cachedContracts: ContractSummary[] | null = null;
+const currentYear = new Date().getFullYear();
+const YEAR_FILTER_OPTIONS: FilterOption[] = [
+  { id: "year-all", label: "Todos los años", value: "all" },
+  ...Array.from({ length: 8 }, (_, i) => {
+    const y = String(currentYear - i);
+    return { id: `year-${y}`, label: y, value: y };
+  }),
+];
 
 // ─────────────────────────────────────────────
 // Status Config
@@ -296,84 +310,91 @@ const ContractTable: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState<boolean>(false);
-  const [selectedYear, setSelectedYear] = useState<string>("");
+  const [selectedYear, setSelectedYear] = useState<string>("all");
   const [isYearDropdownOpen, setIsYearDropdownOpen] = useState<boolean>(false);
 
   const [selectedContract, setSelectedContract] = useState<ContractSummary | null>(null);
   const [modalPreYear, setModalPreYear] = useState<string>("all");
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
 
+  // Paginación del servidor
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const itemsPerPage = 15;
+  const [count, setCount] = useState<number>(0);
+  const [serverPageSize, setServerPageSize] = useState<number>(15);
 
-  const yearInitialized = useRef(false);
+  // Historial del contrato seleccionado (se carga on-demand al abrir el modal)
+  const [modalPagos, setModalPagos] = useState<HistorialPago[]>([]);
+  const [modalLoading, setModalLoading] = useState<boolean>(false);
 
-  // ── Data loading ──────────────────────────────────────────────
-  const loadData = useCallback(async () => {
-    if (cachedContracts) {
-      setContracts(cachedContracts);
-      return;
-    }
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("access");
-      if (!token) {
-        setError("Sesión expirada. Por favor, inicia sesión nuevamente.");
-        return;
-      }
-      const data = await getContractData();
-      cachedContracts = data;
-      setContracts(data);
-    } catch (err: any) {
-      const message =
-        err.response?.status === 403
-          ? "Acceso prohibido. Tu sesión puede haber expirado."
-          : err.response?.status === 401
-            ? "No autorizado. Por favor, inicia sesión nuevamente."
-            : err.response?.status === 429
-              ? "Demasiadas solicitudes. Espera un momento antes de recargar."
+  const yearOptions = YEAR_FILTER_OPTIONS;
+
+  // Filtros que se mandan al backend. La búsqueda funciona seguro; año, estado
+  // y calle son "best-effort" (si el backend no los soporta, no filtran).
+  const filtrosActivos = React.useMemo(
+    () => ({
+      search: searchTerm,
+      anio: selectedYear,
+      estatus: selectedStatus,
+      calle: selectedStreetKey || streetTermDebounced,
+    }),
+    [
+      searchTerm,
+      selectedYear,
+      selectedStatus,
+      selectedStreetKey,
+      streetTermDebounced,
+    ],
+  );
+
+  // ── Carga de UNA página del servidor ──────────────────────────
+  const cargarPagina = useCallback(
+    async (page: number, filtros: typeof filtrosActivos) => {
+      try {
+        setLoading(true);
+        setError(null);
+        const token = localStorage.getItem("access");
+        if (!token) {
+          setError("Sesión expirada. Por favor, inicia sesión nuevamente.");
+          return;
+        }
+        const data = await getPagosPagina({ ...filtros, page });
+        setContracts(data.results);
+        setCount(data.count);
+        // Deduce el tamaño real de página del backend:
+        //  - Si hay "next", esta página está llena → ese es el tamaño.
+        //  - Si es la página 1 sin "next", todo cabe en una página.
+        if (data.results.length > 0) {
+          if (data.next) {
+            setServerPageSize(data.results.length);
+          } else if (page === 1) {
+            setServerPageSize(data.results.length);
+          }
+        }
+        setCurrentPage(page);
+      } catch (err: any) {
+        const message =
+          err.response?.status === 403
+            ? "Acceso prohibido. Tu sesión puede haber expirado."
+            : err.response?.status === 401
+              ? "No autorizado. Por favor, inicia sesión nuevamente."
               : "Ocurrió un error al cargar los datos.";
-      setError(message);
-      Swal.fire({ icon: "error", title: "Error", text: message });
-      if (err.response?.status === 401 || err.response?.status === 403) {
-        localStorage.removeItem("access");
-        localStorage.removeItem("usuario");
+        setError(message);
+        Swal.fire({ icon: "error", title: "Error", text: message });
+        if (err.response?.status === 401 || err.response?.status === 403) {
+          localStorage.removeItem("access");
+          localStorage.removeItem("usuario");
+        }
+      } finally {
+        setLoading(false);
       }
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [],
+  );
 
+  // Al montar y cada vez que cambian los filtros → recarga desde la página 1.
   useEffect(() => {
-    loadData();
-  }, [loadData]);
-
-  // ── Year options ──────────────────────────────────────────────
-  const yearOptions: FilterOption[] = React.useMemo(() => {
-    const years = Array.from(
-      new Set(contracts.map((c) => c.anio?.toString()).filter(Boolean)),
-    ).sort((a, b) => Number(b) - Number(a));
-    return years.map((y) => ({ id: `year-${y}`, label: y!, value: y! }));
-  }, [contracts]);
-
-  useEffect(() => {
-    if (!yearInitialized.current && yearOptions.length > 0) {
-      setSelectedYear(yearOptions[0].value);
-      yearInitialized.current = true;
-    }
-  }, [yearOptions]);
-
-  // ── Reset página cuando cambian filtros ───────────────────────
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [
-    searchTerm,
-    selectedFilter,
-    selectedStatus,
-    selectedYear,
-    streetTermDebounced,
-    selectedStreetKey,
-  ]);
+    cargarPagina(1, filtrosActivos);
+  }, [filtrosActivos, cargarPagina]);
 
   // ── Street groups ─────────────────────────────────────────────
   const streetGroups = React.useMemo(
@@ -381,114 +402,46 @@ const ContractTable: React.FC = () => {
     [contracts],
   );
 
-  // ── Filter helpers ────────────────────────────────────────────
-  const filterByDateRange = useCallback(
-    (contract: ContractSummary): boolean => {
-      if (selectedFilter === "all") return true;
-      if (!contract.ultimo_pago) return false;
-      const fechaLimpia = contract.ultimo_pago.includes("T")
-        ? contract.ultimo_pago.split("T")[0]
-        : contract.ultimo_pago;
-      const [year, month, day] = fechaLimpia.split("-").map(Number);
-      const lastPaymentDate = new Date(year, month - 1, day);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const diffDays = Math.ceil(
-        (today.getTime() - lastPaymentDate.getTime()) / 86400000,
-      );
-      switch (selectedFilter) {
-        case "day":   return diffDays <= 1;
-        case "week":  return diffDays <= 7;
-        case "month": return diffDays <= 31;
-        case "year":  return diffDays <= 365;
-        default:      return true;
-      }
-    },
-    [selectedFilter],
-  );
-
-  // ── Table rows (filtrado + mapeo en un solo useMemo) ──────────
-  const tableRows = React.useMemo<TableRow[]>(() => {
-    const lowerSearch = searchTerm.toLowerCase();
-    const normalizedStreet = normalizeStreet(streetTermDebounced);
-
-    return contracts
-      .filter((contract) => {
-        // Búsqueda por nombre / contrato
-        if (
-          lowerSearch &&
-          !contract.numero_contrato.toString().toLowerCase().includes(lowerSearch) &&
-          !contract.nombre_completo.toLowerCase().includes(lowerSearch)
-        )
-          return false;
-
-        // Filtro de calle
-        if (selectedStreetKey) {
-          if (normalizeStreet(contract.calle || "") !== selectedStreetKey) return false;
-        } else if (normalizedStreet) {
-          if (!normalizeStreet(contract.calle || "").includes(normalizedStreet)) return false;
-        }
-
-        // Filtro de estado
-        if (
-          selectedStatus !== "all" &&
-          contract.estatus_deuda.trim().toLowerCase() !== selectedStatus
-        )
-          return false;
-
-        // Filtro de año
-        if (
-          selectedYear &&
-          selectedYear !== "all" &&
-          contract.anio?.toString() !== selectedYear
-        )
-          return false;
-
-        // Filtro de fecha
-        if (!filterByDateRange(contract)) return false;
-
-        return true;
+  // ── Historial del modal: se carga solo al abrir un contrato ────
+  useEffect(() => {
+    if (!selectedContract) {
+      setModalPagos([]);
+      return;
+    }
+    let cancelado = false;
+    setModalLoading(true);
+    getHistorialPorContrato(selectedContract.numero_contrato)
+      .then((h) => {
+        if (!cancelado) setModalPagos(h);
       })
-      .map((contract) => {
-        const pagosDelAnio = (contract.pagos || []).filter(
-          (p) =>
-            !selectedYear ||
-            selectedYear === "all" ||
-            p.anio?.toString() === selectedYear,
-        );
-        const pagosTotalesFila = pagosDelAnio.reduce(
-          (sum, p) => sum + Number(p.monto_recibido || 0),
-          0,
-        );
-        return {
-          rowKey: `${contract.id}-${contract.anio}`,
-          contract,
-          anioFila: contract.anio?.toString() || "—",
-          pagosTotalesFila,
-          saldoPendienteFila: Number(contract.saldo_pendiente || 0),
-          modalYear: selectedYear || "all",
-        };
+      .catch(() => {
+        if (!cancelado) setModalPagos([]);
+      })
+      .finally(() => {
+        if (!cancelado) setModalLoading(false);
       });
-  }, [
-    contracts,
-    searchTerm,
-    streetTermDebounced,
-    selectedStreetKey,
-    selectedStatus,
-    selectedYear,
-    filterByDateRange,
-  ]);
+    return () => {
+      cancelado = true;
+    };
+  }, [selectedContract]);
 
-  // ── Pagination ────────────────────────────────────────────────
-  const totalPages = Math.ceil(tableRows.length / itemsPerPage);
-  const currentRows = React.useMemo(
-    () =>
-      tableRows.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage,
-      ),
-    [tableRows, currentPage, itemsPerPage],
-  );
+  // ── Table rows (solo mapeo; el filtrado y la paginación los hace
+  //    el servidor) ──────────────────────────────────────────────
+  const tableRows = React.useMemo<TableRow[]>(() => {
+    return contracts.map((contract) => ({
+      rowKey: `${contract.id}-${contract.anio}`,
+      contract,
+      anioFila: contract.anio?.toString() || "—",
+      pagosTotalesFila: Number(contract.pagos_totales || 0),
+      saldoPendienteFila: Number(contract.saldo_pendiente || 0),
+      modalYear: selectedYear || "all",
+    }));
+  }, [contracts, selectedYear]);
+
+  // ── Pagination (del servidor) ─────────────────────────────────
+  const totalPages = Math.max(1, Math.ceil(count / serverPageSize));
+  // El backend ya devuelve la página actual; se muestra tal cual.
+  const currentRows = tableRows;
 
   const getFilterLabel = () =>
     filterOptions.find((o) => o.value === selectedFilter)?.label || "Filtrar";
@@ -499,9 +452,11 @@ const ContractTable: React.FC = () => {
 
   const goToPage = useCallback(
     (page: number) => {
-      if (page >= 1 && page <= totalPages) setCurrentPage(page);
+      if (page >= 1 && page <= totalPages && page !== currentPage) {
+        cargarPagina(page, filtrosActivos);
+      }
     },
-    [totalPages],
+    [totalPages, currentPage, cargarPagina, filtrosActivos],
   );
 
   const getPageNumbers = (): (number | string)[] => {
@@ -650,7 +605,7 @@ const ContractTable: React.FC = () => {
                 <span style={{ fontSize: "0.78rem", color: "#9ca3af" }}>
                   Total:{" "}
                   <strong style={{ color: "#58b2ee", fontSize: "0.9rem" }}>
-                    {tableRows.length}
+                    {count}
                   </strong>{" "}
                   contratos
                 </span>
@@ -1245,7 +1200,7 @@ const ContractTable: React.FC = () => {
             </div>
 
             {/* ── PAGINATION ─────────────────────────────────── */}
-            {tableRows.length > 0 && (
+            {totalPages > 1 && (
               <div
                 style={{
                   display: "flex",
@@ -1349,7 +1304,7 @@ const ContractTable: React.FC = () => {
       ────────────────────────────────────────────────────────── */}
       {selectedContract &&
         (() => {
-          const allPagos = selectedContract.pagos || [];
+          const allPagos = modalPagos;
           const pagosFiltrados =
             modalPreYear !== "all"
               ? allPagos.filter((p) => p.anio?.toString() === modalPreYear)
@@ -1603,7 +1558,21 @@ const ContractTable: React.FC = () => {
                       </span>
                     </div>
 
-                    {pagosFiltrados.length === 0 ? (
+                    {modalLoading ? (
+                      <div
+                        style={{
+                          textAlign: "center",
+                          color: "#9ca3af",
+                          padding: "2rem",
+                          backgroundColor: "#0a0c10",
+                          borderRadius: "10px",
+                          border: "1px solid #1a1d24",
+                          fontSize: "0.82rem",
+                        }}
+                      >
+                        Cargando historial de pagos…
+                      </div>
+                    ) : pagosFiltrados.length === 0 ? (
                       <div
                         style={{
                           textAlign: "center",

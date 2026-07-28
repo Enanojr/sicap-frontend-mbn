@@ -78,7 +78,7 @@ export default function RegisterAsignacion({
         }
 
         Swal.close();
-      } catch (error) {
+      } catch {
         Swal.fire({
           icon: "error",
           title: "Error al cargar datos",

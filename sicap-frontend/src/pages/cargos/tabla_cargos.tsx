@@ -70,7 +70,7 @@ const handleDelete = async (cargo: CargoResponse): Promise<boolean> => {
 
         setRefreshKey((prev) => prev + 1);
         return true;
-      } catch (error) {
+      } catch {
         Swal.fire({
           icon: "error",
           title: "Error",
@@ -90,7 +90,7 @@ const handleDelete = async (cargo: CargoResponse): Promise<boolean> => {
       columns={columns}
       fetchData={fetchData}
       searchableFields={["nombre"]}
-      itemsPerPage={10}
+      itemsPerPage={20}
       title="Cargos Registrados"
       showActions={true}
       onEdit={handleEdit}

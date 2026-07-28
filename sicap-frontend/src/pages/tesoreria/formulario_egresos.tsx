@@ -250,7 +250,7 @@ const EgresosManager: React.FC = () => {
       });
 
       limpiarFormulario();
-    } catch (error) {
+    } catch {
       Swal.fire({
         icon: "error",
         title: "Error inesperado",

@@ -30,6 +30,9 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
 
   // Sincroniza el label cuando cambia el value seleccionado,
   // pero NO interrumpe si el usuario está escribiendo en modo onSearch.
+  // El setState en este efecto es intencional: el texto del input es estado
+  // interno que debe seguir a la selección que llega por props.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (isTypingRef.current && onSearch) return; // no pisamos lo que escribe el usuario
     const selectedOption = options.find(opt => String(opt.value) === String(value));
@@ -39,6 +42,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
       setSearchTerm('');
     }
   }, [value, options]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

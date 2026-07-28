@@ -11,6 +11,13 @@ import Logo from "../../assets/Logo.png";
 import WatermarkLogo from "../../assets/Logo.png";
 
 import type { EstadoCuentaNewDetalleRow } from "../../services/reporte_cobradores";
+import {
+  money,
+  percent,
+  formatFechaLocal,
+  DIRECCION_FOOTER,
+} from "../../components/pdf/formato";
+import { BloqueFirmas } from "../../components/pdf/comunes";
 
 type CuentahabienteGroup = {
   id_cuentahabiente: number;
@@ -42,27 +49,6 @@ interface Props {
   rows: EstadoCuentaNewDetalleRow[];
   anio?: number;
 }
-
-const money = (n: number) =>
-  `$${Number(n || 0).toLocaleString("es-MX", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
-
-const percent = (value: number) => `${Number(value || 0).toFixed(1)}%`;
-
-const formatFechaLocal = (fecha?: string | null) => {
-  if (!fecha) return "—";
-  const clean = fecha.includes("T") ? fecha.split("T")[0] : fecha;
-  const [y, m, d] = clean.split("-").map(Number);
-  if (!y || !m || !d) return "—";
-  const dt = new Date(y, m - 1, d);
-  return dt.toLocaleDateString("es-MX", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
-};
 
 const normalizeText = (value?: string | null) =>
   String(value ?? "")
@@ -510,9 +496,7 @@ export default function EstadoCuentaCobradoresPDF({ rows, anio }: Props) {
           </View>
 
           <View style={styles.footer} fixed>
-            <Text style={styles.footerCenter}>
-              Guadalupe Hidalgo Acuamanala, C.P. 90860
-            </Text>
+            <Text style={styles.footerCenter}>{DIRECCION_FOOTER}</Text>
             <Text>{footerDate}</Text>
           </View>
         </Page>
@@ -750,33 +734,11 @@ export default function EstadoCuentaCobradoresPDF({ rows, anio }: Props) {
 
           {/* Firmantes — solo en la última página de cada cobrador */}
           {cobradorIndex === cobradores.length - 1 && (
-            <View style={styles.signaturesBox} wrap={false}>
-              <View style={styles.signatureItem}>
-                <View style={styles.signatureLine} />
-                <Text style={styles.signatureRole}>Presidente</Text>
-                <Text style={styles.signatureName}>
-                  Odilón Paredes Carbajal
-                </Text>
-              </View>
-              <View style={styles.signatureItem}>
-                <View style={styles.signatureLine} />
-                <Text style={styles.signatureRole}>Tesorero</Text>
-                <Text style={styles.signatureName}>Jaime Paredes González</Text>
-              </View>
-              <View style={styles.signatureItem}>
-                <View style={styles.signatureLine} />
-                <Text style={styles.signatureRole}>Secretario</Text>
-                <Text style={styles.signatureName}>
-                  Antonio Corte Hernández
-                </Text>
-              </View>
-            </View>
+            <BloqueFirmas styles={styles} />
           )}
 
           <View style={styles.footer} fixed>
-            <Text style={styles.footerCenter}>
-              Guadalupe Hidalgo Acuamanala, C.P. 90860
-            </Text>
+            <Text style={styles.footerCenter}>{DIRECCION_FOOTER}</Text>
             <Text>{footerDate}</Text>
           </View>
         </Page>

@@ -23,7 +23,18 @@ export interface FilterOption {
 
 export interface ReusableTableProps<T> {
   columns: Column<T>[];
-  fetchData: () => Promise<T[]>;
+  /** Modo cliente: descarga todo y pagina/filtra en memoria. */
+  fetchData?: () => Promise<T[]>;
+  /**
+   * Modo servidor: pide UNA página al backend (paginación bajo demanda).
+   * Si se pasa, tiene prioridad sobre fetchData y desactiva el filtrado en
+   * cliente (la búsqueda se manda al backend).
+   */
+  fetchPage?: (opts: { page: number; search: string }) => Promise<{
+    results: T[];
+    next: string | null;
+    count: number;
+  }>;
   searchableFields?: (keyof T)[];
   filterOptions?: FilterOption[];
   itemsPerPage?: number;
@@ -40,7 +51,7 @@ export function ReusableTable<T extends Record<string, any>>({
   fetchData,
   searchableFields = [],
   filterOptions = [],
-  itemsPerPage = 10,
+  itemsPerPage = 20,
   title = "Datos",
   getRowId,
   onEdit,
@@ -48,18 +59,15 @@ export function ReusableTable<T extends Record<string, any>>({
   showActions = true,
 }: ReusableTableProps<T>) {
   const [data, setData] = useState<T[]>([]);
-  const [loading, setLoading] = useState(false);
+  // Inicia en true: la carga inicial arranca en cuanto el componente monta
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    setLoading(true);
+  // Sin setState síncrono: apto para llamarse desde el efecto de montaje
+  const cargarDatos = async () => {
     try {
       const result = await fetchData();
       setData(Array.isArray(result) ? result : []);
@@ -68,6 +76,17 @@ export function ReusableTable<T extends Record<string, any>>({
     }
     setLoading(false);
   };
+
+  // Para recargas manuales (botones): enciende el indicador y recarga
+  const loadData = async () => {
+    setLoading(true);
+    await cargarDatos();
+  };
+
+  useEffect(() => {
+    cargarDatos();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const filtered = data.filter((item) => {
     const matchesSearch =

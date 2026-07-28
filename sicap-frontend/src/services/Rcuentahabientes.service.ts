@@ -1,4 +1,5 @@
 import api from "../api_axios";
+import { fetchAllPages } from "./paginacion";
 
 const API_URL = "/cuentahabientes/";
 
@@ -226,20 +227,10 @@ export const getCuentahabientesList = async (
     results: CuentahabienteResponse[];
   }>
 > => {
-  let allResults: CuentahabienteResponse[] = [];
-  let nextUrl: string | null = API_URL;
-
   try {
-    while (nextUrl) {
-      const response = await getCuentahabientes(nextUrl);
-
-      if (!response.success || !response.data) {
-        break;
-      }
-
-      allResults = [...allResults, ...response.data.results];
-      nextUrl = response.data.next;
-    }
+    const allResults = await fetchAllPages<CuentahabienteResponse>(API_URL, {
+      pageSize: 200,
+    });
 
     return {
       success: true,

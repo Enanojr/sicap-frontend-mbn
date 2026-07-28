@@ -1,6 +1,6 @@
 // ProtectedRoute.tsx
 import { Outlet, Navigate } from 'react-router-dom';
-import { useAuth } from '../services/authcontext';
+import { useAuth } from '../services/auth.context';
 
 export default function ProtectedRoute() {
   const { isAuthenticated } = useAuth();

@@ -11,6 +11,7 @@ import type {
   PagoData,
 } from "../../services/cargos.service";
 import { getCuentahabientes } from "../../services/Rcuentahabientes.service";
+import { fetchAllPages } from "../../services/paginacion";
 import {
   getAllCargos,
   type CargoResponse as TipoCargoOp,
@@ -26,19 +27,15 @@ import "../../styles/styles.css";
 // Trae TODOS los cargos activos recorriendo la paginación
 // ────────────────────────────────────────────────────────────
 const getTodosLosCargosActivos = async (): Promise<CargoResponse[]> => {
-  const todos: CargoResponse[] = [];
-  let nextUrl: string | null = "/cargos/?activo=true";
-
-  while (nextUrl) {
-    const res = await getCargos(nextUrl);
-    if (!res.success || !res.data) break;
-
-    const pagina: CargoResponse[] = res.data.results || res.data;
-    todos.push(...pagina.filter((c) => parseFloat(c.saldo_restante_cargo) > 0));
-    nextUrl = res.data.next || null;
+  try {
+    const todos = await fetchAllPages<CargoResponse>("/cargos/?activo=true", {
+      pageSize: 200,
+    });
+    return todos.filter((c) => parseFloat(c.saldo_restante_cargo) > 0);
+  } catch (error) {
+    console.error("Error obteniendo cargos activos:", error);
+    return [];
   }
-
-  return todos;
 };
 
 // ────────────────────────────────────────────────────────────
@@ -125,10 +122,11 @@ const useUsuariosConCargosActivos = () => {
   const [opciones, setOpciones] = useState<
     { value: string | number; label: string; keywords: string }[]
   >([]);
-  const [cargando, setCargando] = useState(false);
+  // Inicia en true: la carga inicial arranca en cuanto el hook monta
+  const [cargando, setCargando] = useState(true);
 
-  const cargar = async () => {
-    setCargando(true);
+  // Sin setState síncrono: apto para llamarse desde el efecto de montaje
+  const cargarOpciones = async () => {
     const todosLosCargos = await getTodosLosCargosActivos();
 
     const mapa = new Map<
@@ -149,7 +147,18 @@ const useUsuariosConCargosActivos = () => {
     setCargando(false);
   };
 
-  useEffect(() => { cargar(); }, []);
+  // Para recargas manuales: enciende el indicador y recarga
+  const cargar = async () => {
+    setCargando(true);
+    await cargarOpciones();
+  };
+
+  useEffect(() => {
+    // El setState ocurre tras el await dentro de cargarOpciones (no es
+    // síncrono), pero la regla no puede verificarlo desde aquí.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    cargarOpciones();
+  }, []);
 
   return { opciones, cargando, refrescar: cargar };
 };

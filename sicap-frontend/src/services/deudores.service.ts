@@ -1,4 +1,5 @@
 import api from '../api_axios';
+import { fetchAllPages } from './paginacion';
 
 const API_URL = "/api"; // Ajusta esta ruta según tu API
 
@@ -21,16 +22,6 @@ export interface Deudor {
 }
 
 /**
- * Interface para respuesta paginada
- */
-interface PaginatedResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: Deudor[];
-}
-
-/**
  * Obtiene todos los deudores (todas las páginas)
  * @returns Promise con la lista completa de deudores
  */
@@ -47,20 +38,10 @@ export const getAllDeudores = async () => {
       };
     }
 
-    let allDeudores: Deudor[] = [];
-    let nextUrl: string | null = `${API_URL}/vista-deudores/`;
-
-    // Iterar a través de todas las páginas
-    while (nextUrl) {
-      const response: { data: PaginatedResponse } = await api.get<PaginatedResponse>(nextUrl);
-      
-      // Agregar los resultados de esta página
-      allDeudores = [...allDeudores, ...response.data.results];
-      
-      // Obtener la siguiente URL
-      nextUrl = response.data.next;
-      
-    }
+    const allDeudores = await fetchAllPages<Deudor>(
+      `${API_URL}/vista-deudores/`,
+      { pageSize: 200 },
+    );
 
     return {
       success: true,

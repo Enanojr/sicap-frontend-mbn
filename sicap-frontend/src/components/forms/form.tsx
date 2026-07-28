@@ -219,7 +219,7 @@ const FormularioReutilizable: React.FC<Props> = ({ config, isEditMode }) => {
       });
 
       handleReset();
-    } catch (err) {
+    } catch {
       Swal.fire({
         icon: "error",
         title: "Error",

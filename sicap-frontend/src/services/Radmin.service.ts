@@ -81,7 +81,7 @@ export const isSuperAdmin = (): boolean => {
   try {
     const userData = JSON.parse(user);
     return userData.is_superadmin === true || userData.role === 'superadmin';
-  } catch (error) {
+  } catch {
     return false;
   }
 };
